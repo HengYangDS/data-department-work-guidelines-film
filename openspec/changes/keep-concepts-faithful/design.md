@@ -46,7 +46,7 @@ The rest of the term choices recorded by the improve-film-intelligibility design
 
 **Non-Goals:**
 
-- Restructuring the 25-minute editions; their walkthrough of the seven topics stays.
+- Restructuring the 25-minute editions; on 2026-11-01 the user decided that they are repaired only, and their walkthrough of the seven topics stays.
 - The essentials film's production, which needs its own repository.
 - Changes to the guidelines.
 
@@ -67,7 +67,7 @@ The rest of the term choices recorded by the improve-film-intelligibility design
 | Agent                                | DR-0001; human-agent            | One executing or reasoning entity, never a source of organizational authority.              | 智能体                         | Agent                  |
 | source of truth; lead                | charter; data                   | The authoritative record, against everything that only points toward it.                    | 权威来源；线索                 | source of truth; lead  |
 
-The user approves these renderings before any thought is narrated again. A rendering the review rejects changes here first and then everywhere it is used.
+The user approved these renderings on 2026-11-01. A rendering that a later review rejects changes here first, with the user's approval, and then everywhere it is used.
 
 ### 2. Repair without restructuring
 
@@ -83,7 +83,7 @@ Language review reads the contract with the script and scores concept fidelity a
 
 ### 5. The essentials film follows in its own repository
 
-The user's plan for a ten-minute essentials edition beside the 25-minute editions cannot live in this repository: `filmkit` declares one film per repository, with two editions of equal length. The essentials film is therefore formed as its own repository from the same contract and narrator, after the user approves its outline. The proposed outline puts what and why first and follows one incident, the price data that arrived two hours late:
+The user's plan for a ten-minute essentials edition beside the 25-minute editions cannot live in this repository: `filmkit` declares one film per repository, with two editions of equal length. The essentials film is therefore formed as its own repository from the same contract and narrator. The user approved this outline on 2026-11-01; it puts what and why first and follows one incident, the price data that arrived two hours late:
 
 | Part | Content                                                                                                                                      | Seconds |
 | ---- | -------------------------------------------------------------------------------------------------------------------------------------------- | ------: |
@@ -115,12 +115,11 @@ The user's plan for a ten-minute essentials edition beside the 25-minute edition
 
 ## Migration Plan
 
-1. The user reviews this design and the contract's renderings.
+1. The user approved the contract's renderings, the repair-only scope of the 25-minute editions and the essentials outline on 2026-11-01.
 2. Specifications and tasks follow; the script repairs are written, term-audited and approved.
 3. After the `filmkit` release with the new checks is pinned, the affected thoughts are narrated, qualified and heard; then picture, render and review.
 4. Both editions are delivered to Documents with readback and replace v1.1.0 there; v1.2.0 is released after the user confirms.
 
 ## Open Questions
 
-- Whether the 25-minute editions should also gain an essence-first opening, or stay a walkthrough beside the essentials film.
 - The essentials film's repository name and title.
