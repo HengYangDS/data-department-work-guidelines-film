@@ -1285,12 +1285,16 @@ scenes["03"] = function (s, t) {
   const [two, apart, decideQ, factQ] = cues(s, [["两种依据", "two kinds of authority"], ["分开看", "stay apart"], ["行动依据", "authority to act"],
     ["事实依据", "authority about facts"]]);
   const ranks = cues(s, [["法律", "law"], ["这件事的决策负责人", "explicit decision"], ["有效的契约", "then contracts"], ["工作计划、临时约定", "plans provisional agreements"]]);
-  // Both editions name authority to act again as the thought that answers it begins, and the frame of its order opens
-  // on those words, so the two kinds give way as that thought begins; the frame takes the order's announcement as its
-  // title.
-  const order = cue(s, "有先后", "it has an order"), orderCut = cueFrom(s, "行动依据", "authority to act", factQ);
+  // Both editions name authority to act again as the thought that answers it begins. Chinese announces its order on
+  // those words, so the two kinds give way as that thought begins; English first says what that authority answers, so
+  // the two kinds stand through it and give way as the order is announced. The frame of the order opens on its
+  // announcement and takes it as its title.
+  const order = cue(s, "有先后", "it has an order"), actQ = cueFrom(s, "行动依据", "authority to act", factQ);
+  const orderCut = en ? order : actQ;
   // The second kind is named again where its answer begins.
   const truthQ = cueFrom(s, "事实依据", "authority about facts", ranks[3]);
+  // English says what each kind answers as the thought about it begins, where Chinese says both as it names the two.
+  const asks = en ? [cueFrom(s, "", "answers", actQ), cueFrom(s, "", "answers", truthQ)] : [Infinity, Infinity];
   const [record, observe, onlyLeads] = cues(s, [["原始记录", "primary records"], ["能重复的观察", "repeatable observations"], ["都只能算线索", "only leads"]]);
   // What an observation must state, in the order each edition speaks it.
   const attrs = en ? cues(s, [["", "a source"], ["", "time"], ["", "subject"], ["", "scope"]]) : cues(s, [["并说清来源", ""], ["时间", ""], ["对象和范围", ""]]);
@@ -1362,20 +1366,27 @@ scenes["03"] = function (s, t) {
   // form, and a divider parts it into two on the words that keep them apart. Each kind then takes its seal and stands
   // under it on its own words: the seal's rim closes around the mark, and once the rim stands the mark gives way and
   // the seal is stamped where it stood, so the half is never empty and the mark never shares its place with the stamp.
-  // The frame grows to hold the kind's name, and the stage gives way as the first kind's answer begins.
+  // The frame grows to hold the kind's name, and the stage gives way as the first kind's order begins. English names
+  // authority to act again to say what it answers before it announces the order: the count's name gives way as the
+  // kind is named again, and the question the kind answers stands under its name, smaller, on the words that say it
+  // answers, the frame deepening to hold it.
   const versus = cue(s, "行动依据不能", "authority to act cannot");
   const kinds = stageIn(t, two) * stageOut(t, orderCut);
   if (kinds > 0) {
     // The pair stands where the guidelines' frame stood, so the frame reads as re-formed in place rather than moved.
     const SY = CONTENT_CY + 60, R = 60, sx = 370, P0 = 38, on = kinds * named(t, two);
     const questions = [L("行动依据", "Authority to act"), L("事实依据", "Authority about facts")], qW = questions.map(v => measure(v, LABEL));
+    const ask = L("", "Who may decide what to do"), askW = measure(ask, NOTE);
     const qTop = SY + R + NAME_GAP, x0 = 960 - sx - R - P0, x1 = 960 + sx + R + P0;
-    const left = s03Extent(t, x0, [[decideQ, -Math.max(0, x0 - (960 - sx - qW[0] / 2 - 30))]]);
+    const nameOut = Math.max(0, x0 - (960 - sx - qW[0] / 2 - 30)), askOut = Math.max(0, x0 - (960 - sx - askW / 2 - 30));
+    const left = s03Extent(t, x0, [[decideQ, -nameOut], [asks[0], -Math.max(0, askOut - nameOut)]]);
     const right = s03Extent(t, x1, [[factQ, Math.max(0, 960 + sx + qW[1] / 2 + 30 - x1)]]);
-    const low = s03Extent(t, SY + R + P0, [[decideQ, labelSize(LABEL) + 4]]);
+    const low = s03Extent(t, SY + R + P0, [[decideQ, labelSize(LABEL) + 4], [asks[0], labelSize(NOTE) + 8]]);
     box(left, SY - R - P0, right - left, low - SY + R + P0, {stroke: P.line, alpha: on, radius: 16, width: 3});
-    // The count's name gives way as the first kind is named.
-    nameText(L("两种依据", "Two kinds of authority"), 960, SY - R - P0 - NAME_GAP, {valign: "bottom", alpha: on * (1 - ramp(t, decideQ + .05, .3))});
+    // The count's name gives way as the first kind is named, in English as it is named again to say what it answers.
+    nameText(L("两种依据", "Two kinds of authority"), 960, SY - R - P0 - NAME_GAP, {valign: "bottom",
+      alpha: on * (1 - ramp(t, L(decideQ, actQ) + .05, .3))});
+    if (en) nameText(ask, 960 - sx, qTop + labelSize(LABEL) + 8, {valign: "top", size: NOTE, color: P.muted, alpha: kinds * named(t, asks[0])});
     [[960 - sx, decideQ, P.authority], [960 + sx, factQ, P.evidence]].forEach(([x, at, color]) => {
       text("?", x, SY, 100, {role: "mark", align: "center", color, alpha: on * (1 - ramp(t, at + .25, .15))});
       seal(x, SY, R, {color, alpha: kinds * named(t, at), stamp: kinds * ramp(t, at + .35, .3)});
@@ -1384,13 +1395,13 @@ scenes["03"] = function (s, t) {
     nameText(questions[0], 960 - sx, qTop, {valign: "top", color: P.authority, alpha: kinds * named(t, decideQ)});
     nameText(questions[1], 960 + sx, qTop, {valign: "top", color: P.evidence, alpha: kinds * named(t, factQ)});
   }
-  // 3. The first kind's answer on the words that begin it: a frame in its colour, headed by its seal and name and
+  // 3. The first kind's order on the words that begin it: a frame in its colour, headed by its seal and name and
   // centred, that opens with its head and grows with the order of authority to act, one rank to a row, each rank
   // within the one above it. The rail draws down to each rank as it is named, and the rank's station, a mark that
   // shrinks from rank to rank, stands at its end. Each rank is named by its spoken words, its head term and, smaller,
   // the rest of what it holds. When the second kind is named again the ranks leave as a whole and the frame returns to
-  // its head; once it has closed, the second kind's seal and name stand under it, and the stage gives way on the words
-  // that name the first of its answers.
+  // its head; once it has closed, the second kind's seal and name stand under it, in English with the question it
+  // answers on the words that say it answers, and the stage gives way on the words that name the first of its answers.
   const g2 = stageIn(t, orderCut) * stageOut(t, record);
   if (g2 > 0) {
     const colors = [P.authority, P.authority, P.ink, P.muted];
@@ -1431,13 +1442,15 @@ scenes["03"] = function (s, t) {
     const asked = truthQ + .85;
     seal(ox + 36, oy, 36, {color: P.evidence, alpha: g2 * ramp(t, asked - .15, .4)});
     nameText(other, ox + 72 + NAME_GAP, oy, {align: "left", color: P.evidence, alpha: g2 * named(t, asked)});
+    if (en) nameText("What can establish what is true", 960, oy + 36 + NAME_GAP, {valign: "top", size: NOTE, color: P.muted, alpha: g2 * named(t, asks[1])});
   }
   // 4. The second kind's answer on the words of its first member: its own frame, headed by its seal and name and
   // centred, opens with primary records and grows with what establishes a fact. Primary records and repeatable
   // observations stand on the rail under the fact seal; the leads stand below a bar across it, and their way up toward
   // the seal stops at the bar. The leads are a list: each is named on its own words where the row's qualifier stands,
-  // and the name that calls them only leads comes last, on its own words. The order holds until authority and fact are
-  // set against each other.
+  // and the name that calls them only leads comes last, on its own words. The Chinese rows are set within the width of
+  // the order of authority to act, so the leads stand under their name and the frame stands nearer the centre while its
+  // first rows build. The order holds until authority and fact are set against each other.
   const g3f = stageIn(t, record) * stageOut(t, versus);
   if (g3f > 0) {
     const facts = en ? [[["Primary records"], [record], [], []],
@@ -1448,7 +1461,7 @@ scenes["03"] = function (s, t) {
     const starts = facts.map(([, termAts, , qualAts]) => Math.min(...termAts, ...qualAts));
     // A row's station beats once for each part of the row after the first as it is said.
     const parts = facts.map(([, termAts, , qualAts], r) => r === 2 ? qualAts : [...termAts, ...qualAts]);
-    const {SX, ys, tops} = s03Order(t, g3f, {FT: 260, width: 760, color: P.evidence, question: L("事实依据", "Authority about facts"), questionAt: truthQ,
+    const {SX, ys, tops} = s03Order(t, g3f, {FT: 260, width: L(640, 760), color: P.evidence, question: L("事实依据", "Authority about facts"), questionAt: truthQ,
       build: true, rows: facts.map(([term, termAts, qual, qualAts], r) => [term, termAts, qual, qualAts, starts[r], r === 2 ? 30 : 0, r < 2 ? P.evidence : P.muted, "facts",
         r === 2 ? "leads" : null]),
       station: (x, y, r, q, lit) => {
@@ -1742,9 +1755,10 @@ scenes["04"] = function (s, t) {
     const listedAt = en ? [] : cues(s, [["轻量", ""], ["标准", ""], ["高风险", ""]]);
     const heights = tiers.map(([term, , qual], i) => Math.max(docs[i][1], s04Height(term, tw(i), LABEL), s04Height(qual, QW(i), NOTE, groups(i))));
     const tops = stackTops(heights, CONTENT_CY - 20, 40), mids = tops.map((y, i) => y + heights[i] / 2), end = tops[2] + heights[2] + 24;
-    // Risk rises down the spine through three levels; the stage's words name the spine above it.
+    // Risk rises down the spine through three levels; the stage's words name the spine above it. The point that travels
+    // down the spine keeps to the part already drawn, so it stands on the spine from the stage's first frame.
     const grow = soon(t, form + .05, .35), from = tops[0] - 24;
-    link(SX, from, SX, end, {alpha: three, upto: grow, flow: (voiceTime(t) * .15) % 1});
+    link(SX, from, SX, end, {alpha: three, upto: grow, flow: grow * ((voiceTime(t) * .15) % 1)});
     // In Chinese the thought opens by asking how much record and process the work needs; that question names the spine.
     nameText(L("要留多少记录、走多少手续", "Risk sets the process"), SX, from - NAME_GAP, {valign: "bottom", alpha: three * named(t, form)});
     nameText(L("风险", "Risk"), SX, end + NAME_GAP, {valign: "top", color: P.muted, alpha: three * named(t, cueFrom(s, "风险", "risk", form))});
