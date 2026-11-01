@@ -83,6 +83,8 @@ The approved third revision (`build/runtime/work/repair/concept-edits-r3.md`), a
 
 The pronunciation contract's hash enters every narration request, so both editions are narrated again in full from their casts' seeds, and new takes are selected for the repaired thoughts. The narration is qualified and heard before the picture is composed, under the existing lock order: script, voice, picture, one render, one review.
 
+The repaired thoughts add 5.4 s of Chinese and 6.3 s of English speech, and v1.1.0 filled its 1500 s to within a tenth of a second, so the assembly refused both editions. The fit keeps every sentence break and thought pause, as earlier fits did. English commas, capped at 0.12 s, are capped at 0.1 s, which returns 6.4 s. Chinese commas are natively short, so a 0.12 s cap would return only 0.7 s, and the boundary floors already hold the Chinese statement mean at its declared 0.46 s; the Chinese time therefore comes from the gaps between segments: the chapter gap takes the English edition's 2.0 s, and the paragraph gap moves from 1.2 s to 1.1 s. Only each script's `voice_performance` changes; its segments, titles and metadata stay byte-identical to the audited and approved revision. Both editions then assemble at exactly 1500 s, with every boundary ratio as heard in v1.1.0 (`build/evidence/runtime-fit/2026-11-02-runtime-fit.json`).
+
 ### 3. Pronunciation
 
 The pronunciation contract moves to schema version 2, which the `filmkit` readings check enforces on the spoken text. Its Chinese part declares 250 words that resolve all 1,373 watched occurrences: 245 words reviewed in context for the v1.1.0 text, including the 13 earlier targets the narration still says, 22 of them recording where the narration departs from the dictionary, such as the 得 of 做得 (de) and 当时 (dāng); 两种 and 待决定 for the repair; and 谁 shéi, 这 zhè and 那 nà, the one reading the approved text names for the edition. 一字不差 keeps the dictionary's chà. 谁, 这, 那 and 审美 hold no character the engine watches, so the readings check's occurrence plan has no row for them; the listening plan derived for the review lists every one of their occurrences. The Chinese narration says no Latin name. The English part names IDs as letter names beside AI.
@@ -120,7 +122,7 @@ The user's plan for a ten-minute essentials edition beside the 25-minute edition
 
 ## Risks / Trade-offs
 
-- **A repaired thought no longer fits its place.** → Rewrite within the measured length; if a thought must grow, re-fit through the existing comma-capped runtime method, never by deleting needed punctuation.
+- **A repaired thought no longer fits its place.** → Rewrite within the measured length; if a thought must grow, re-fit through the pause contract, from commas or the gaps between segments as section 2 records, never by deleting needed punctuation or shortening a sentence break or thought pause.
 - **A rendering is contested.** → The contract cites the passage; the user decides once.
 - **New narration differs in tone from its neighbours.** → Retake whole thoughts with the narrator's existing reference and qualify them under the existing endings and loudness checks.
 - **The essentials film waits on a new repository.** → Its outline is reviewed now; its formation follows the user's approval and does not block v1.2.0.
