@@ -72,8 +72,8 @@
       "thought": 0.46,
       "question": 0.8,
       "opening": 2.0,
-      "paragraph": 1.2,
-      "chapter": 2.5,
+      "paragraph": 1.1,
+      "chapter": 2.0,
       "closing": 1.7
     },
     "thought_pause_range": [
@@ -85,7 +85,7 @@
     "thought_level_tolerance_db": 0.75,
     "chapter_level_tolerance_db": 0.3,
     "paragraph_pause_range": [
-      1.2,
+      1.1,
       2.7
     ],
     "designed_pause_limits": {

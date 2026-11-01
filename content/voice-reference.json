@@ -137,6 +137,10 @@
         "5": {
           "seed": 329362,
           "text_sha256": "82d01ec8208e9a337c84988fbe8318f01d69903220983382ef9c52544effa22b"
+        },
+        "3": {
+          "seed": 115549,
+          "text_sha256": "6204daee8cc46de22c971c383750a2e6e8909a7619f65ee5b65688e414422277"
         }
       }
     },
@@ -153,7 +157,16 @@
       }
     },
     "09": {
-      "groups": {}
+      "groups": {
+        "1": {
+          "seed": 107633,
+          "text_sha256": "dee2393edb46eb7e87f6388a9105e017f919f0dddcd1b0f364a156e054608fa4"
+        },
+        "2": {
+          "seed": 123471,
+          "text_sha256": "75ea8a89f0988270bee34b469c71f17d39ac3ead4eb7cfa2abc64d7b3ff694a3"
+        }
+      }
     },
     "10": {
       "groups": {
@@ -195,11 +208,20 @@
         "1": {
           "seed": 337294,
           "text_sha256": "5a7ace9cbfd38c08c179d5fc39d748efefb57ba646a6a345a7d21d663a0caaf0"
+        },
+        "3": {
+          "seed": 91805,
+          "text_sha256": "fd34b4b980a5a8a3d865daf8d91e87b8c22d1dbabf89adfb3f2e402260de0425"
         }
       }
     },
     "21": {
-      "groups": {}
+      "groups": {
+        "3": {
+          "seed": 123483,
+          "text_sha256": "e546c7b691606311abc5c31791abb7b11168a4cfc4369e8a05ebb53bbdeb5c4f"
+        }
+      }
     },
     "22": {
       "groups": {
@@ -222,6 +244,10 @@
         "5": {
           "seed": 91808,
           "text_sha256": "997ec541d7baa49482eff597462d95c658da24abcc474c9754a7cabf833c418e"
+        },
+        "1": {
+          "seed": 99727,
+          "text_sha256": "86d1b215b3ba91c8fac4bf11bf7e4c51ac511631fbee1c6a45193d22d8776e66"
         }
       }
     },
@@ -278,6 +304,10 @@
         "7": {
           "seed": 115568,
           "text_sha256": "76c1605946e749443b1cdd30ecbd68602a6101722ff27f270f24c706b9af59bf"
+        },
+        "8": {
+          "seed": 123487,
+          "text_sha256": "3e83710cbae68b93d390470c31adb65f61cd00b13e1f0207f941ff114a51b893"
         }
       }
     },
@@ -326,6 +356,10 @@
         "5": {
           "seed": 376899,
           "text_sha256": "0e1d63ee8504969625c14c5ac857c7ee98bdffa40b4ed57859526143dc2f5f87"
+        },
+        "6": {
+          "seed": 91815,
+          "text_sha256": "f4448f2cb67e75516e790554c8189b21280539adc0612db1cf927f869a96da77"
         }
       }
     },
@@ -449,6 +483,10 @@
         "4": {
           "seed": 321452,
           "text_sha256": "6812778293bc253a357d4a2c4676f0b18e7005f923e6992e5222879056c8ea46"
+        },
+        "5": {
+          "seed": 91801,
+          "text_sha256": "c6a8ff55859e314a2c1db0e02f0e75630a83fe45080f7d4c64ff2a288d3bea95"
         }
       }
     },
@@ -457,6 +495,14 @@
         "3": {
           "seed": 115563,
           "text_sha256": "4f2d1c99130e90172695dde9b9145e348b7e12ac947618a927b4f98c64e7fe43"
+        },
+        "1": {
+          "seed": 91806,
+          "text_sha256": "7884fb1b7f4d0165727149a5d606c4bfa87ba1a25c89ac0ef36f7d724adcae9d",
+          "run_on": {
+            "spoken_text": "调用智能体的人，对它用到的信息、权限、核验和结果负责。提交它帮忙做的工作，就表示你看懂了、检查过，并为后果负责。",
+            "cut_sample": 284880
+          }
         }
       }
     }

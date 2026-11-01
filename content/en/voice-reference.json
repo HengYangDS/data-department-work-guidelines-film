@@ -49,6 +49,10 @@
             "spoken_text": "Escalating a risk takes four parts. The risk. The facts, impact, and the latest safe time to decide. What containment was tried, and with what result. And the options, their costs, your recommendation, and who must decide by when.",
             "cut_sample": 348720
           }
+        },
+        "7": {
+          "seed": 99730,
+          "text_sha256": "c0dc568275ac709c8472ebf8f5e289c1ad0feadf19dfa2d6d96e425046fa98f5"
         }
       }
     },
