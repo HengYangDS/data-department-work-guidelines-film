@@ -1,56 +1,10 @@
 {
   "mandarin": {
-    "偏好": "piānhào",
     "补一次数": "bǔ yí cì shù",
-    "降级": "jiàngjí",
-    "偏差": "piānchā",
-    "沉没": "chénmò",
-    "漂亮": "piàoliang",
-    "漂移": "piāoyí",
-    "重新": "chóngxīn",
-    "塞进": "sāijìn",
-    "阻塞": "zǔsè",
-    "不了": "bùliǎo",
-    "标识": "biāozhì or biāoshí (both in current use; either is accepted)",
-    "处置": "chǔzhì",
-    "处理": "chǔlǐ",
-    "调用": "diàoyòng",
-    "调查": "diàochá",
-    "相应": "xiāngyìng",
-    "长期": "chángqī",
-    "更长": "gèng cháng",
-    "重大": "zhòngdà",
-    "模型": "móxíng",
-    "模拟": "mónǐ",
-    "模式": "móshì",
-    "模板": "múbǎn",
-    "成长": "chéngzhǎng",
-    "差距": "chājù",
-    "校准": "jiàozhǔn",
-    "暴露": "bàolù",
-    "了解": "liǎojiě",
-    "懂行": "dǒngháng",
-    "行为": "xíngwéi",
-    "划清": "huàqīng",
     "划不出": "huà bu chū",
-    "一字不差": "yí zì bú chà",
-    "差异": "chāyì",
-    "角色": "juésè",
-    "目的": "mùdì",
-    "得不偿失": "dé bù cháng shī",
-    "要求": "yāoqiú",
-    "变更": "biàngēng",
-    "充分": "chōngfèn",
-    "充当": "chōngdāng",
-    "答应": "dāying",
-    "钻空子": "zuān kòngzi",
-    "格调": "gédiào",
     "该尽的": "gāi jìn de",
-    "应对": "yìngduì",
     "假定": "jiǎdìng",
-    "强制性": "qiángzhìxìng",
-    "供应商": "gōngyìngshāng",
-    "运行": "yùnxíng"
+    "供应商": "gōngyìngshāng"
   },
   "heteronyms": {
     "lead": {
@@ -237,6 +191,7 @@
   },
   "grammar": {
     "lead": {
+      "06:1005": "noun",
       "11:1139": "noun",
       "13:917": "noun",
       "14:680": "noun",
@@ -246,19 +201,20 @@
       "29:841": "noun"
     },
     "leads": {
-      "23:242": "verb"
+      "03:895": "noun",
+      "23:248": "verb"
     },
     "reads": {
       "18:674": "present",
       "21:597": "present"
     },
     "close": {
-      "04:843": "verb"
+      "04:848": "verb"
     },
     "present": {
       "05:393": "adjective",
-      "22:606": "verb",
-      "23:271": "adjective"
+      "22:602": "verb",
+      "23:277": "adjective"
     },
     "permit": {
       "13:851": "verb"
@@ -268,7 +224,7 @@
       "20:113": "verb"
     },
     "conflict": {
-      "03:970": "noun",
+      "03:1075": "noun",
       "13:502": "noun",
       "22:95": "verb",
       "29:197": "verb"
@@ -277,8 +233,8 @@
       "29:96": "noun"
     },
     "subject": {
-      "03:698": "noun",
-      "04:175": "noun",
+      "03:796": "noun",
+      "04:180": "noun",
       "05:360": "noun",
       "05:596": "noun",
       "05:828": "noun",
@@ -287,7 +243,7 @@
       "16:325": "noun",
       "17:404": "noun",
       "18:177": "noun",
-      "23:636": "noun",
+      "23:642": "noun",
       "25:462": "noun",
       "25:794": "noun",
       "26:789": "noun"
@@ -315,7 +271,7 @@
       "26:807": "verb"
     },
     "update": {
-      "23:235": "noun"
+      "23:241": "noun"
     },
     "coordinates": {
       "13:922": "verb"
@@ -324,11 +280,11 @@
       "29:1103": "verb"
     },
     "contracts": {
-      "03:478": "noun"
+      "03:534": "noun"
     },
     "record": {
-      "03:1011": "noun",
-      "04:1010": "noun",
+      "03:1116": "noun",
+      "04:1015": "noun",
       "15:724": "verb",
       "15:776": "noun",
       "21:979": "noun",
@@ -336,8 +292,8 @@
       "29:1172": "noun"
     },
     "records": {
-      "03:527": "noun",
-      "03:640": "noun"
+      "03:583": "noun",
+      "03:738": "noun"
     },
     "use": {
       "01:67": "verb",

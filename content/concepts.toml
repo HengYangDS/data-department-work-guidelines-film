@@ -1,0 +1,120 @@
+# The DDWG films' concept contract: what each concept the films name means in the guidelines, and
+# the words each edition uses for it. The user approved the renderings on 2026-11-01 and the
+# revision-3 choices on 2026-11-02. A rendering changes here first, with the user's approval, then
+# wherever it is used.
+
+[[concept]]
+id = "authority-to-act"
+term = "authority to act"
+essence = "What decides what may be done, in an order where law and policy come before any person's decision."
+source = { path = "docs/charter.md", quote = "Authority to act answers who may decide what to do." }
+zh = { rendering = "行动依据", avoid = ["谁说了算"] }
+en = { rendering = "authority to act" }
+
+[[concept]]
+id = "authority-about-facts"
+term = "authority about facts"
+essence = "What can establish a fact: primary records and repeatable observations; everything else is a lead."
+source = { path = "docs/charter.md", quote = "Authority about facts answers what can establish what is true." }
+zh = { rendering = "事实依据" }
+en = { rendering = "authority about facts", forms = ["fact source"] }
+
+[[concept]]
+id = "held-scope"
+term = "authority; permission"
+essence = "The range within which a person or Agent may act or use something; urgency, delegation and acceptance never enlarge it."
+source = { path = "docs/charter.md", quote = "factual evidence does not itself grant permission to act" }
+zh = { rendering = "权限", forms = ["获准"], avoid = ["许可"] }
+en = { rendering = "authority", forms = ["permission", "permissions", "permitted"] }
+
+[[concept]]
+id = "authorization"
+term = "authorization"
+essence = "The act of granting that range for a stated action."
+source = { path = "docs/human-agent.md", quote = "People retain direction, authorization, decisions, and responsibility for consequences." }
+zh = { rendering = "授权" }
+en = { rendering = "authorization", forms = ["authorized", "authorize"] }
+
+[[concept]]
+id = "decision-owner"
+term = "decision owner"
+essence = "The accountable person who decides the matter within their authority."
+source = { path = "docs/decide.md", quote = "If the decision owner or subject is unknown" }
+zh = { rendering = "决策负责人", avoid = ["有决定权的人", "谁有权决定", "谁有决定权", "授权负责人", "拍板"] }
+en = { rendering = "decision owner", forms = ["decision owners"] }
+
+[[concept]]
+id = "human-ai-collaboration"
+term = "human–AI collaboration"
+essence = "The whole relationship between people and AI, named so that no single Agent stands for it."
+source = { path = "docs/human-agent.md", quote = "Human–AI Collaboration" }
+zh = { rendering = "人与人工智能的协作", forms = ["人与人工智能怎样协作"], avoid = ["人与智能体"] }
+en = { rendering = "human–AI collaboration", avoid = [
+  "working with Agents",
+  "human-Agent collaboration",
+  "human–Agent collaboration",
+] }
+
+[[concept]]
+id = "agent"
+term = "Agent"
+essence = "One executing or reasoning entity that extends people's work, never a source of organizational authority."
+source = { path = "docs/charter.md", quote = "An Agent, tool, or repository file cannot grant organizational authority" }
+zh = { rendering = "智能体" }
+en = { rendering = "Agent", forms = ["Agents"] }
+
+[[concept]]
+id = "source-of-truth"
+term = "source of truth"
+essence = "The authoritative record of a fact or asset, against every report, cache and summary derived from it."
+source = { path = "docs/data.md", quote = "Reports, catalogs, caches, and Agent summaries are projections; none may quietly become the source of truth." }
+zh = { rendering = "权威来源" }
+en = { rendering = "source of truth" }
+
+[[concept]]
+id = "lead"
+term = "lead"
+essence = "What only points toward a fact: accounts, caches, generated views, Agent output and memory."
+source = { path = "docs/charter.md", quote = "Secondhand accounts, caches, generated views, Agent output, and memory are leads, not verified facts." }
+zh = { rendering = "线索" }
+en = { rendering = "lead", forms = ["leads"], avoid = ["clue", "clues"] }
+
+[[concept]]
+id = "qualified-for-use"
+term = "qualify data for a use"
+essence = "Showing that data's meaning, quality, permission and reproducibility fit one stated use before it is trusted."
+source = { path = "docs/data.md", quote = "Qualify data for a specific use before treating it as trusted." }
+zh = { rendering = "证明适合" }
+en = { rendering = "shown fit", forms = ["qualified"] }
+
+[[concept]]
+id = "verification"
+term = "verification"
+essence = "Checks passed for a stated subject, version, environment and limit."
+source = { path = "docs/deliver.md", quote = "Checks passed for a stated subject, version, environment, and limit." }
+zh = { rendering = "核验", forms = ["核实"] }
+en = { rendering = "verification", forms = ["verified", "verify"] }
+
+[[concept]]
+id = "contract"
+term = "contract"
+essence = "An agreement in force: the guidelines themselves as the department's work-quality contract, and the contracts that rank in authority to act."
+source = { path = "docs/charter.md", quote = "work-quality contract against four failures" }
+zh = { rendering = "契约" }
+en = { rendering = "contract", forms = ["contracts"] }
+
+[[concept]]
+id = "cache"
+term = "cache"
+essence = "A stored copy kept for speed, which is only a lead to the record it copies."
+source = { path = "docs/charter.md", quote = "Secondhand accounts, caches, generated views, Agent output, and memory are leads, not verified facts." }
+zh = { rendering = "缓存" }
+en = { rendering = "cache", forms = ["caches"] }
+
+[[concept]]
+id = "generated-view"
+term = "generated view"
+essence = "A view derived from records for people to read, which is only a lead."
+source = { path = "docs/charter.md", quote = "Secondhand accounts, caches, generated views, Agent output, and memory are leads, not verified facts." }
+zh = { rendering = "派生视图" }
+en = { rendering = "generated view", forms = ["generated views"] }

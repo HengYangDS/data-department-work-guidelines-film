@@ -2,7 +2,7 @@
 
 Two introduction films to the [Data Department Work Guidelines](https://github.com/HengYangDS/data-department-work-guidelines), one in Chinese and one in English, and everything needed to rebuild them from source.
 
-Each film explains the guidelines' seven documents, from the charter and decisions through delivery, data, communication and human-Agent work to practice evolution, with illustrative examples from a data department's work. Each edition lasts exactly 1500 seconds: 90,000 native 60 fps frames of 2D picture in 16:9, 48 kHz stereo narration in one synthetic voice, small single-line captions and no music. Each comes as a UHD master and a captioned 1080p film.
+Each film explains the guidelines' seven documents, from the charter and decisions through delivery, data, communication and human–AI collaboration to practice evolution, with illustrative examples from a data department's work. Each edition lasts exactly 1500 seconds: 90,000 native 60 fps frames of 2D picture in 16:9, 48 kHz stereo narration in one synthetic voice, small single-line captions and no music. Each comes as a UHD master and a captioned 1080p film.
 
 Author: Yang HENG.
 

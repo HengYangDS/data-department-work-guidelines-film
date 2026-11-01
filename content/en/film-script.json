@@ -7,13 +7,13 @@
     "genre": "Education",
     "description": "Data Department Work Guidelines; English; 2D; narration only",
     "comment": "English introduction film; illustrative examples; no asserted deployment or adoption",
-    "synopsis": "A 25-minute introduction to the Data Department Work Guidelines (DDWG): why the work matters, then how to do it, by framing the problem, making data mean what it says, making delivery verifiable and working with Agents, and finally how to communicate and how to make the next attempt better. The price history and identifier cases are illustrative; no deployment or adoption is asserted.",
+    "synopsis": "A 25-minute introduction to the Data Department Work Guidelines (DDWG): why the work matters, then how to do it, by framing the problem, making data mean what it says, making delivery verifiable and getting human–AI collaboration right, and finally how to communicate and how to make the next attempt better. The price history and identifier cases are illustrative; no deployment or adoption is asserted.",
     "keywords": [
       "Data Department Work Guidelines",
       "DDWG",
       "data quality",
       "delivery and verification",
-      "human-Agent collaboration",
+      "human–AI collaboration",
       "quantitative research"
     ],
     "tracks": {
@@ -44,7 +44,7 @@
     },
     {
       "id": "human-agent",
-      "title": "Working with Agents"
+      "title": "Human–AI collaboration"
     },
     {
       "id": "communicate",
@@ -127,16 +127,19 @@
         "charter:Purpose",
         "data:Ownership and Change Boundaries"
       ],
+      "concepts": [
+        "human-ai-collaboration"
+      ],
       "utterance_groups": [
         "A historical price dataset is finished. But can the next person to use it rely on it? ",
         "They need to know what each number means, which time it describes, what evidence it rests on, and what it may be used for. ",
         "Researchers backtest with this data, and trading systems control risk with it. A number nobody can explain travels down the whole chain. ",
         "Every step hands something to the next person: from acquisition and modeling, through development, production and platforms, to product management, governance and operational delivery. ",
         "So the value of the work isn't a file, a table, a report or the start of a process. It is turning real-world information into judgments, data assets and actions others can safely rely on. ",
-        "This film follows the Data Department Work Guidelines in seven parts. It starts with why the work matters, then covers how to do it: framing the problem, making data mean what it says, making delivery verifiable, and working with Agents. It ends with communicating so others can act, and making the next attempt better."
+        "This film follows the Data Department Work Guidelines in seven parts. It starts with why the work matters, then covers how to do it: framing the problem, making data mean what it says, making delivery verifiable, and getting human–AI collaboration right. It ends with communicating so others can act, and making the next attempt better."
       ],
-      "text": "A historical price dataset is finished. But can the next person to use it rely on it? They need to know what each number means, which time it describes, what evidence it rests on, and what it may be used for. Researchers backtest with this data, and trading systems control risk with it. A number nobody can explain travels down the whole chain. Every step hands something to the next person: from acquisition and modeling, through development, production and platforms, to product management, governance and operational delivery. So the value of the work isn't a file, a table, a report or the start of a process. It is turning real-world information into judgments, data assets and actions others can safely rely on. This film follows the Data Department Work Guidelines in seven parts. It starts with why the work matters, then covers how to do it: framing the problem, making data mean what it says, making delivery verifiable, and working with Agents. It ends with communicating so others can act, and making the next attempt better.",
-      "spoken_text": "A historical price dataset is finished. But can the next person to use it rely on it? They need to know what each number means, which time it describes, what evidence it rests on, and what it may be used for. Researchers backtest with this data, and trading systems control risk with it. A number nobody can explain travels down the whole chain. Every step hands something to the next person: from acquisition and modeling, through development, production and platforms, to product management, governance and operational delivery. So the value of the work isn't a file, a table, a report or the start of a process. It is turning real-world information into judgments, data assets and actions others can safely rely on. This film follows the Data Department Work Guidelines in seven parts. It starts with why the work matters, then covers how to do it: framing the problem, making data mean what it says, making delivery verifiable, and working with Agents. It ends with communicating so others can act, and making the next attempt better."
+      "text": "A historical price dataset is finished. But can the next person to use it rely on it? They need to know what each number means, which time it describes, what evidence it rests on, and what it may be used for. Researchers backtest with this data, and trading systems control risk with it. A number nobody can explain travels down the whole chain. Every step hands something to the next person: from acquisition and modeling, through development, production and platforms, to product management, governance and operational delivery. So the value of the work isn't a file, a table, a report or the start of a process. It is turning real-world information into judgments, data assets and actions others can safely rely on. This film follows the Data Department Work Guidelines in seven parts. It starts with why the work matters, then covers how to do it: framing the problem, making data mean what it says, making delivery verifiable, and getting human–AI collaboration right. It ends with communicating so others can act, and making the next attempt better.",
+      "spoken_text": "A historical price dataset is finished. But can the next person to use it rely on it? They need to know what each number means, which time it describes, what evidence it rests on, and what it may be used for. Researchers backtest with this data, and trading systems control risk with it. A number nobody can explain travels down the whole chain. Every step hands something to the next person: from acquisition and modeling, through development, production and platforms, to product management, governance and operational delivery. So the value of the work isn't a file, a table, a report or the start of a process. It is turning real-world information into judgments, data assets and actions others can safely rely on. This film follows the Data Department Work Guidelines in seven parts. It starts with why the work matters, then covers how to do it: framing the problem, making data mean what it says, making delivery verifiable, and getting human–AI collaboration right. It ends with communicating so others can act, and making the next attempt better."
     },
     {
       "id": "02",
@@ -148,6 +151,9 @@
       "source_sections": [
         "charter:Purpose"
       ],
+      "concepts": [
+        "contract"
+      ],
       "utterance_groups": [
         "These guidelines are the department's work-quality contract. They target four failures. ",
         "The first confuses facts with choices: data arriving late is a fact; changing vendors is a choice. ",
@@ -155,10 +161,10 @@
         "The third ends a conversation with nobody able to decide or act. ",
         "The fourth lets AI produce more material, while judgment and results grow no more reliable. ",
         "So a task should deliver three outcomes: solve the problem; test the judgment and its limits; and leave the system better able to recognize or handle the next occurrence. ",
-        "Three outcomes, not three reports."
+        "These are three outcomes, not three reports."
       ],
-      "text": "These guidelines are the department's work-quality contract. They target four failures. The first confuses facts with choices: data arriving late is a fact; changing vendors is a choice. The second fixes the symptom and leaves the mechanism alone: someone backfills by hand, and next month it breaks again. The third ends a conversation with nobody able to decide or act. The fourth lets AI produce more material, while judgment and results grow no more reliable. So a task should deliver three outcomes: solve the problem; test the judgment and its limits; and leave the system better able to recognize or handle the next occurrence. Three outcomes, not three reports.",
-      "spoken_text": "These guidelines are the department's work-quality contract. They target four failures. The first confuses facts with choices: data arriving late is a fact; changing vendors is a choice. The second fixes the symptom and leaves the mechanism alone: someone backfills by hand, and next month it breaks again. The third ends a conversation with nobody able to decide or act. The fourth lets AI produce more material, while judgment and results grow no more reliable. So a task should deliver three outcomes: solve the problem; test the judgment and its limits; and leave the system better able to recognize or handle the next occurrence. Three outcomes, not three reports."
+      "text": "These guidelines are the department's work-quality contract. They target four failures. The first confuses facts with choices: data arriving late is a fact; changing vendors is a choice. The second fixes the symptom and leaves the mechanism alone: someone backfills by hand, and next month it breaks again. The third ends a conversation with nobody able to decide or act. The fourth lets AI produce more material, while judgment and results grow no more reliable. So a task should deliver three outcomes: solve the problem; test the judgment and its limits; and leave the system better able to recognize or handle the next occurrence. These are three outcomes, not three reports.",
+      "spoken_text": "These guidelines are the department's work-quality contract. They target four failures. The first confuses facts with choices: data arriving late is a fact; changing vendors is a choice. The second fixes the symptom and leaves the mechanism alone: someone backfills by hand, and next month it breaks again. The third ends a conversation with nobody able to decide or act. The fourth lets AI produce more material, while judgment and results grow no more reliable. So a task should deliver three outcomes: solve the problem; test the judgment and its limits; and leave the system better able to recognize or handle the next occurrence. These are three outcomes, not three reports."
     },
     {
       "id": "03",
@@ -172,16 +178,29 @@
         "charter:Four Non-Negotiable Boundaries",
         "human-agent:Human–AI Collaboration"
       ],
+      "concepts": [
+        "authority-to-act",
+        "authority-about-facts",
+        "held-scope",
+        "authorization",
+        "decision-owner",
+        "agent",
+        "lead",
+        "verification",
+        "contract",
+        "cache",
+        "generated-view"
+      ],
       "utterance_groups": [
         "The guidelines bind members, and the Agents that members delegate to: AI systems that search, reason and act toward a goal. Direction, authorization, decisions and responsibility for consequences stay with people. ",
-        "Two questions need to stay apart: who decides, and what counts as fact. ",
-        "There's an order to who decides. Law, regulation, security requirements and mandatory company policy come first. Within them, the explicit decision of the decision owner for this matter. Then contracts, policies, specifications and decision records in force. Plans, provisional agreements and personal preferences come last. ",
-        "What counts as fact? Primary records and repeatable observations, with a source, time, subject and scope. Second-hand accounts, caches, generated views, Agent output and memory are only clues. ",
-        "Authority cannot make a false fact true, and a fact does not grant permission to act. If a release is set for today but verification finds the data wrong, report the conflict and its impact. Don't alter the record, or silently act as if one side had won. ",
+        "Two kinds of authority need to stay apart: authority to act, and authority about facts. ",
+        "Authority to act answers who may decide what to do, and it has an order. Law, regulation, security requirements and mandatory company policy come first. Within them, the explicit decision of the decision owner for this matter. Then contracts, policies, specifications and decision records in force. Plans, provisional agreements and personal preferences come last. ",
+        "Authority about facts answers what can establish what is true: primary records and repeatable observations, with a source, time, subject and scope. Second-hand accounts, caches, generated views, Agent output and memory are only leads. ",
+        "Authority to act cannot make a false fact true, and a fact does not grant permission to act. If a release is set for today but verification finds the data wrong, report the conflict and its impact. Don't alter the record, or silently act as if one side had won. ",
         "Professional judgment belongs with people who have the competence and the facts; when either is missing, bring in the domain owner. Expertise alone grants no authority to decide or act."
       ],
-      "text": "The guidelines bind members, and the Agents that members delegate to: AI systems that search, reason and act toward a goal. Direction, authorization, decisions and responsibility for consequences stay with people. Two questions need to stay apart: who decides, and what counts as fact. There's an order to who decides. Law, regulation, security requirements and mandatory company policy come first. Within them, the explicit decision of the decision owner for this matter. Then contracts, policies, specifications and decision records in force. Plans, provisional agreements and personal preferences come last. What counts as fact? Primary records and repeatable observations, with a source, time, subject and scope. Second-hand accounts, caches, generated views, Agent output and memory are only clues. Authority cannot make a false fact true, and a fact does not grant permission to act. If a release is set for today but verification finds the data wrong, report the conflict and its impact. Don't alter the record, or silently act as if one side had won. Professional judgment belongs with people who have the competence and the facts; when either is missing, bring in the domain owner. Expertise alone grants no authority to decide or act.",
-      "spoken_text": "The guidelines bind members, and the Agents that members delegate to: AI systems that search, reason and act toward a goal. Direction, authorization, decisions and responsibility for consequences stay with people. Two questions need to stay apart: who decides, and what counts as fact. There's an order to who decides. Law, regulation, security requirements and mandatory company policy come first. Within them, the explicit decision of the decision owner for this matter. Then contracts, policies, specifications and decision records in force. Plans, provisional agreements and personal preferences come last. What counts as fact? Primary records and repeatable observations, with a source, time, subject and scope. Second-hand accounts, caches, generated views, Agent output and memory are only clues. Authority cannot make a false fact true, and a fact does not grant permission to act. If a release is set for today but verification finds the data wrong, report the conflict and its impact. Don't alter the record, or silently act as if one side had won. Professional judgment belongs with people who have the competence and the facts; when either is missing, bring in the domain owner. Expertise alone grants no authority to decide or act."
+      "text": "The guidelines bind members, and the Agents that members delegate to: AI systems that search, reason and act toward a goal. Direction, authorization, decisions and responsibility for consequences stay with people. Two kinds of authority need to stay apart: authority to act, and authority about facts. Authority to act answers who may decide what to do, and it has an order. Law, regulation, security requirements and mandatory company policy come first. Within them, the explicit decision of the decision owner for this matter. Then contracts, policies, specifications and decision records in force. Plans, provisional agreements and personal preferences come last. Authority about facts answers what can establish what is true: primary records and repeatable observations, with a source, time, subject and scope. Second-hand accounts, caches, generated views, Agent output and memory are only leads. Authority to act cannot make a false fact true, and a fact does not grant permission to act. If a release is set for today but verification finds the data wrong, report the conflict and its impact. Don't alter the record, or silently act as if one side had won. Professional judgment belongs with people who have the competence and the facts; when either is missing, bring in the domain owner. Expertise alone grants no authority to decide or act.",
+      "spoken_text": "The guidelines bind members, and the Agents that members delegate to: AI systems that search, reason and act toward a goal. Direction, authorization, decisions and responsibility for consequences stay with people. Two kinds of authority need to stay apart: authority to act, and authority about facts. Authority to act answers who may decide what to do, and it has an order. Law, regulation, security requirements and mandatory company policy come first. Within them, the explicit decision of the decision owner for this matter. Then contracts, policies, specifications and decision records in force. Plans, provisional agreements and personal preferences come last. Authority about facts answers what can establish what is true: primary records and repeatable observations, with a source, time, subject and scope. Second-hand accounts, caches, generated views, Agent output and memory are only leads. Authority to act cannot make a false fact true, and a fact does not grant permission to act. If a release is set for today but verification finds the data wrong, report the conflict and its impact. Don't alter the record, or silently act as if one side had won. Professional judgment belongs with people who have the competence and the facts; when either is missing, bring in the domain owner. Expertise alone grants no authority to decide or act."
     },
     {
       "id": "04",
@@ -194,8 +213,12 @@
         "charter:Four Non-Negotiable Boundaries",
         "charter:Form Follows Risk"
       ],
+      "concepts": [
+        "held-scope",
+        "authorization"
+      ],
       "utterance_groups": [
-        "Four lines must never be crossed. ",
+        "Four boundaries must never be crossed. ",
         "First, tell the truth: no fabrication, no hiding, no cherry-picking, no uncertainty dressed as certainty. Second, stay within your limits of subject and time, competence and permission, and data, security, compliance and action. ",
         "Third, name the owner: every important judgment, decision, change and acceptance has an accountable person. Fourth, do not claim false completion: without current evidence matching the claim, call nothing complete, correct, usable or adopted. ",
         "Inside them, autonomy, exploration and creative work are welcome. When an action would cross one, stop, make it visible, and escalate. After a breach, stop the affected action, disclose it, correct it within your authority, and escalate as the risk requires. ",
@@ -204,8 +227,8 @@
         "High-risk work also needs a written decision, explicit authorization, a rollback or degradation path, independent review and human acceptance. High risk means work touching production, funds, sensitive data, security or compliance, deletion or overwrite, external commitments or irreversible consequences. ",
         "Lower risk means less process. Every duty still applies."
       ],
-      "text": "Four lines must never be crossed. First, tell the truth: no fabrication, no hiding, no cherry-picking, no uncertainty dressed as certainty. Second, stay within your limits of subject and time, competence and permission, and data, security, compliance and action. Third, name the owner: every important judgment, decision, change and acceptance has an accountable person. Fourth, do not claim false completion: without current evidence matching the claim, call nothing complete, correct, usable or adopted. Inside them, autonomy, exploration and creative work are welcome. When an action would cross one, stop, make it visible, and escalate. After a breach, stop the affected action, disclose it, correct it within your authority, and escalate as the risk requires. Risk sets the process. Local, reversible work with no external commitment can close in one clear exchange that states the conclusion, basis and action. Cross-role or extended work, competing options or material uncertainty call for a reviewable record. High-risk work also needs a written decision, explicit authorization, a rollback or degradation path, independent review and human acceptance. High risk means work touching production, funds, sensitive data, security or compliance, deletion or overwrite, external commitments or irreversible consequences. Lower risk means less process. Every duty still applies.",
-      "spoken_text": "Four lines must never be crossed. First, tell the truth: no fabrication, no hiding, no cherry-picking, no uncertainty dressed as certainty. Second, stay within your limits of subject and time, competence and permission, and data, security, compliance and action. Third, name the owner: every important judgment, decision, change and acceptance has an accountable person. Fourth, do not claim false completion: without current evidence matching the claim, call nothing complete, correct, usable or adopted. Inside them, autonomy, exploration and creative work are welcome. When an action would cross one, stop, make it visible, and escalate. After a breach, stop the affected action, disclose it, correct it within your authority, and escalate as the risk requires. Risk sets the process. Local, reversible work with no external commitment can close in one clear exchange that states the conclusion, basis and action. Cross-role or extended work, competing options or material uncertainty call for a reviewable record. High-risk work also needs a written decision, explicit authorization, a rollback or degradation path, independent review and human acceptance. High risk means work touching production, funds, sensitive data, security or compliance, deletion or overwrite, external commitments or irreversible consequences. Lower risk means less process. Every duty still applies."
+      "text": "Four boundaries must never be crossed. First, tell the truth: no fabrication, no hiding, no cherry-picking, no uncertainty dressed as certainty. Second, stay within your limits of subject and time, competence and permission, and data, security, compliance and action. Third, name the owner: every important judgment, decision, change and acceptance has an accountable person. Fourth, do not claim false completion: without current evidence matching the claim, call nothing complete, correct, usable or adopted. Inside them, autonomy, exploration and creative work are welcome. When an action would cross one, stop, make it visible, and escalate. After a breach, stop the affected action, disclose it, correct it within your authority, and escalate as the risk requires. Risk sets the process. Local, reversible work with no external commitment can close in one clear exchange that states the conclusion, basis and action. Cross-role or extended work, competing options or material uncertainty call for a reviewable record. High-risk work also needs a written decision, explicit authorization, a rollback or degradation path, independent review and human acceptance. High risk means work touching production, funds, sensitive data, security or compliance, deletion or overwrite, external commitments or irreversible consequences. Lower risk means less process. Every duty still applies.",
+      "spoken_text": "Four boundaries must never be crossed. First, tell the truth: no fabrication, no hiding, no cherry-picking, no uncertainty dressed as certainty. Second, stay within your limits of subject and time, competence and permission, and data, security, compliance and action. Third, name the owner: every important judgment, decision, change and acceptance has an accountable person. Fourth, do not claim false completion: without current evidence matching the claim, call nothing complete, correct, usable or adopted. Inside them, autonomy, exploration and creative work are welcome. When an action would cross one, stop, make it visible, and escalate. After a breach, stop the affected action, disclose it, correct it within your authority, and escalate as the risk requires. Risk sets the process. Local, reversible work with no external commitment can close in one clear exchange that states the conclusion, basis and action. Cross-role or extended work, competing options or material uncertainty call for a reviewable record. High-risk work also needs a written decision, explicit authorization, a rollback or degradation path, independent review and human acceptance. High risk means work touching production, funds, sensitive data, security or compliance, deletion or overwrite, external commitments or irreversible consequences. Lower risk means less process. Every duty still applies."
     },
     {
       "id": "05",
@@ -217,6 +240,9 @@
       "source_sections": [
         "decide:Analysis and Decisions",
         "decide:Frame the Right Problem"
+      ],
+      "concepts": [
+        "decision-owner"
       ],
       "utterance_groups": [
         "Start by framing the problem. Before analysis, ask which decision it must support: who decides what, and by when. ",
@@ -238,16 +264,23 @@
       "source_sections": [
         "decide:Keep Six Meanings Distinct"
       ],
+      "concepts": [
+        "decision-owner",
+        "agent",
+        "lead",
+        "verification",
+        "cache"
+      ],
       "utterance_groups": [
         "Six kinds of statement need to stay distinct. Take an illustrative case: last night's price collection ran two hours late. ",
         "Two hours late is a recorded fact. Late publication by the vendor is an untested hypothesis. If publication was on time but the job started late, scheduling may explain the delay. That is an inference, and other explanations still need ruling out. ",
         "By the timeliness standard, this delivery failed. That is a judgment. Starting the job earlier is a decision, and the decision owner makes it. Who makes the change, and by when, is the action. ",
         "A fact states its source, subject, time and scope; a hypothesis, what would refute it; an inference, its reasoning and alternative explanations. ",
         "A judgment states its criterion, confidence and limits; a decision, who made it, the trade-off, and what would trigger a revisit; an action, its owner, deadline and completion condition. ",
-        "A second-hand account, a cache, an Agent's analysis, or a remark like “this is usually true”: each is only a clue until verified."
+        "A second-hand account, a cache, an Agent's analysis, or a remark like “this is usually true”: each is only a lead until verified."
       ],
-      "text": "Six kinds of statement need to stay distinct. Take an illustrative case: last night's price collection ran two hours late. Two hours late is a recorded fact. Late publication by the vendor is an untested hypothesis. If publication was on time but the job started late, scheduling may explain the delay. That is an inference, and other explanations still need ruling out. By the timeliness standard, this delivery failed. That is a judgment. Starting the job earlier is a decision, and the decision owner makes it. Who makes the change, and by when, is the action. A fact states its source, subject, time and scope; a hypothesis, what would refute it; an inference, its reasoning and alternative explanations. A judgment states its criterion, confidence and limits; a decision, who made it, the trade-off, and what would trigger a revisit; an action, its owner, deadline and completion condition. A second-hand account, a cache, an Agent's analysis, or a remark like “this is usually true”: each is only a clue until verified.",
-      "spoken_text": "Six kinds of statement need to stay distinct. Take an illustrative case: last night's price collection ran two hours late. Two hours late is a recorded fact. Late publication by the vendor is an untested hypothesis. If publication was on time but the job started late, scheduling may explain the delay. That is an inference, and other explanations still need ruling out. By the timeliness standard, this delivery failed. That is a judgment. Starting the job earlier is a decision, and the decision owner makes it. Who makes the change, and by when, is the action. A fact states its source, subject, time and scope; a hypothesis, what would refute it; an inference, its reasoning and alternative explanations. A judgment states its criterion, confidence and limits; a decision, who made it, the trade-off, and what would trigger a revisit; an action, its owner, deadline and completion condition. A second-hand account, a cache, an Agent's analysis, or a remark like “this is usually true”: each is only a clue until verified."
+      "text": "Six kinds of statement need to stay distinct. Take an illustrative case: last night's price collection ran two hours late. Two hours late is a recorded fact. Late publication by the vendor is an untested hypothesis. If publication was on time but the job started late, scheduling may explain the delay. That is an inference, and other explanations still need ruling out. By the timeliness standard, this delivery failed. That is a judgment. Starting the job earlier is a decision, and the decision owner makes it. Who makes the change, and by when, is the action. A fact states its source, subject, time and scope; a hypothesis, what would refute it; an inference, its reasoning and alternative explanations. A judgment states its criterion, confidence and limits; a decision, who made it, the trade-off, and what would trigger a revisit; an action, its owner, deadline and completion condition. A second-hand account, a cache, an Agent's analysis, or a remark like “this is usually true”: each is only a lead until verified.",
+      "spoken_text": "Six kinds of statement need to stay distinct. Take an illustrative case: last night's price collection ran two hours late. Two hours late is a recorded fact. Late publication by the vendor is an untested hypothesis. If publication was on time but the job started late, scheduling may explain the delay. That is an inference, and other explanations still need ruling out. By the timeliness standard, this delivery failed. That is a judgment. Starting the job earlier is a decision, and the decision owner makes it. Who makes the change, and by when, is the action. A fact states its source, subject, time and scope; a hypothesis, what would refute it; an inference, its reasoning and alternative explanations. A judgment states its criterion, confidence and limits; a decision, who made it, the trade-off, and what would trigger a revisit; an action, its owner, deadline and completion condition. A second-hand account, a cache, an Agent's analysis, or a remark like “this is usually true”: each is only a lead until verified."
     },
     {
       "id": "07",
@@ -259,6 +292,9 @@
       "source_sections": [
         "decide:Use the Smallest Sufficient Model",
         "decide:Check the Reasoning"
+      ],
+      "concepts": [
+        "verification"
       ],
       "utterance_groups": [
         "Understanding a problem takes the smallest model that will do, not a longer list. ",
@@ -284,6 +320,9 @@
         "decide:Make the Choice Comparable and Actionable",
         "decide:Decision Readiness"
       ],
+      "concepts": [
+        "decision-owner"
+      ],
       "utterance_groups": [
         "When something fails, keep the original symptom and timeline. Find the direct cause, and ask why the existing system did not prevent or detect it in time. Containment, repair and prevention are three layers. Doing only the first two is not a systemic fix. ",
         "When choosing, compare the feasible options, including the status quo, on the same basis: benefit, cost, risk, reversibility and opportunity cost. Novelty, completeness or popularity do not prove a fit. ",
@@ -303,6 +342,14 @@
       "source_sections": [
         "data:Data Quality and Adoption",
         "data:Answer Six Questions First"
+      ],
+      "concepts": [
+        "held-scope",
+        "authorization",
+        "agent",
+        "source-of-truth",
+        "qualified-for-use",
+        "cache"
       ],
       "utterance_groups": [
         "With the problem framed, we turn to data. Data earns trust only after it is shown fit for a specific use. ",
@@ -324,6 +371,7 @@
         "data:Preserve the Historical Point of View",
         "data:Answer Six Questions First"
       ],
+      "concepts": [],
       "utterance_groups": [
         "One price carries at least five moments. ",
         "A trade sets it in the market. The vendor publishes it. We collect it, then write it into the receiving system. ",
@@ -345,6 +393,11 @@
       "source_sections": [
         "data:Preserve the Historical Point of View",
         "data:Worked decision: revised market history"
+      ],
+      "concepts": [
+        "authorization",
+        "decision-owner",
+        "agent"
       ],
       "utterance_groups": [
         "Here is an illustrative case. ",
@@ -373,6 +426,10 @@
         "data:Admit a Durable Data Asset",
         "data:Move from a Signal to Controlled Use"
       ],
+      "concepts": [
+        "held-scope",
+        "verification"
+      ],
       "utterance_groups": [
         "Before data enters a lasting work system, eight conditions must all hold. Its meaning is explainable, its source traceable, its time identifiable. Its process is reproducible, its quality verifiable, its operation observable. Its owner is identifiable, and its use is bounded. ",
         "If any condition is unmet, label the data exploratory, temporary, limited-use, or awaiting verification; a limited use needs its own evidence and permission. ",
@@ -395,6 +452,11 @@
         "data:Assign Modeling and Lifecycle Decisions",
         "data:Worked change: a shared issuer identifier"
       ],
+      "concepts": [
+        "held-scope",
+        "authorization",
+        "decision-owner"
+      ],
       "utterance_groups": [
         "Now an illustrative change. A shared dataset changes its issuer identifier. Local tests pass, but a downstream factor calculation still joins on the old one, and may match the wrong entities or lose some matches. ",
         "Several decisions are now open. Authorized domain owners settle entities, relationships, rules and metric meanings. The data-model owner settles the grain, meaning what one row stands for, the IDs and keys, constraints, and the time and version rules. A convenient schema cannot resolve a conflict of meaning. ",
@@ -415,6 +477,12 @@
       "source_sections": [
         "data:Own Implementation and Verification",
         "data:Change Shared or Production Data"
+      ],
+      "concepts": [
+        "held-scope",
+        "decision-owner",
+        "agent",
+        "verification"
       ],
       "utterance_groups": [
         "Engineering owners carry a result from requirements and design through implementation, verification, release, operational feedback and improvement, as the work requires. Development and verification are two activities within one responsibility. Quality is not passed to the next stage. ",
@@ -437,6 +505,10 @@
         "deliver:Execution and Delivery",
         "deliver:Before Acting"
       ],
+      "concepts": [
+        "decision-owner",
+        "verification"
+      ],
       "utterance_groups": [
         "Trusted data still needs delivery that can be verified. Before acting, make the commitment, owner and completion condition visible. ",
         "Delivery follows a chain of trust. Take last night's delay: the decision owner approves an earlier start and its limits; the job is changed within them; current runs give evidence; the claim stays within that evidence; then come acceptance and learning. ",
@@ -456,6 +528,10 @@
       "language": "English",
       "source_sections": [
         "deliver:Name the State, Not the Effort"
+      ],
+      "concepts": [
+        "authorization",
+        "verification"
       ],
       "utterance_groups": [
         "Report the state, not the effort. ",
@@ -478,6 +554,10 @@
         "deliver:Close the Work",
         "deliver:Evidence Sets the Limit of the Claim"
       ],
+      "concepts": [
+        "agent",
+        "verification"
+      ],
       "utterance_groups": [
         "Say complete only when every condition holds. The deliverable is at the agreed location. Every completion criterion is met. Current verification matching the claim has passed. Risks, limits and follow-up owners are recorded. The agreed state is reached. And where human acceptance is required, the acceptor has accepted it. ",
         "Every completion claim answers the same questions. What is claimed, about which subject and version? Verified when, by whom, and how? Covering what, and leaving what unproved? ",
@@ -498,6 +578,9 @@
         "deliver:The Working Loop",
         "deliver:Close the Work"
       ],
+      "concepts": [
+        "verification"
+      ],
       "utterance_groups": [
         "The work runs as a loop, not a fixed sequence of stages: frame, analyze, decide, execute, verify, learn. When evidence or risk changes, review the judgment it affects; when the subject, outcome or boundaries change, frame the work again, keeping the verified parts that still hold. ",
         "Before calling high-impact or repeated work complete, leave the test, monitor, rule or recovery path it needs with the existing owners, so the next occurrence is found earlier and judged more easily. ",
@@ -511,33 +594,45 @@
       "id": "19",
       "chapter": "human-agent",
       "chapter_index": 4,
-      "chapter_title": "Working with Agents",
+      "chapter_title": "Human–AI collaboration",
       "title": "Delegate a boundary",
       "language": "English",
       "source_sections": [
         "human-agent:Human–AI Collaboration",
         "human-agent:Delegate a Boundary, Not a Pile of Context"
       ],
+      "concepts": [
+        "authority-about-facts",
+        "held-scope",
+        "authorization",
+        "agent",
+        "verification"
+      ],
       "utterance_groups": [
         "Members delegate search, analysis, drafting and changes to Agents. Agents extend what people can investigate, reason about and do, within a delegated boundary. But an Agent is not a source of organizational authority. ",
         "So delegate with a clear boundary, not a pile of context. A consequential delegation states its purpose and scope, the deliverable, the limits and permissions, how the result will be accepted, and when to stop. ",
         "For example: compare the vendor's earlier and revised price snapshots without changing anything. Report each value's source and observation time, the differences, and what cannot be verified. Stop if the earlier snapshot is missing or a write to production would be needed. Do not grant admission. ",
         "Telling an Agent to “just handle it” does not set an authorization boundary. ",
-        "If missing context does not materially affect direction, safety or authority, the Agent proceeds on reasonable stated assumptions. If the target, source of truth, responsible person, authority or an irreversible consequence is unclear, it stops and asks."
+        "If missing context does not materially affect direction, safety or authority, the Agent proceeds on reasonable stated assumptions. If the target, fact source, responsible person, authority or an irreversible consequence is unclear, it stops and asks."
       ],
-      "text": "Members delegate search, analysis, drafting and changes to Agents. Agents extend what people can investigate, reason about and do, within a delegated boundary. But an Agent is not a source of organizational authority. So delegate with a clear boundary, not a pile of context. A consequential delegation states its purpose and scope, the deliverable, the limits and permissions, how the result will be accepted, and when to stop. For example: compare the vendor's earlier and revised price snapshots without changing anything. Report each value's source and observation time, the differences, and what cannot be verified. Stop if the earlier snapshot is missing or a write to production would be needed. Do not grant admission. Telling an Agent to “just handle it” does not set an authorization boundary. If missing context does not materially affect direction, safety or authority, the Agent proceeds on reasonable stated assumptions. If the target, source of truth, responsible person, authority or an irreversible consequence is unclear, it stops and asks.",
-      "spoken_text": "Members delegate search, analysis, drafting and changes to Agents. Agents extend what people can investigate, reason about and do, within a delegated boundary. But an Agent is not a source of organizational authority. So delegate with a clear boundary, not a pile of context. A consequential delegation states its purpose and scope, the deliverable, the limits and permissions, how the result will be accepted, and when to stop. For example: compare the vendor's earlier and revised price snapshots without changing anything. Report each value's source and observation time, the differences, and what cannot be verified. Stop if the earlier snapshot is missing or a write to production would be needed. Do not grant admission. Telling an Agent to “just handle it” does not set an authorization boundary. If missing context does not materially affect direction, safety or authority, the Agent proceeds on reasonable stated assumptions. If the target, source of truth, responsible person, authority or an irreversible consequence is unclear, it stops and asks."
+      "text": "Members delegate search, analysis, drafting and changes to Agents. Agents extend what people can investigate, reason about and do, within a delegated boundary. But an Agent is not a source of organizational authority. So delegate with a clear boundary, not a pile of context. A consequential delegation states its purpose and scope, the deliverable, the limits and permissions, how the result will be accepted, and when to stop. For example: compare the vendor's earlier and revised price snapshots without changing anything. Report each value's source and observation time, the differences, and what cannot be verified. Stop if the earlier snapshot is missing or a write to production would be needed. Do not grant admission. Telling an Agent to “just handle it” does not set an authorization boundary. If missing context does not materially affect direction, safety or authority, the Agent proceeds on reasonable stated assumptions. If the target, fact source, responsible person, authority or an irreversible consequence is unclear, it stops and asks.",
+      "spoken_text": "Members delegate search, analysis, drafting and changes to Agents. Agents extend what people can investigate, reason about and do, within a delegated boundary. But an Agent is not a source of organizational authority. So delegate with a clear boundary, not a pile of context. A consequential delegation states its purpose and scope, the deliverable, the limits and permissions, how the result will be accepted, and when to stop. For example: compare the vendor's earlier and revised price snapshots without changing anything. Report each value's source and observation time, the differences, and what cannot be verified. Stop if the earlier snapshot is missing or a write to production would be needed. Do not grant admission. Telling an Agent to “just handle it” does not set an authorization boundary. If missing context does not materially affect direction, safety or authority, the Agent proceeds on reasonable stated assumptions. If the target, fact source, responsible person, authority or an irreversible consequence is unclear, it stops and asks."
     },
     {
       "id": "20",
       "chapter": "human-agent",
       "chapter_index": 4,
-      "chapter_title": "Working with Agents",
+      "chapter_title": "Human–AI collaboration",
       "title": "Delegation transfers work, not duty",
       "language": "English",
       "source_sections": [
         "human-agent:Delegate a Boundary, Not a Pile of Context",
         "human-agent:Execute and Verify"
+      ],
+      "concepts": [
+        "held-scope",
+        "agent",
+        "verification"
       ],
       "utterance_groups": [
         "A piece of work can involve a task lead, an executing member, an Agent, a reviewer and an acceptor. Where policy permits, the task lead, the decision owner and the acceptor may be one person, but a title alone grants no power to decide or accept. ",
@@ -552,13 +647,18 @@
       "id": "21",
       "chapter": "human-agent",
       "chapter_index": 4,
-      "chapter_title": "Working with Agents",
+      "chapter_title": "Human–AI collaboration",
       "title": "Check the actual work",
       "language": "English",
       "source_sections": [
         "human-agent:Check Agent Output",
         "human-agent:Agent Execution",
         "human-agent:Parallel Work"
+      ],
+      "concepts": [
+        "decision-owner",
+        "agent",
+        "verification"
       ],
       "utterance_groups": [
         "Checking an Agent's output means checking the work, not just its summary. ",
@@ -574,22 +674,29 @@
       "id": "22",
       "chapter": "human-agent",
       "chapter_index": 4,
-      "chapter_title": "Working with Agents",
+      "chapter_title": "Human–AI collaboration",
       "title": "Stop and hand off",
       "language": "English",
       "source_sections": [
         "human-agent:Stop and Handoff",
         "human-agent:Report and Preserve a Handoff"
       ],
+      "concepts": [
+        "authority-about-facts",
+        "held-scope",
+        "authorization",
+        "source-of-truth",
+        "verification"
+      ],
       "utterance_groups": [
-        "Stop the affected action and escalate in five kinds of situation. One: instructions materially conflict, or the target, source of truth or responsible person can't be identified. Two: authority is insufficient, the action would cross a permission, compliance, security or data boundary, or an irreversible step lacks authorization or recovery. ",
+        "Stop the affected action and escalate in five kinds of situation. One: instructions materially conflict, or the target, fact source or responsible person can't be identified. Two: authority is insufficient, the action would cross a permission, compliance, security or data boundary, or an irreversible step lacks authorization or recovery. ",
         "Three: you find work you don't recognize, someone else's uncommitted work, or work whose owner is unknown. Four: verification contradicts expectation, or evidence has expired. Five: continuing would hide a failure, corrupt a source of truth, worsen the harm, or present a guess as fact. ",
         "Independent authorized work may continue. ",
         "A report names the work, the delivery state reached, the evidence, its limits, and any acceptance still needed. On interruption, preserve the state, uncommitted work, attempts and failures, and where to resume. ",
         "End with the next responsible person, action and due time, not a vague promise to follow up."
       ],
-      "text": "Stop the affected action and escalate in five kinds of situation. One: instructions materially conflict, or the target, source of truth or responsible person can't be identified. Two: authority is insufficient, the action would cross a permission, compliance, security or data boundary, or an irreversible step lacks authorization or recovery. Three: you find work you don't recognize, someone else's uncommitted work, or work whose owner is unknown. Four: verification contradicts expectation, or evidence has expired. Five: continuing would hide a failure, corrupt a source of truth, worsen the harm, or present a guess as fact. Independent authorized work may continue. A report names the work, the delivery state reached, the evidence, its limits, and any acceptance still needed. On interruption, preserve the state, uncommitted work, attempts and failures, and where to resume. End with the next responsible person, action and due time, not a vague promise to follow up.",
-      "spoken_text": "Stop the affected action and escalate in five kinds of situation. One: instructions materially conflict, or the target, source of truth or responsible person can't be identified. Two: authority is insufficient, the action would cross a permission, compliance, security or data boundary, or an irreversible step lacks authorization or recovery. Three: you find work you don't recognize, someone else's uncommitted work, or work whose owner is unknown. Four: verification contradicts expectation, or evidence has expired. Five: continuing would hide a failure, corrupt a source of truth, worsen the harm, or present a guess as fact. Independent authorized work may continue. A report names the work, the delivery state reached, the evidence, its limits, and any acceptance still needed. On interruption, preserve the state, uncommitted work, attempts and failures, and where to resume. End with the next responsible person, action and due time, not a vague promise to follow up."
+      "text": "Stop the affected action and escalate in five kinds of situation. One: instructions materially conflict, or the target, fact source or responsible person can't be identified. Two: authority is insufficient, the action would cross a permission, compliance, security or data boundary, or an irreversible step lacks authorization or recovery. Three: you find work you don't recognize, someone else's uncommitted work, or work whose owner is unknown. Four: verification contradicts expectation, or evidence has expired. Five: continuing would hide a failure, corrupt a source of truth, worsen the harm, or present a guess as fact. Independent authorized work may continue. A report names the work, the delivery state reached, the evidence, its limits, and any acceptance still needed. On interruption, preserve the state, uncommitted work, attempts and failures, and where to resume. End with the next responsible person, action and due time, not a vague promise to follow up.",
+      "spoken_text": "Stop the affected action and escalate in five kinds of situation. One: instructions materially conflict, or the target, fact source or responsible person can't be identified. Two: authority is insufficient, the action would cross a permission, compliance, security or data boundary, or an irreversible step lacks authorization or recovery. Three: you find work you don't recognize, someone else's uncommitted work, or work whose owner is unknown. Four: verification contradicts expectation, or evidence has expired. Five: continuing would hide a failure, corrupt a source of truth, worsen the harm, or present a guess as fact. Independent authorized work may continue. A report names the work, the delivery state reached, the evidence, its limits, and any acceptance still needed. On interruption, preserve the state, uncommitted work, attempts and failures, and where to resume. End with the next responsible person, action and due time, not a vague promise to follow up."
     },
     {
       "id": "23",
@@ -603,15 +710,16 @@
         "communicate:Know What the Exchange Must Accomplish",
         "communicate:Structure an Important Update"
       ],
+      "concepts": [],
       "utterance_groups": [
-        "Results become other people's actions through communication. Communication answers the reader's actual need before recounting the whole process. ",
+        "Through communication, results become something others can act on. Communication answers the reader's actual need before recounting the whole process. ",
         "Name the purpose first: to synchronize, discuss, decide, escalate or review. ",
         "An important update leads with the conclusion or present state, and what actually changed since last time. Then the decisive facts, impact and risks. Then your recommendation and the decision needed, from whom, and by when. Then the next action, its owner and due time, and what will show it is done. ",
         "When you don't know, say so. When new evidence overturns a position, revise it at once. ",
         "In a follow-up, keep the subject, definitions and criteria unchanged. If one must change, say so and why before answering."
       ],
-      "text": "Results become other people's actions through communication. Communication answers the reader's actual need before recounting the whole process. Name the purpose first: to synchronize, discuss, decide, escalate or review. An important update leads with the conclusion or present state, and what actually changed since last time. Then the decisive facts, impact and risks. Then your recommendation and the decision needed, from whom, and by when. Then the next action, its owner and due time, and what will show it is done. When you don't know, say so. When new evidence overturns a position, revise it at once. In a follow-up, keep the subject, definitions and criteria unchanged. If one must change, say so and why before answering.",
-      "spoken_text": "Results become other people's actions through communication. Communication answers the reader's actual need before recounting the whole process. Name the purpose first: to synchronize, discuss, decide, escalate or review. An important update leads with the conclusion or present state, and what actually changed since last time. Then the decisive facts, impact and risks. Then your recommendation and the decision needed, from whom, and by when. Then the next action, its owner and due time, and what will show it is done. When you don't know, say so. When new evidence overturns a position, revise it at once. In a follow-up, keep the subject, definitions and criteria unchanged. If one must change, say so and why before answering."
+      "text": "Through communication, results become something others can act on. Communication answers the reader's actual need before recounting the whole process. Name the purpose first: to synchronize, discuss, decide, escalate or review. An important update leads with the conclusion or present state, and what actually changed since last time. Then the decisive facts, impact and risks. Then your recommendation and the decision needed, from whom, and by when. Then the next action, its owner and due time, and what will show it is done. When you don't know, say so. When new evidence overturns a position, revise it at once. In a follow-up, keep the subject, definitions and criteria unchanged. If one must change, say so and why before answering.",
+      "spoken_text": "Through communication, results become something others can act on. Communication answers the reader's actual need before recounting the whole process. Name the purpose first: to synchronize, discuss, decide, escalate or review. An important update leads with the conclusion or present state, and what actually changed since last time. Then the decisive facts, impact and risks. Then your recommendation and the decision needed, from whom, and by when. Then the next action, its owner and due time, and what will show it is done. When you don't know, say so. When new evidence overturns a position, revise it at once. In a follow-up, keep the subject, definitions and criteria unchanged. If one must change, say so and why before answering."
     },
     {
       "id": "24",
@@ -623,6 +731,11 @@
       "source_sections": [
         "communicate:Make Meetings Produce Decisions, Not Transcripts",
         "communicate:Replace Vague Assurances with Checkable Statements"
+      ],
+      "concepts": [
+        "held-scope",
+        "agent",
+        "verification"
       ],
       "utterance_groups": [
         "Meetings should produce decisions, not transcripts. Don't meet for what can be settled asynchronously. Align facts and definitions before comparing options, and locate any disagreement: in facts, inference, values, resources or authority. ",
@@ -645,6 +758,7 @@
         "communicate:Review Before Sending",
         "communicate:Escalate Risk in Four Parts"
       ],
+      "concepts": [],
       "utterance_groups": [
         "Writing aims for fidelity, clarity and elegance, in that order. ",
         "Fidelity preserves the meaning: actors, conditions, responsibilities and limits stay intact, facts keep their sources, and counterexamples, uncertainty and failure stay visible.",
@@ -652,10 +766,10 @@
         " Elegance brings taste and aesthetic judgment to rhythm, transitions and form, in a style suited to the subject and the reader, with precise verbs and concrete nouns, without slogans or pretended depth. ",
         "If collection ran two hours late, write two hours late, not “roughly on time”. That is fidelity. Lead with the conclusion and the decision needed, then the detail. That is clarity. ",
         "Clarity has concrete checks: a title that names the subject and purpose; the conclusion first; one point per paragraph; important terms defined at first use. Before sending, ask whether a reader outside the work could restate the conclusion, basis, limits and next action. ",
-        "Escalating a risk takes four parts. The risk. The facts, impact, and the latest safe time to decide. What containment was tried, and with what result. And the options, their costs, your recommendation, and who must decide by when."
+        "Escalating a risk takes four parts: the risk; the facts, the impact and the latest safe time to decide; what containment was tried, and with what result; and the options, their costs, your recommendation, and who must decide by when."
       ],
-      "text": "Writing aims for fidelity, clarity and elegance, in that order. Fidelity preserves the meaning: actors, conditions, responsibilities and limits stay intact, facts keep their sources, and counterexamples, uncertainty and failure stay visible. Clarity begins with accurate understanding, then puts it plainly and fluently, so the reader can understand and act. Elegance brings taste and aesthetic judgment to rhythm, transitions and form, in a style suited to the subject and the reader, with precise verbs and concrete nouns, without slogans or pretended depth. If collection ran two hours late, write two hours late, not “roughly on time”. That is fidelity. Lead with the conclusion and the decision needed, then the detail. That is clarity. Clarity has concrete checks: a title that names the subject and purpose; the conclusion first; one point per paragraph; important terms defined at first use. Before sending, ask whether a reader outside the work could restate the conclusion, basis, limits and next action. Escalating a risk takes four parts. The risk. The facts, impact, and the latest safe time to decide. What containment was tried, and with what result. And the options, their costs, your recommendation, and who must decide by when.",
-      "spoken_text": "Writing aims for fidelity, clarity and elegance, in that order. Fidelity preserves the meaning: actors, conditions, responsibilities and limits stay intact, facts keep their sources, and counterexamples, uncertainty and failure stay visible. Clarity begins with accurate understanding, then puts it plainly and fluently, so the reader can understand and act. Elegance brings taste and aesthetic judgment to rhythm, transitions and form, in a style suited to the subject and the reader, with precise verbs and concrete nouns, without slogans or pretended depth. If collection ran two hours late, write two hours late, not “roughly on time”. That is fidelity. Lead with the conclusion and the decision needed, then the detail. That is clarity. Clarity has concrete checks: a title that names the subject and purpose; the conclusion first; one point per paragraph; important terms defined at first use. Before sending, ask whether a reader outside the work could restate the conclusion, basis, limits and next action. Escalating a risk takes four parts. The risk. The facts, impact, and the latest safe time to decide. What containment was tried, and with what result. And the options, their costs, your recommendation, and who must decide by when."
+      "text": "Writing aims for fidelity, clarity and elegance, in that order. Fidelity preserves the meaning: actors, conditions, responsibilities and limits stay intact, facts keep their sources, and counterexamples, uncertainty and failure stay visible. Clarity begins with accurate understanding, then puts it plainly and fluently, so the reader can understand and act. Elegance brings taste and aesthetic judgment to rhythm, transitions and form, in a style suited to the subject and the reader, with precise verbs and concrete nouns, without slogans or pretended depth. If collection ran two hours late, write two hours late, not “roughly on time”. That is fidelity. Lead with the conclusion and the decision needed, then the detail. That is clarity. Clarity has concrete checks: a title that names the subject and purpose; the conclusion first; one point per paragraph; important terms defined at first use. Before sending, ask whether a reader outside the work could restate the conclusion, basis, limits and next action. Escalating a risk takes four parts: the risk; the facts, the impact and the latest safe time to decide; what containment was tried, and with what result; and the options, their costs, your recommendation, and who must decide by when.",
+      "spoken_text": "Writing aims for fidelity, clarity and elegance, in that order. Fidelity preserves the meaning: actors, conditions, responsibilities and limits stay intact, facts keep their sources, and counterexamples, uncertainty and failure stay visible. Clarity begins with accurate understanding, then puts it plainly and fluently, so the reader can understand and act. Elegance brings taste and aesthetic judgment to rhythm, transitions and form, in a style suited to the subject and the reader, with precise verbs and concrete nouns, without slogans or pretended depth. If collection ran two hours late, write two hours late, not “roughly on time”. That is fidelity. Lead with the conclusion and the decision needed, then the detail. That is clarity. Clarity has concrete checks: a title that names the subject and purpose; the conclusion first; one point per paragraph; important terms defined at first use. Before sending, ask whether a reader outside the work could restate the conclusion, basis, limits and next action. Escalating a risk takes four parts: the risk; the facts, the impact and the latest safe time to decide; what containment was tried, and with what result; and the options, their costs, your recommendation, and who must decide by when."
     },
     {
       "id": "26",
@@ -668,13 +782,18 @@
         "evolve:Practice and Evolution",
         "evolve:Admit Practices and Prevent Recurrence"
       ],
+      "concepts": [
+        "held-scope",
+        "agent",
+        "source-of-truth"
+      ],
       "utterance_groups": [
-        "The last part is about making the next attempt better. Learning exists to find the next failure earlier, judge it more easily, and need less manual rescue. Not to add files. ",
+        "The last part is about making the next attempt better. Learning exists to find the next failure earlier, judge it more easily, and need less manual rescue, not to add files. ",
         "Before a rule, template, tool or Agent workflow becomes department practice, show an observed problem, a material risk with evidence, or an obligation that applies. Explain why the existing mechanism falls short, and what the new practice would cost to understand and maintain. Require a bounded trial, evidence of net benefit, a named owner, and stated triggers for revision or retirement. ",
         "Necessary safeguards must not wait for an incident, or for a new practice to be approved. Meet the obligation now, within existing authority; a trial decides only how to meet it, not whether. Retire a rule that has lost its subject or users, duplicates a source of truth, or costs more than it returns."
       ],
-      "text": "The last part is about making the next attempt better. Learning exists to find the next failure earlier, judge it more easily, and need less manual rescue. Not to add files. Before a rule, template, tool or Agent workflow becomes department practice, show an observed problem, a material risk with evidence, or an obligation that applies. Explain why the existing mechanism falls short, and what the new practice would cost to understand and maintain. Require a bounded trial, evidence of net benefit, a named owner, and stated triggers for revision or retirement. Necessary safeguards must not wait for an incident, or for a new practice to be approved. Meet the obligation now, within existing authority; a trial decides only how to meet it, not whether. Retire a rule that has lost its subject or users, duplicates a source of truth, or costs more than it returns.",
-      "spoken_text": "The last part is about making the next attempt better. Learning exists to find the next failure earlier, judge it more easily, and need less manual rescue. Not to add files. Before a rule, template, tool or Agent workflow becomes department practice, show an observed problem, a material risk with evidence, or an obligation that applies. Explain why the existing mechanism falls short, and what the new practice would cost to understand and maintain. Require a bounded trial, evidence of net benefit, a named owner, and stated triggers for revision or retirement. Necessary safeguards must not wait for an incident, or for a new practice to be approved. Meet the obligation now, within existing authority; a trial decides only how to meet it, not whether. Retire a rule that has lost its subject or users, duplicates a source of truth, or costs more than it returns."
+      "text": "The last part is about making the next attempt better. Learning exists to find the next failure earlier, judge it more easily, and need less manual rescue, not to add files. Before a rule, template, tool or Agent workflow becomes department practice, show an observed problem, a material risk with evidence, or an obligation that applies. Explain why the existing mechanism falls short, and what the new practice would cost to understand and maintain. Require a bounded trial, evidence of net benefit, a named owner, and stated triggers for revision or retirement. Necessary safeguards must not wait for an incident, or for a new practice to be approved. Meet the obligation now, within existing authority; a trial decides only how to meet it, not whether. Retire a rule that has lost its subject or users, duplicates a source of truth, or costs more than it returns.",
+      "spoken_text": "The last part is about making the next attempt better. Learning exists to find the next failure earlier, judge it more easily, and need less manual rescue, not to add files. Before a rule, template, tool or Agent workflow becomes department practice, show an observed problem, a material risk with evidence, or an obligation that applies. Explain why the existing mechanism falls short, and what the new practice would cost to understand and maintain. Require a bounded trial, evidence of net benefit, a named owner, and stated triggers for revision or retirement. Necessary safeguards must not wait for an incident, or for a new practice to be approved. Meet the obligation now, within existing authority; a trial decides only how to meet it, not whether. Retire a rule that has lost its subject or users, duplicates a source of truth, or costs more than it returns."
     },
     {
       "id": "27",
@@ -686,6 +805,9 @@
       "source_sections": [
         "evolve:Detect Drift Before Failure",
         "evolve:Improve the Existing Mechanism"
+      ],
+      "concepts": [
+        "agent"
       ],
       "utterance_groups": [
         "Many system defects begin as small signals: definitions drifting, questions recurring, people stepping in to rescue, evidence expiring, ownership blurring, intermittent failures, slight delays. ",
@@ -712,14 +834,19 @@
         "evolve:Observe the System Without Worshipping Numbers",
         "evolve:Cadence and Responsibilities"
       ],
+      "concepts": [
+        "authorization",
+        "agent",
+        "verification"
+      ],
       "utterance_groups": [
         "Capability grows through real work. Confirm the boundary and success criteria at the start, examine the reasoning at important decisions, and after delivery, agree on one observable improvement for the next task. ",
         "Coaching tests a member's reasoning without making the judgment for them. Feedback names a proposition, evidence, behavior and consequence. A label like “weak logic” gives no direction. ",
-        "Fluency, effort and Agent efficiency never make up for risks like these: fabricated, selectively hidden or unverified facts presented as established, completion claimed without current verification, Agent output standing in for fact, authorization or responsibility, high-risk or irreversible action beyond authority, hidden blockers and failures. ",
+        "Fluency, effort and Agent efficiency never make up for risks like these: fabricated, selectively hidden or unverified facts presented as established, completion claimed without current verification, Agent output standing in for fact, authorization or responsibility, high-risk or irreversible action beyond authorization, hidden blockers and failures. ",
         "If work is scored, the score expresses delivery risk. It must never label a person. Ask what decision a metric supports and how it could be gamed, and investigate anomalies through cases and mechanisms. By default, the department calibrates judgment weekly, reviews mechanisms monthly, and reviews practices and capability priorities quarterly. Escalate high-risk signals at once."
       ],
-      "text": "Capability grows through real work. Confirm the boundary and success criteria at the start, examine the reasoning at important decisions, and after delivery, agree on one observable improvement for the next task. Coaching tests a member's reasoning without making the judgment for them. Feedback names a proposition, evidence, behavior and consequence. A label like “weak logic” gives no direction. Fluency, effort and Agent efficiency never make up for risks like these: fabricated, selectively hidden or unverified facts presented as established, completion claimed without current verification, Agent output standing in for fact, authorization or responsibility, high-risk or irreversible action beyond authority, hidden blockers and failures. If work is scored, the score expresses delivery risk. It must never label a person. Ask what decision a metric supports and how it could be gamed, and investigate anomalies through cases and mechanisms. By default, the department calibrates judgment weekly, reviews mechanisms monthly, and reviews practices and capability priorities quarterly. Escalate high-risk signals at once.",
-      "spoken_text": "Capability grows through real work. Confirm the boundary and success criteria at the start, examine the reasoning at important decisions, and after delivery, agree on one observable improvement for the next task. Coaching tests a member's reasoning without making the judgment for them. Feedback names a proposition, evidence, behavior and consequence. A label like “weak logic” gives no direction. Fluency, effort and Agent efficiency never make up for risks like these: fabricated, selectively hidden or unverified facts presented as established, completion claimed without current verification, Agent output standing in for fact, authorization or responsibility, high-risk or irreversible action beyond authority, hidden blockers and failures. If work is scored, the score expresses delivery risk. It must never label a person. Ask what decision a metric supports and how it could be gamed, and investigate anomalies through cases and mechanisms. By default, the department calibrates judgment weekly, reviews mechanisms monthly, and reviews practices and capability priorities quarterly. Escalate high-risk signals at once."
+      "text": "Capability grows through real work. Confirm the boundary and success criteria at the start, examine the reasoning at important decisions, and after delivery, agree on one observable improvement for the next task. Coaching tests a member's reasoning without making the judgment for them. Feedback names a proposition, evidence, behavior and consequence. A label like “weak logic” gives no direction. Fluency, effort and Agent efficiency never make up for risks like these: fabricated, selectively hidden or unverified facts presented as established, completion claimed without current verification, Agent output standing in for fact, authorization or responsibility, high-risk or irreversible action beyond authorization, hidden blockers and failures. If work is scored, the score expresses delivery risk. It must never label a person. Ask what decision a metric supports and how it could be gamed, and investigate anomalies through cases and mechanisms. By default, the department calibrates judgment weekly, reviews mechanisms monthly, and reviews practices and capability priorities quarterly. Escalate high-risk signals at once.",
+      "spoken_text": "Capability grows through real work. Confirm the boundary and success criteria at the start, examine the reasoning at important decisions, and after delivery, agree on one observable improvement for the next task. Coaching tests a member's reasoning without making the judgment for them. Feedback names a proposition, evidence, behavior and consequence. A label like “weak logic” gives no direction. Fluency, effort and Agent efficiency never make up for risks like these: fabricated, selectively hidden or unverified facts presented as established, completion claimed without current verification, Agent output standing in for fact, authorization or responsibility, high-risk or irreversible action beyond authorization, hidden blockers and failures. If work is scored, the score expresses delivery risk. It must never label a person. Ask what decision a metric supports and how it could be gamed, and investigate anomalies through cases and mechanisms. By default, the department calibrates judgment weekly, reviews mechanisms monthly, and reviews practices and capability priorities quarterly. Escalate high-risk signals at once."
     },
     {
       "id": "29",
@@ -731,6 +858,11 @@
       "source_sections": [
         "evolve:Management Responsibilities",
         "evolve:Emergencies and Exceptions"
+      ],
+      "concepts": [
+        "held-scope",
+        "decision-owner",
+        "verification"
       ],
       "utterance_groups": [
         "Managers clarify direction, priorities, decision boundaries and resources, resolve cross-domain conflicts and stalled decisions in time, and protect people who honestly expose problems. When goals conflict, priorities drift, resources run short or decisions stall, repair the management system before blaming a member. ",
@@ -755,6 +887,7 @@
         "charter:From Principle to Action",
         "evolve:Emergencies and Exceptions"
       ],
+      "concepts": [],
       "utterance_groups": [
         "Back to the price dataset we began with. Its next user needs clear meaning, the facts available at the time, evidence that matches each claim, and a permitted, bounded use. ",
         "None of this is extra paperwork. It is what turns a finished dataset into something others can safely rely on. ",

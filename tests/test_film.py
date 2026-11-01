@@ -16,8 +16,8 @@ from filmkit.review.listening_plan import listening_plan
 CHINESE = re.compile(r"[\u3000-\u303f\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff\uff00-\uffef]")
 # The release the lock pins the engine to, by its tag.
 ENGINE_SOURCE = re.compile(r"^https://github\.com/HengYangDS/filmkit\?tag=v([^#]+)#[0-9a-f]{40}$")
-# The SHA-256 of the listening plan that the engine copy of v1.0.0 derived from these scripts.
-PLAN_SHA256 = "737ce59e4b6952dd58d6980fa37cbb19f8339f05691d8f4c95c4b23ad0ebf80e"
+# The SHA-256 of the listening plan derived from the v1.2.0 repair's scripts, contract and readings.
+PLAN_SHA256 = "3a4a0d33c7e2ab8fb88354a458b748b1e25089be983d615409bab5598355b414"
 
 
 def test_the_declaration_loads_with_both_editions():
@@ -47,7 +47,7 @@ def test_the_english_player_keeps_no_chinese_text():
     assert CHINESE.search((repository.ROOT / Edition("en").player).read_text()) is None
 
 
-def test_the_listening_plan_is_the_one_v1_0_0_derived(tmp_path):
+def test_the_listening_plan_is_the_one_the_v1_2_0_repair_derives(tmp_path):
     out = tmp_path / "listening-plan.json"
     listening_plan(out)
     assert hashlib.sha256(out.read_bytes()).hexdigest() == PLAN_SHA256
