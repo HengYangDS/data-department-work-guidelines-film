@@ -63,7 +63,7 @@ The rest of the term choices recorded by the improve-film-intelligibility design
 | authority as a held scope            | charter; human-agent; evolve    | The range within which a person may act; it never grows by urgency or acceptance.           | 权限                           | authority              |
 | authorization                        | charter; human-agent            | The act of granting that scope for a stated action.                                         | 授权                           | authorization          |
 | decision owner; authorized owner     | decide; deliver; data           | The accountable person who decides the matter within their authority.                       | 决策负责人；这件事的授权负责人 | decision owner         |
-| human–AI collaboration               | DR-0001; human-agent            | The whole relationship, named so that no single Agent stands for it.                        | 人与 AI 的协作                 | human–AI collaboration |
+| human–AI collaboration               | DR-0001; human-agent            | The whole relationship, named so that no single Agent stands for it.                        | 人与人工智能的协作             | human–AI collaboration |
 | Agent                                | DR-0001; human-agent            | One executing or reasoning entity, never a source of organizational authority.              | 智能体                         | Agent                  |
 | source of truth; lead                | charter; data                   | The authoritative record, against everything that only points toward it.                    | 权威来源；线索                 | source of truth; lead  |
 
