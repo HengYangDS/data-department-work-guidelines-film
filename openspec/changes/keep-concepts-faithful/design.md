@@ -25,13 +25,17 @@ The charter names four failures the contract stands against: reasoning that conf
 
 ### Where the films depart from the concepts
 
-The audit of both editions at v1.1.0 found:
+The audit of both editions at v1.1.0, and the independent audit of the repair's second revision (`build/evidence/script-audit/v1.2.0-repair-r2-audit.md`), found:
 
 | Concept                                 | Chinese at v1.1.0                                                                       | English at v1.1.0                         |
 | --------------------------------------- | --------------------------------------------------------------------------------------- | ----------------------------------------- |
 | authority to act; authority about facts | 谁说了算 and 什么才算事实 (03)                                                          | "who decides", "what counts as fact" (03) |
 | decision owner; authorized owner        | 有决定权的人 (03, 05, 06, 08, 11, 13, 14, 15, 21, 29); 谁有权决定 (05); 谁有决定权 (15) | decision owner (faithful)                 |
-| authority to act, as a held scope       | 权限 (04, 13, 19, 20, 22, 24, 26, 29), faithful                                         | authority (faithful)                      |
+| deciding                                | 拍板 (02, 08, 20, 25)                                                                   | "decide" (faithful)                       |
+| authority to act, as a held scope       | 权限 (04, 13, 19, 20, 22, 24, 26, 29), faithful; 许可 (09, 12, 13, 19)                  | authority, permission (faithful)          |
+| lead                                    | 线索 (faithful)                                                                         | "clue", "clues" (03, 06)                  |
+| fact source, in the stop rule           | 权威来源 (19, 22)                                                                       | "source of truth" (19, 22)                |
+| qualifying data for a use               | 核验 (09)                                                                               | "shown fit" (faithful)                    |
 | human–AI collaboration                  | 人与智能体怎样协作 (01 and the chapter of 19–22)                                        | "Working with Agents" (chapter of 19–22)  |
 
 The rest of the term choices recorded by the improve-film-intelligibility design, such as 契约, 权威来源, 缓存, 派生视图, 公司代码 and 核验, remain faithful and enter the contract unchanged.
@@ -56,26 +60,34 @@ The rest of the term choices recorded by the improve-film-intelligibility design
 
 `content/concepts.toml` holds one entry per concept sense: the source term, the exact passage and anchor at the pinned commit, its essence in one sentence, the approved Chinese and English renderings with the inflections the narration may use, and the counterexamples the audit found. Each segment of each edition's script declares the senses it states; both editions of a segment declare the same set; and the narration, captions and picture labels use only the approved renderings. The film owns its contract because the contract is a statement about this film's language; the check that enforces it belongs to `filmkit`. The entries that change or that the source spells alike:
 
-| Sense                                | Source (pinned)                 | Essence                                                                                     | Chinese                        | English                |
-| ------------------------------------ | ------------------------------- | ------------------------------------------------------------------------------------------- | ------------------------------ | ---------------------- |
-| authority to act, as ordered sources | charter, Two Kinds of Authority | What decides what may be done, in an order where law and policy come before any person.     | 行动依据                       | authority to act       |
-| authority about facts                | charter, Two Kinds of Authority | What can establish a fact: primary records and repeatable observations; the rest are leads. | 事实依据                       | authority about facts  |
-| authority as a held scope            | charter; human-agent; evolve    | The range within which a person may act; it never grows by urgency or acceptance.           | 权限                           | authority              |
-| authorization                        | charter; human-agent            | The act of granting that scope for a stated action.                                         | 授权                           | authorization          |
-| decision owner; authorized owner     | decide; deliver; data           | The accountable person who decides the matter within their authority.                       | 决策负责人；这件事的授权负责人 | decision owner         |
-| human–AI collaboration               | DR-0001; human-agent            | The whole relationship, named so that no single Agent stands for it.                        | 人与人工智能的协作             | human–AI collaboration |
-| Agent                                | DR-0001; human-agent            | One executing or reasoning entity, never a source of organizational authority.              | 智能体                         | Agent                  |
-| source of truth; lead                | charter; data                   | The authoritative record, against everything that only points toward it.                    | 权威来源；线索                 | source of truth; lead  |
+| Sense                                | Source (pinned)                 | Essence                                                                                     | Chinese            | English                            |
+| ------------------------------------ | ------------------------------- | ------------------------------------------------------------------------------------------- | ------------------ | ---------------------------------- |
+| authority to act, as ordered sources | charter, Two Kinds of Authority | What decides what may be done, in an order where law and policy come before any person.     | 行动依据           | authority to act                   |
+| authority about facts                | charter, Two Kinds of Authority | What can establish a fact: primary records and repeatable observations; the rest are leads. | 事实依据           | authority about facts; fact source |
+| authority as a held scope            | charter; human-agent; evolve    | The range within which a person may act; it never grows by urgency or acceptance.           | 权限               | authority; permission              |
+| authorization                        | charter; human-agent            | The act of granting that scope for a stated action.                                         | 授权               | authorization                      |
+| decision owner; authorized owner     | decide; deliver; data           | The accountable person who decides the matter within their authority.                       | 决策负责人         | decision owner                     |
+| human–AI collaboration               | DR-0001; human-agent            | The whole relationship, named so that no single Agent stands for it.                        | 人与人工智能的协作 | human–AI collaboration             |
+| Agent                                | DR-0001; human-agent            | One executing or reasoning entity, never a source of organizational authority.              | 智能体             | Agent                              |
+| source of truth                      | data                            | The authoritative record, against every report, cache and summary derived from it.          | 权威来源           | source of truth                    |
+| lead                                 | charter                         | What only points toward a fact: accounts, caches, generated views, Agent output and memory. | 线索               | lead                               |
+| qualified for a use                  | data                            | Showing that data's meaning, quality, permission and reproducibility fit one stated use.    | 证明适合           | shown fit                          |
 
-The user approved these renderings on 2026-11-01. A rendering that a later review rejects changes here first, with the user's approval, and then everywhere it is used.
+The user approved these renderings on 2026-11-01. On 2026-11-02 the user approved the repair's third revision with its five choices: one name for the decision owner, so the contract drops 这件事的授权负责人; 权限 for every held scope, so 许可 goes; 证明适合 and "shown fit" for qualifying data, so 核验 keeps one meaning; 做决定 or 决定 for 拍板; and 事实依据 and "fact source" where the stop rule names the fact source. The independent audit of the third revision (`build/evidence/script-audit/v1.2.0-repair-r3-audit.md`) found two titles that still departed: 09 now says 证明数据适合具体用途, as choice 3 requires, and 14 says 实现、核验与生产变更, the contract's verification word. In 05.3 and 21.1 the Chinese says 行动依据, while the English keeps the source's own bare "authority" (decide, Frame the Right Problem; human-agent, Check Agent Output), so neither segment declares authority to act, and no sense binds the authority wording of those two thoughts: a recorded exception, not a gap. Unchanged thoughts that state a sense in one edition of their segment only, or by a form the contract does not list, stay undeclared as well: Chinese 01.6 and 26.4 (核验) and 14.2 and 20.0 (授权), and English 11.9 (permission), 20.0 (decision owner) and 30.0 (permitted). A rendering that a later review rejects changes here first, with the user's approval, and then everywhere it is used.
 
 ### 2. Repair without restructuring
 
-Each departure in the audit table is rewritten in the source's sense, keeping the thought's length within its measured place so the 1500 s fit and the picture's timings move as little as possible. The authority segment 03 states both questions in the contract's words, the decision owner becomes 决策负责人 throughout, and the collaboration chapter and the roadmap of 01 use the DR-0001 name in both editions. Picture labels that show a changed term change with it. The affected thoughts are narrated again, qualified and heard before the picture is composed, under the existing lock order: script, voice, picture, one render, one review.
+Each departure in the audit table is rewritten in the source's sense, keeping the thought's length within its measured place so the 1500 s fit and the picture's timings move as little as possible. The authority segment 03 states both kinds of authority in the contract's words, the decision owner becomes 决策负责人 throughout, and the collaboration chapter and the roadmap of 01 use the DR-0001 name in both editions. Picture labels that show a changed term change with it.
+
+The approved third revision (`build/runtime/work/repair/concept-edits-r3.md`), applied with `filmkit.narration.script_edits`, changes 29 Chinese thoughts in 18 segments and 14 English thoughts in 11 segments; no thought is split or merged. The Chinese grows by 37 Han characters and the English by about two dozen words. The titles of 03, 04, 09 and 14, the collaboration chapter's name, the release synopsis and keywords, both players and the README follow. The casts release the retakes of the changed thoughts; every other thought keeps its text and seed.
+
+The pronunciation contract's hash enters every narration request, so both editions are narrated again in full from their casts' seeds, and new takes are selected for the repaired thoughts. The narration is qualified and heard before the picture is composed, under the existing lock order: script, voice, picture, one render, one review.
 
 ### 3. Pronunciation
 
-The pronunciation contract declares the context reading of every Chinese character whose dictionary reading is ambiguous, such as 行情 háng, 重新 chóng, 当时 dāng and the 得 of necessity, děi, and one reading for each name. One approved occurrence of each declared reading is the reference; every other occurrence must match it within the threshold the `filmkit` check is calibrated to, and a mismatch is retaken.
+The pronunciation contract moves to schema version 2, which the `filmkit` readings check enforces on the spoken text. Its Chinese part declares 250 words that resolve all 1,373 watched occurrences: 245 words reviewed in context for the v1.1.0 text, including the 13 earlier targets the narration still says, 22 of them recording where the narration departs from the dictionary, such as the 得 of 做得 (de) and 当时 (dāng); 两种 and 待决定 for the repair; and 谁 shéi, 这 zhè and 那 nà, the one reading the approved text names for the edition. 一字不差 keeps the dictionary's chà. 谁, 这, 那 and 审美 hold no character the engine watches, so the readings check's occurrence plan has no row for them; the listening plan derived for the review lists every one of their occurrences. The Chinese narration says no Latin name. The English part names IDs as letter names beside AI.
+
+The listening plan's analyst readings drop the 46 Chinese words that the contract now declares or the narration no longer says, and record the two new noun occurrences, lead (06) and leads (03), as /liːd/. The film's tests pin the plan derived from the repaired scripts. Every occurrence of a declared reading or name is heard against its approved reference, and a mismatch is retaken.
 
 ### 4. Review
 
@@ -116,10 +128,10 @@ The user's plan for a ten-minute essentials edition beside the 25-minute edition
 ## Migration Plan
 
 1. The user approved the contract's renderings, the repair-only scope of the 25-minute editions and the essentials outline on 2026-11-01.
-2. Specifications and tasks follow; the script repairs are written, term-audited and approved.
-3. After the `filmkit` release with the new checks is pinned, the affected thoughts are narrated, qualified and heard; then picture, render and review.
+2. Specifications and tasks follow; the script repairs are written and term-audited, and the user approved the third revision on 2026-11-02.
+3. With `filmkit` 0.3.0 pinned, both editions are narrated from their casts' seeds and the repaired thoughts' takes are qualified and heard; then picture, render and review.
 4. Both editions are delivered to Documents with readback and replace v1.1.0 there; v1.2.0 is released after the user confirms.
 
 ## Open Questions
 
-- The essentials film's repository name and title.
+- The essentials film's repository name and title, and its length: at the narrator's speaking rate its approved text runs about a third short of ten minutes, as the ETHOS film's does of fifteen, and the user decides how to close that gap.
