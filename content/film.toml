@@ -75,6 +75,10 @@ subject_and_faithfulness = """\
   DDWG remains the subject; all seven documents substantively covered with conditions and \
   boundaries; examples illuminate rules; Human/Agent responsibility and role combinations \
   accurate."""
+concept_fidelity = """\
+  each concept the film names keeps its source meaning as the concept contract quotes it, in \
+  the edition's one rendering through narration, captions, titles and picture; no rendering \
+  narrows, personifies, substitutes or literally translates a concept."""
 narrative_and_clarity = """\
   the real problem before the response; terms defined before use; connected argument; clear \
   chapter boundaries; ending returns to the opening; the edition stands alone."""
