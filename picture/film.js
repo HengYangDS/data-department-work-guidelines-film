@@ -2989,7 +2989,9 @@ scenes["09"] = function (s, t) {
   // decision work until it is shown fit. The data that cannot answer stands from the cut; its exploration scope, a frame
   // sized to it, stands round it on the words that allow exploring ("可以…", "may be explored"), and the work it stays
   // out of stands beside it as a small frame whose three uses arrive on their words. The way from the data toward that
-  // work stops at a boundary halfway.
+  // work stops at a boundary halfway. Chinese says what the data must first be shown, fit for this use, as the clause
+  // that refuses it begins, so that condition stands under the boundary on its words; English says it last, as the
+  // stage gives way.
   const four = base * stageIn(t, unclear) * stageOut(t, views[0]);
   if (four > 0) {
     const scope = cue(s, "可以在授权范围里探索", "may be explored"), uses = cues(s, [["共享", "shared"], ["投产", "production"], ["做决策", "decision work"]]);
@@ -3012,6 +3014,7 @@ scenes["09"] = function (s, t) {
     const refuse = cue(s, "证明它适合这个用途之前", "but stays out of"), go = soon(t, refuse - .05, .6), bx = (lx + fw + ax) / 2;
     link(lx + fw + 12, mid, ax - 12, mid, {color: P.unknown, alpha: four * ramp(t, refuse - .05, .3), upto: .46 * go, end: false, dash: [8, 8]});
     line(bx, mid - 34, bx, mid + 34, {color: P.unknown, alpha: ramp(t, refuse + .45, .3) * four, width: 4});
+    if (!en) nameText("证明它适合\n这个用途之前", bx, mid + 34 + NAME_GAP, {valign: "top", size: NOTE, color: P.muted, alpha: four * named(t, refuse)});
   }
   // 5. Reports, catalogs, caches and Agent summaries are derived from other data: they hang from the source of truth on
   // one trunk and one crossing row, the order of a family tree, and what flows down each drop is a copy. When the words

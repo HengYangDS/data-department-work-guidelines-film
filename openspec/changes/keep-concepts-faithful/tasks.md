@@ -26,7 +26,7 @@
 ## 5. Picture
 
 - [x] 5.1 Change the picture's labels and cue words for every repaired term, in 01, 03 and the chapter 19 to 22; verify the composition tests, the concept check on picture labels, and the geometry, still, motion and sync audits. The composition tests pass 9 of 9 and the concept check finds no counterexample. On the repaired timelines three stages still followed the old words; design §2 records their fixes. The frame and sync audits now report no finding in either edition, the real-browser check finds none in 45,000 frames of each, the longest still picture under speech lasts 3.0 s, and the one new caption echo is 29's 什么情况下回滚, whose caption the repaired clause now leaves alone (`build/evidence/picture-audit/2026-11-02-picture-audits.json`).
-- [ ] 5.2 Render a 10 fps draft and scan its stills at both phases; verify that no frame shows a collision, clipping or a blank picture under speech.
+- [x] 5.2 Render a 10 fps draft and scan its stills at both phases; verify that no frame shows a collision, clipping or a blank picture under speech. The drafts' longest still runs under speech last 3.1 s (Chinese) and 2.81 s (English), under the 3.5 s limit, after the Chinese 09.4 boundary took its condition (design §2); the frame audits find no blank or thin picture under speech and the real-browser check no collision or clipping (`build/evidence/picture/{zh,en}-draft-stills.json`, `build/evidence/picture-audit/2026-11-02-picture-audits.json`).
 
 ## 6. Render, review and delivery
 
