@@ -88,13 +88,14 @@ The user's plan for a ten-minute essentials edition beside the 25-minute edition
 | Part | Content                                                                                                                                      | Seconds |
 | ---- | -------------------------------------------------------------------------------------------------------------------------------------------- | ------: |
 | 01   | The late data, and the four failures it invites: switching vendors at once, a manual patch, a meeting with no decision, an Agent's ten pages |      60 |
-| 02   | What the guidelines are and why: reliable judgments others can depend on, and the three outcomes of a task                                   |      90 |
-| 03   | The two kinds of authority, and why neither stands in for the other                                                                          |     100 |
-| 04   | The four boundaries, and form following risk                                                                                                 |      90 |
-| 05   | Evidence limits the claim: verified, published and in use are different states                                                               |     100 |
-| 06   | Agents extend people; responsibility stays with people                                                                                       |      80 |
-| 07   | Learning: leave the check that finds the next delay before the strategy runs                                                                 |      50 |
-|      | Credits                                                                                                                                      |      30 |
+| 02   | What the guidelines are and why: reliable judgments others can depend on, and the three outcomes of a task                                   |      75 |
+| 03   | The two kinds of authority, and why neither stands in for the other                                                                          |      95 |
+| 04   | The four boundaries, and form following risk                                                                                                 |      85 |
+| 05   | Data qualified for a use: the six questions, and what could be known then against hindsight                                                  |      85 |
+| 06   | Evidence limits the claim: verified, published and in use are different states                                                               |      85 |
+| 07   | Human–AI collaboration: Agents extend people, and responsibility stays with people                                                           |      70 |
+| 08   | Learning: leave the check that finds the next delay earlier                                                                                  |      42 |
+|      | Credits                                                                                                                                      |       3 |
 
 ## Alternatives Considered
 
