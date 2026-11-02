@@ -11,7 +11,7 @@ All notable changes to the DDWG introduction films and their build are recorded 
 ### Changed
 
 - The repository is now `data-department-work-guidelines-film`, titled "Data Department Work Guidelines: Film", so that its name corresponds to the guidelines' own repository; the old address redirects.
-- The repository runs ETHOS 0.2.0-alpha.26, and its CI workflow uses `jdx/mise-action` 5.2.5.
+- The repository runs ETHOS 0.2.0-alpha.27, and its CI workflow uses `jdx/mise-action` 5.2.5.
 
 ## [1.1.0] - 2026-10-31
 
