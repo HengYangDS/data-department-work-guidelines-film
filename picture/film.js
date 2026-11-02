@@ -1407,19 +1407,21 @@ scenes["03"] = function (s, t) {
     const colors = [P.authority, P.authority, P.ink, P.muted];
     // Each rank as [term, qualifier], named by its spoken words: a rank that lists several members names its first as
     // its term and the rest as its qualifier, and each further member joins the qualifier on its own words, so a rank
-    // said over several seconds keeps building. The second rank names the decision and its owner, in each edition's order.
-    // A term keeps the punctuation that follows it, so its qualifier, set a term gap after it, never opens on a mark.
+    // said over several seconds keeps building. The second rank is the owner's decision, never the owner: English names
+    // the decision and qualifies it with its owner, and Chinese, which says the owner first, names the whole phrase, so
+    // the rank's name ends on the decision in both editions. A term keeps the punctuation that follows it, so its
+    // qualifier, set a term gap after it, never opens on a mark.
     const names = en ? [[["Law,"], ["regulation, security requirements", " and mandatory company policy"]],
       [["The explicit decision"], ["of the decision owner"]],
       [["Contracts,"], ["policies", ", specifications", " and decision records in force"]],
       [["Plans,"], ["provisional agreements", " and personal preferences"]]]
-      : [[["法律、"], ["监管", "、安全要求", "和公司的强制性制度"]], [["这件事的决策负责人"], ["作出的明确决定"]],
+      : [[["法律、"], ["监管", "、安全要求", "和公司的强制性制度"]], [["这件事的决策负责人作出的明确决定"], []],
         [["有效的契约、"], ["制度", "、规范", "和决策记录"]], [["工作计划、"], ["临时约定", "和个人偏好"]]];
     // What each rank holds, as it is said: its station beats once for each member after the first, on the words that
     // bring that member to the rank's qualifier.
     const members = (en ? [["regulation", "security requirements", "mandatory company policy"], ["decision owner"],
       ["policies", "specifications", "decision records"], ["provisional agreements", "personal preferences"]]
-      : [["监管", "安全要求", "公司的强制性制度"], ["作出的明确决定"], ["制度", "规范", "决策记录"], ["临时约定", "个人偏好"]])
+      : [["监管", "安全要求", "公司的强制性制度"], [], ["制度", "规范", "决策记录"], ["临时约定", "个人偏好"]])
       .map((rest, r) => [ranks[r], ...rest.map(v => cueFrom(s, v, v, ranks[r]))]);
     // The words each qualifier's parts join on: each further member's. English names its first rank's members in two
     // parts, so the frame stands near its full width from the first and the rank still grows while the rest is said.
@@ -4843,9 +4845,11 @@ scenes["17"] = function (s, t) {
   // 3. Adjacent states are not each other. Each pair stands in one row of a ledger: the state reached on the left, its
   // mark filled, and the state it does not make on the right, its ring hollow and dashed, each on its own words. The way
   // from one toward the other draws on from the reached mark and stops at a tall bar on the words that deny it, so each
-  // table of refusals builds and stands instead of its rows replacing each other. The first table holds the passing test
-  // and the exact copy of a file; on the merged change a second, laid out on the same columns, takes the merge, the
-  // publication and the Agent's report, and holds until missing evidence is named. Each table balances on the frame.
+  // table of refusals builds and stands instead of its rows replacing each other. English says all five pairs in one
+  // thought, so one table holds them all until missing evidence is named. Chinese says the passing test and the exact copy
+  // of a file in one thought and the rest in the next, so a table holds each thought's pairs: on the merged change a
+  // second, laid out on the same columns, takes the merge, the publication and the Agent's report, and holds until missing
+  // evidence is named. Each table balances on the frame.
   // The exact copy can still mean the wrong thing: in English its bar stands on "still", and the meaning it does not
   // make is named on "the wrong thing".
   const stopWords = en ? ["is not", "still", "is not", "is not", "does not"] : ["不等于", "也不等于", "不等于", "不等于", "也不等于"];
@@ -4883,9 +4887,10 @@ scenes["17"] = function (s, t) {
         alpha: a * named(t, rightAts[i]) * Math.max(listLevel(t, notAts, k), ramp(t, whole + .05, .25))});
     });
   };
-  const g3 = base * stageIn(t, nots[0]) * stageOut(t, nots[2]);
-  if (g3 > 0) ledger([0, 1], [CONTENT_CY - 80, CONTENT_CY + 80], g3, "first", cueFrom(s, "就对", "wrong thing", rightAts[1]));
-  const g3b = base * stageIn(t, nots[2]) * stageOut(t, missing);
+  const g3 = base * stageIn(t, nots[0]) * stageOut(t, en ? missing : nots[2]);
+  if (g3 > 0 && en) ledger([0, 1, 2, 3, 4], [-240, -120, 0, 120, 240].map(dy => CONTENT_CY + dy), g3, "all", cueFrom(s, "完成了", "complete", rightAts[4]));
+  if (g3 > 0 && !en) ledger([0, 1], [CONTENT_CY - 80, CONTENT_CY + 80], g3, "first", cueFrom(s, "就对", "wrong thing", rightAts[1]));
+  const g3b = en ? 0 : base * stageIn(t, nots[2]) * stageOut(t, missing);
   // The second table's first row stands just above the centre, so the table is balanced from its first row on.
   if (g3b > 0) ledger([2, 3, 4], [CONTENT_CY - 70, CONTENT_CY + 50, CONTENT_CY + 170], g3b, "second", cueFrom(s, "完成了", "complete", rightAts[4]));
   // 4. When evidence is missing, the claim narrows to it. A row of evidence stands on the words that say evidence is

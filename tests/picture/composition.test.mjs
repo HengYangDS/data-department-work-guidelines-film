@@ -225,3 +225,42 @@ test("a label whose words hold no joint is authored as its lines", async () => {
     assert.ok(texts.has(line), `missing line ${line}`);
   for (const v of texts) assert.ok(!/^的/u.test(v), `a line begins with 的: ${v}`);
 });
+
+for (const [code, law, owner, decision] of [
+  ["zh", "法律、", "这件事的决策负责人", "明确决定"],
+  ["en", "Law,", "of the decision owner", "The explicit decision"],
+]) {
+  test(`${code} order of authority to act ranks the owner's decision, never the owner`, async () => {
+    const film = await authoredTimeline(code),
+      composition = openComposition(film),
+      segment = film.segments.find((v) => v.id === "03");
+    let ranked = 0;
+    for (let t = segment.voice_start; t < segment.end; t += 0.25) {
+      const texts = composition.render(t).texts.filter((v) => v.scene && v.alpha > 0.35);
+      const name = texts.find((v) => v.text === law);
+      if (!name) continue;
+      // A rank's name stands at the size of the first rank's, so the owner alone is never set at that size.
+      assert.ok(
+        !texts.some((v) => v.size === name.size && v.text === owner),
+        `${owner} stands as a rank at ${t.toFixed(2)}`,
+      );
+      if (texts.some((v) => v.size === name.size && v.text.includes(decision))) ranked++;
+    }
+    assert.ok(ranked > 0, "the decision never stands as a rank");
+  });
+}
+
+test("English keeps the five refusals of 17 on one table until missing evidence is named", async () => {
+  const film = await authoredTimeline("en"),
+    composition = openComposition(film),
+    segment = film.segments.find((v) => v.id === "17");
+  const at = (word) => segment.words.find((v) => v.text === word).start;
+  const reached = ["A passing test", "An exact copy", "A merged change", "Published", "An Agent reports completion"];
+  const standing = (t, alpha) =>
+    reached.filter((name) =>
+      composition.render(t).texts.some((v) => v.scene && v.text === name && v.alpha > alpha),
+    );
+  // The first two refusals still stand while the merged change is said, and all five as the claim begins to narrow.
+  assert.deepEqual(standing(at("merged") + 0.5, 0.2).slice(0, 2), reached.slice(0, 2));
+  assert.deepEqual(standing(at("When") - 0.3, 0.5), reached);
+});
