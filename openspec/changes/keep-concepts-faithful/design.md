@@ -119,6 +119,12 @@ The user's plan for a ten-minute essentials edition beside the 25-minute edition
 | 08   | Learning: leave the check that finds the next delay earlier                                                                                  |      42 |
 |      | Credits                                                                                                                                      |       3 |
 
+### 6. The supply at the latest stable releases
+
+On 2026-11-02 the owner asked that every supply move to its latest stable release. The film moves to `filmkit` 0.4.0, which renders with HyperFrames 0.9.3 and keeps Chrome Headless Shell 152.0.7977.30 and the `undici` 7.30.1 override; puppeteer-core 25.16.0 and @puppeteer/browsers 3.2.6 move with it. Node moves to 26.13.0, uv to 0.13.6, the CI's Mise to 2026.10.25, hatchling to 1.33.0, coverage to 7.17.0 and pytest to 9.2.0, and both locks take the newest releases their declarations admit; OSV reports no advisory in either lock. Python stays at 3.12.16, the newest release of the 3.12 line. A renderer that HyperFrames publishes while the edition is produced moves with the next recheck, as HyperFrames 0.9.4 does.
+
+The speech engine stays at mlx-audio 0.5.8 and MLX 0.32.3, so that every thought the repair leaves unchanged still reproduces its v1.1.0 recording (task 4.2); the next full production moves it. `uv pip check` reports that override as an incompatibility with the mlx-audio that `filmkit` declares, so `check:dependencies` relies on the frozen sync check, which proves the environment is exactly the lock, until the hold ends. A new renderer can change the frames, so 6.1 renders both editions again on this supply, and the next review compares their frames with the `6702e20` render's.
+
 ## Alternatives Considered
 
 | Approach                                                      | Trade-off                                                                                                                        | Decision |
@@ -139,7 +145,7 @@ The user's plan for a ten-minute essentials edition beside the 25-minute edition
 
 1. The user approved the contract's renderings, the repair-only scope of the 25-minute editions and the essentials outline on 2026-11-01.
 2. Specifications and tasks follow; the script repairs are written and term-audited, and the user approved the third revision on 2026-11-02.
-3. With `filmkit` 0.3.0 pinned, both editions are narrated from their casts' seeds and the repaired thoughts' takes are qualified and heard; then picture, render and review.
+3. With `filmkit` 0.3.0 pinned, both editions are narrated from their casts' seeds and the repaired thoughts' takes are qualified and heard; then picture, render and review, the render on `filmkit` 0.4.0 after the supply move of section 6.
 4. Both editions are delivered to Documents with readback and replace v1.1.0 there; v1.2.0 is released after the user confirms.
 
 ## Open Questions

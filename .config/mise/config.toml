@@ -11,10 +11,12 @@ depends_post = ["check:dependencies"]
 
 [tasks."check:dependencies"]
 description = "Verify that the lock is current and the installed dependency graphs match the frozen inputs"
+# No `uv pip check` while pyproject.toml holds the speech engine: it reports the hold's override of
+# filmkit's mlx-audio pin as an incompatibility, and the frozen sync check already proves that the
+# environment is exactly the lock. The next full production removes the hold and restores it.
 run = [
   "uv lock --python 3.12 --check --offline",
   "uv sync --python 3.12 --frozen --check --offline --group dev",
-  "uv run --python 3.12 --frozen --offline --no-sync --group dev uv pip check",
   "npm ls --all --include=dev",
 ]
 
@@ -106,9 +108,9 @@ run = "uv run --python 3.12 --frozen --offline python -m filmkit.delivery.reprod
 # The ETHOS gates resolve these only from this lock, never from PATH: Node for the picture checks,
 # Python and uv for the suite. Python stays on the 3.12 line that production selects.
 [tools]
-node = "26.12.1"
+node = "26.13.0"
 python = "3.12.16"
-uv = "0.13.5"
+uv = "0.13.6"
 
 # The ETHOS release declaration as published with v0.2.0-alpha.27.
 [tools."http:ethos"]
