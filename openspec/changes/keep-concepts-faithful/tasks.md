@@ -30,7 +30,7 @@
 
 ## 6. Render, review and delivery
 
-- [ ] 6.1 Render, package and verify both editions; verify the technical checks and that the tracked tree is unchanged.
+- [x] 6.1 Render, package and verify both editions; verify the technical checks and that the tracked tree is unchanged. HyperFrames 0.8.225 rendered both editions at UHD from `eb9462a` in 28.7 and 33.5 minutes; the technical verification passes for both, each film holds 90,000 frames and 72,000,000 audio sample frames, and the tracked tree is unchanged. Its GPU encoder writes about a third fewer bits than 0.8.150 did at the same settings, and every frame of ten seconds in each edition measures at least 51.4 dB PSNR and 0.9993 SSIM against a lossless render of the same stage (`build/evidence/verification/2026-11-02-technical.json`, `build/evidence/picture/encoding-transparency.json`).
 - [ ] 6.2 Pass the independent production review of the exact build at 90 or more overall and in every declared dimension, concept fidelity among them; a fixed build is reviewed again.
 - [ ] 6.3 Deliver both editions to `~/Documents/ddwg-introduction-film/` and read them back; verify every delivered file's SHA-256, both players in a real browser, and that each replaced v1.1.0 file lies in the rollback copy.
 - [ ] 6.4 Record the user's acceptance of the delivered films; verify that the record names both editions' delivered films, and keep the rollback copy until it exists.
