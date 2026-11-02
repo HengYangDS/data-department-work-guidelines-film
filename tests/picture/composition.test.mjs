@@ -255,7 +255,13 @@ test("English keeps the five refusals of 17 on one table until missing evidence 
     composition = openComposition(film),
     segment = film.segments.find((v) => v.id === "17");
   const at = (word) => segment.words.find((v) => v.text === word).start;
-  const reached = ["A passing test", "An exact copy", "A merged change", "Published", "An Agent reports completion"];
+  const reached = [
+    "A passing test",
+    "An exact copy",
+    "A merged change",
+    "Published",
+    "An Agent reports completion",
+  ];
   const standing = (t, alpha) =>
     reached.filter((name) =>
       composition.render(t).texts.some((v) => v.scene && v.text === name && v.alpha > alpha),
@@ -263,4 +269,32 @@ test("English keeps the five refusals of 17 on one table until missing evidence 
   // The first two refusals still stand while the merged change is said, and all five as the claim begins to narrow.
   assert.deepEqual(standing(at("merged") + 0.5, 0.2).slice(0, 2), reached.slice(0, 2));
   assert.deepEqual(standing(at("When") - 0.3, 0.5), reached);
+});
+
+test("English grows the table of 17's refusals about the content centre", async () => {
+  const film = await authoredTimeline("en"),
+    composition = openComposition(film),
+    segment = film.segments.find((v) => v.id === "17");
+  const at = (word) => segment.words.find((v) => v.text === word).start;
+  const reached = [
+    "A passing test",
+    "An exact copy",
+    "A merged change",
+    "Published",
+    "An Agent reports completion",
+  ];
+  // As each refusal arrives, the names standing in the table stay within the reviewers' 12% balance limit of the
+  // content centre (960, 510), so the table never opens high and fills downwards.
+  for (const t of [at("copy") + 0.6, at("merged") + 0.6, at("When") - 0.3]) {
+    const boxes = composition
+      .render(t)
+      .texts.filter((v) => v.scene && reached.includes(v.text) && v.alpha > 0.2)
+      .map((v) => v.bounds);
+    const top = Math.min(...boxes.map((b) => b[1])),
+      bottom = Math.max(...boxes.map((b) => b[3]));
+    assert.ok(
+      Math.abs((top + bottom) / 2 - 510) / 1080 <= 0.12,
+      `${t.toFixed(2)} s: names span ${top}-${bottom}`,
+    );
+  }
 });

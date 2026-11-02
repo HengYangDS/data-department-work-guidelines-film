@@ -4849,7 +4849,8 @@ scenes["17"] = function (s, t) {
   // thought, so one table holds them all until missing evidence is named. Chinese says the passing test and the exact copy
   // of a file in one thought and the rest in the next, so a table holds each thought's pairs: on the merged change a
   // second, laid out on the same columns, takes the merge, the publication and the Agent's report, and holds until missing
-  // evidence is named. Each table balances on the frame.
+  // evidence is named. Each table balances on the frame: the English table grows about the content centre, its first row
+  // on the centre line and the rows already shown stepping up by half a row as the words that bring the next one begin.
   // The exact copy can still mean the wrong thing: in English its bar stands on "still", and the meaning it does not
   // make is named on "the wrong thing".
   const stopWords = en ? ["is not", "still", "is not", "is not", "does not"] : ["不等于", "也不等于", "不等于", "不等于", "也不等于"];
@@ -4888,7 +4889,10 @@ scenes["17"] = function (s, t) {
     });
   };
   const g3 = base * stageIn(t, nots[0]) * stageOut(t, en ? missing : nots[2]);
-  if (g3 > 0 && en) ledger([0, 1, 2, 3, 4], [-240, -120, 0, 120, 240].map(dy => CONTENT_CY + dy), g3, "all", cueFrom(s, "完成了", "complete", rightAts[4]));
+  if (g3 > 0 && en) {
+    const grown = [1, 2, 3, 4].reduce((sum, i) => sum + soon(t, pauseHold(nots[i] - .3, .4), .4), 0);
+    ledger([0, 1, 2, 3, 4], [0, 1, 2, 3, 4].map(k => CONTENT_CY + 120 * (k - grown / 2)), g3, "all", cueFrom(s, "完成了", "complete", rightAts[4]));
+  }
   if (g3 > 0 && !en) ledger([0, 1], [CONTENT_CY - 80, CONTENT_CY + 80], g3, "first", cueFrom(s, "就对", "wrong thing", rightAts[1]));
   const g3b = en ? 0 : base * stageIn(t, nots[2]) * stageOut(t, missing);
   // The second table's first row stands just above the centre, so the table is balanced from its first row on.
