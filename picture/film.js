@@ -2174,9 +2174,14 @@ scenes["06"] = function (s, t) {
   }
   // 3. The case's statements sorted into the six kinds. The stage cuts on the second statement's first words; the
   // recorded fact stands in its place as the case left it, and each further statement arrives at its kind's ring on its
-  // own words.
+  // own words. The grid grows about the content centre: while only its first row is spoken, that row eases half a row
+  // down from where the case left the fact, and the grid steps back up to its full layout as the words that bring its
+  // second row begin.
   const three = base * stageIn(t, starts[1]) * stageOut(t, conditions);
-  if (three > 0) rows.forEach((_, i) => statement(i, ...s06Place(i), three, true));
+  if (three > 0) {
+    const low = (S06ROWS[1] - S06ROWS[0]) / 2 * soon(t, starts[1] + STAGE_CUT, .5) * (1 - soon(t, pauseHold(starts[2] - .3, .4), .4));
+    rows.forEach((_, i) => { const [x, y] = s06Place(i); statement(i, x, y + low, three, true); });
+  }
   // 4. Each kind carries its own conditions. The case's statements leave in one cut on the thought's first words, which
   // begin the conditions in English and in Chinese first say that each kind has its own to account for, named above
   // the grid until the next thought; the six kinds keep their marks, positions and names, and each

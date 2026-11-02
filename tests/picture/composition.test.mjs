@@ -298,3 +298,37 @@ test("English grows the table of 17's refusals about the content centre", async 
     );
   }
 });
+
+for (const code of ["zh", "en"]) {
+  test(`${code} grows the grid of 06's statements about the content centre`, async () => {
+    const film = await authoredTimeline(code),
+      composition = openComposition(film),
+      segment = film.segments.find((v) => v.id === "06");
+    // The start of a phrase's first word: a run of Han characters in Chinese, a word in English.
+    const at = (phrase) => {
+      const units = code === "zh" ? [...phrase] : [phrase];
+      const index = segment.words.findIndex((_, i) =>
+        units.every((unit, k) => segment.words[i + k]?.text.replace(/[^\p{L}]/gu, "") === unit),
+      );
+      return segment.words[index].start;
+    };
+    const [hypothesis, inference] =
+      code === "zh" ? [at("供应商发布晚了"), at("问题就可能")] : [at("Late"), at("scheduling")];
+    // While only the grid's first row is spoken, the statements standing in the content band stay within the
+    // reviewers' 12% balance limit of the content centre (960, 510), so the grid never opens high over an empty band.
+    for (const t of [hypothesis + 1, hypothesis + 2, inference - 0.4]) {
+      const boxes = composition
+        .render(t)
+        .texts.filter(
+          (v) => v.scene === "06" && v.alpha > 0.2 && v.bounds[1] >= 110 && v.bounds[3] <= 905,
+        )
+        .map((v) => v.bounds);
+      const top = Math.min(...boxes.map((b) => b[1])),
+        bottom = Math.max(...boxes.map((b) => b[3]));
+      assert.ok(
+        Math.abs((top + bottom) / 2 - 510) / 1080 <= 0.12,
+        `${t.toFixed(2)} s: statements span ${top}-${bottom}`,
+      );
+    }
+  });
+}
