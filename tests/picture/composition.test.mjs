@@ -300,35 +300,84 @@ test("English grows the table of 17's refusals about the content centre", async 
 });
 
 for (const code of ["zh", "en"]) {
-  test(`${code} grows the grid of 06's statements about the content centre`, async () => {
+  test(`${code} keeps 06's case standing until the inference's premise takes its place`, async () => {
     const film = await authoredTimeline(code),
       composition = openComposition(film),
       segment = film.segments.find((v) => v.id === "06");
-    // The start of a phrase's first word: a run of Han characters in Chinese, a word in English.
-    const at = (phrase) => {
-      const units = code === "zh" ? [...phrase] : [phrase];
-      const index = segment.words.findIndex((_, i) =>
-        units.every((unit, k) => segment.words[i + k]?.text.replace(/[^\p{L}]/gu, "") === unit),
+    // The start of a phrase's first word at or after `from`: a run of Han characters in Chinese, a word in English.
+    const at = (phrase, from = 0) => {
+      const units = code === "zh" ? [...phrase] : phrase.split(" ");
+      const index = segment.words.findIndex(
+        (w, i) =>
+          w.start >= from &&
+          units.every((unit, k) => segment.words[i + k]?.text.replace(/[^\p{L}]/gu, "") === unit),
       );
       return segment.words[index].start;
     };
-    const [hypothesis, inference] =
-      code === "zh" ? [at("供应商发布晚了"), at("问题就可能")] : [at("Late"), at("scheduling")];
-    // While only the grid's first row is spoken, the statements standing in the content band stay within the
-    // reviewers' 12% balance limit of the content centre (960, 510), so the grid never opens high over an empty band.
-    for (const t of [hypothesis + 1, hypothesis + 2, inference - 0.4]) {
-      const boxes = composition
-        .render(t)
-        .texts.filter(
-          (v) => v.scene === "06" && v.alpha > 0.2 && v.bounds[1] >= 110 && v.bounds[3] <= 905,
-        )
-        .map((v) => v.bounds);
-      const top = Math.min(...boxes.map((b) => b[1])),
-        bottom = Math.max(...boxes.map((b) => b[3]));
-      assert.ok(
-        Math.abs((top + bottom) / 2 - 510) / 1080 <= 0.12,
-        `${t.toFixed(2)} s: statements span ${top}-${bottom}`,
+    const hypothesis = at(code === "zh" ? "供应商发布晚了" : "Late publication"),
+      kind = at(code === "zh" ? "假设" : "hypothesis", hypothesis),
+      premise = at(code === "zh" ? "如果发布准时" : "If publication", kind),
+      inference = at(code === "zh" ? "问题就可能" : "scheduling", premise);
+    // The case leaves on the hypothesis's kind, and the premise takes its place within a second.
+    assert.ok(
+      premise - 0.15 - (kind + 0.18) < 1,
+      `the first row stands alone from ${kind} to ${premise}`,
+    );
+    // What 06 paints at t that is lit: its texts and its strokes and fills off the ground, within the content band.
+    const lit = (t) => {
+      const points = [];
+      const layout = composition.render(t, (paint) => {
+        if (paint.scene !== "06" || paint.kind === "text" || paint.alpha <= 0.2) return;
+        if (paint.color.toLowerCase() === composition.palette.ground.toLowerCase()) return;
+        for (const sub of paint.subs)
+          for (const [x, y] of sub) if (y >= 120 && y <= 900) points.push([x, y]);
+      });
+      const texts = layout.texts.filter(
+        (v) =>
+          v.scene === "06" &&
+          v.role !== "marker" &&
+          v.alpha > 0.2 &&
+          v.bounds[1] >= 110 &&
+          v.bounds[3] <= 905,
       );
+      for (const v of texts) points.push([v.bounds[0], v.bounds[1]], [v.bounds[2], v.bounds[3]]);
+      return { points, texts };
+    };
+    // While the hypothesis, the premise and the inference are said, the lit picture stands within the reviewers' 12%
+    // balance limit of the content centre (960, 510) and covers at least a tenth of the content band, and no two of its
+    // texts overlap: the grid's first row never stands high over an empty band, and the premise shows as it is said.
+    for (const t of [hypothesis + 1, premise + 0.6, inference - 0.2, inference + 1]) {
+      const { points, texts } = lit(t);
+      const x0 = Math.min(...points.map((v) => v[0])),
+        x1 = Math.max(...points.map((v) => v[0])),
+        y0 = Math.min(...points.map((v) => v[1])),
+        y1 = Math.max(...points.map((v) => v[1]));
+      const off = Math.abs((y0 + y1) / 2 - 510) / 1080,
+        cover = ((x1 - x0) * (y1 - y0)) / (1920 * 780);
+      assert.ok(
+        off <= 0.12 && cover >= 0.1,
+        `${t.toFixed(2)} s: lit ${y0}-${y1}, cover ${cover.toFixed(3)}`,
+      );
+      for (const [i, a] of texts.entries())
+        for (const b of texts.slice(i + 1))
+          assert.ok(
+            a.bounds[2] <= b.bounds[0] ||
+              b.bounds[2] <= a.bounds[0] ||
+              a.bounds[3] <= b.bounds[1] ||
+              b.bounds[3] <= a.bounds[1],
+            `${t.toFixed(2)} s: "${a.text}" overlaps "${b.text}"`,
+          );
     }
+    // The premise stands in the picture while it is said.
+    assert.ok(
+      lit(premise + 0.6).texts.some(
+        (v) =>
+          v.whole ===
+          (code === "zh"
+            ? "如果发布准时，任务却启动得晚"
+            : "If publication was on time but the job started late"),
+      ),
+      "the premise is shown as it is said",
+    );
   });
 }

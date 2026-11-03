@@ -2130,7 +2130,11 @@ scenes["06"] = function (s, t) {
     [["把任务提前启动"], ["把任务提前启动"], ["决策负责人"], ["决策负责人作出的决定"]],
     [["谁在什么时候改好"], ["谁在什么时候"], [], []]]).map(([term, termWords, qual, qualWords]) =>
     [term, termWords.map(w => cue(s, L(w, ""), L("", w))), qual, qualWords.map(w => cue(s, L(w, ""), L("", w)))]);
-  const starts = rows.map(([, termAts, , qualAts]) => Math.min(...termAts, ...qualAts));
+  // The inference rests on a premise, said before its term: set above the term in the qualifier's small muted type,
+  // each part on its own words, so the grid shows the condition while it is said. The inference begins with it.
+  const premise = L(["如果发布准时，", "任务却启动得晚"], ["If publication was on time", " but the job started late"]);
+  const premiseAts = L(["如果发布准时", "任务却启动得晚"], ["if publication was on time", "but the job started late"]).map(w => cue(s, L(w, ""), L("", w)));
+  const starts = rows.map(([, termAts, , qualAts], i) => Math.min(...termAts, ...qualAts, ...(i === 2 ? premiseAts : [])));
   // A kind's place: its mark at (x, y), its name beside the mark and its statement below the name. A statement without
   // a qualifier wraps within its column; one with a qualifier is a term row. A judgment's verdict is set whole from the
   // standard that begins it.
@@ -2140,15 +2144,18 @@ scenes["06"] = function (s, t) {
     s06Mark(i, x, y, {alpha: alpha * kind});
     const level = alpha * listLevel(t, starts, i), top = y + labelSize(LABEL) / 2 + 14;
     nameText(kinds[i], left, y, {align: "left", color: s06Colour(i), alpha: level * named(t, kindAt), set: listed ? "kinds" : null});
-    if (qual.length) termRow(t, term, termAts, qual, qualAts, left, top, {width: S06TEXT, alpha: level, set: listed ? "statements" : null});
-    else growName(t, term, termAts, left, top, {width: S06TEXT, alpha: level, set: listed ? "statements" : null});
+    const head = i === 2 ? growName(t, premise, premiseAts, left, top, {size: NOTE, width: S06TEXT, alpha: level, color: P.muted,
+      build: true, set: listed ? "statements" : null}).bottom + 4 : top;
+    if (qual.length) termRow(t, term, termAts, qual, qualAts, left, head, {width: S06TEXT, alpha: level, set: listed ? "statements" : null});
+    else growName(t, term, termAts, left, head, {width: S06TEXT, alpha: level, set: listed ? "statements" : null});
   };
   // 2. The illustrative case, cut in on the words that name its data: last night's price collection stands on the hour
   // it arrived, on a line of the night's hours. When the words say it ran two hours late, the place it was due stands
   // two hours earlier as a dashed outline, and the two hours between them are measured below the line. When the delay
   // is restated as a recorded fact, the span's name gives way to the fact's statement, which takes the first place of
-  // the grid the next stage builds, and the case holds until the next statement begins.
-  const two = base * stageIn(t, data) * stageOut(t, starts[1]);
+  // the grid the next stage builds. The case stands below the grid's first row while its second statement is said, and
+  // leaves in one cut on that statement's kind, before the next statement's premise arrives where the case stood.
+  const two = base * stageIn(t, data) * stageOut(t, kindAts[1]);
   if (two > 0) {
     const ranLate = cue(s, "采集晚了两个小时", "ran two hours late");
     const AY = 720, due = 780, actual = 1140, TW = 300, TH = 190, top = AY - 36 - TH, SY = AY + 36;
@@ -2170,18 +2177,13 @@ scenes["06"] = function (s, t) {
       alpha: two * named(t, ranLate) * (1 - ramp(t, restate + .05, .3))});
     // In the case the fact's kind arrives within the clause that names it a fact: in English with its restated statement,
     // at most 1.4 s ahead of its own word; in Chinese with the word that records it.
-    statement(0, ...s06Place(0), two * ramp(t, restate + .05, .3), false, en ? Math.max(restate, kindAts[0] - 1.4) : Math.min(kindAts[0], cue(s, "有记录", "")));
+    if (t < starts[1] + STAGE_CUT) statement(0, ...s06Place(0), two * ramp(t, restate + .05, .3), false, en ? Math.max(restate, kindAts[0] - 1.4) : Math.min(kindAts[0], cue(s, "有记录", "")));
   }
-  // 3. The case's statements sorted into the six kinds. The stage cuts on the second statement's first words; the
-  // recorded fact stands in its place as the case left it, and each further statement arrives at its kind's ring on its
-  // own words. The grid grows about the content centre: while only its first row is spoken, that row eases half a row
-  // down from where the case left the fact, and the grid steps back up to its full layout as the words that bring its
-  // second row begin.
+  // 3. The case's statements sorted into the six kinds. The stage begins on the second statement's first words, while
+  // the case still stands below; the recorded fact stands in its place as the case left it, and each further statement
+  // arrives at its kind's ring on its own words.
   const three = base * stageIn(t, starts[1]) * stageOut(t, conditions);
-  if (three > 0) {
-    const low = (S06ROWS[1] - S06ROWS[0]) / 2 * soon(t, starts[1] + STAGE_CUT, .5) * (1 - soon(t, pauseHold(starts[2] - .3, .4), .4));
-    rows.forEach((_, i) => { const [x, y] = s06Place(i); statement(i, x, y + low, three, true); });
-  }
+  if (three > 0) rows.forEach((_, i) => statement(i, ...s06Place(i), three, true));
   // 4. Each kind carries its own conditions. The case's statements leave in one cut on the thought's first words, which
   // begin the conditions in English and in Chinese first say that each kind has its own to account for, named above
   // the grid until the next thought; the six kinds keep their marks, positions and names, and each
