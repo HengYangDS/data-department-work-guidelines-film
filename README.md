@@ -8,13 +8,13 @@ Author: Yang HENG.
 
 ## The films
 
-The films are published as release assets, together with their captions, transcripts, covers, independent review records and `SHA256SUMS`. [`content/release.json`](content/release.json) records each asset's name, size and SHA-256, the digests of the soundtrack and staged picture each edition was made from, and those of the film-bound sources: the scripts, narration texts, voice contracts, reference recordings, source manifest, covers, fonts, composition and pages whose exact bytes the build reads. The independent review of the published films scored each edition 95.9 out of 100, with every dimension at 95 or above and no material finding. That review scores the audio from automated evidence; human listening is a separate acceptance.
+The films are published as release assets, together with their captions, transcripts, covers, independent review records and `SHA256SUMS`. [`content/release.json`](content/release.json) records each asset's name, size and SHA-256, the digests of the soundtrack and staged picture each edition was made from, and those of the film-bound sources: the scripts, narration texts, voice contracts, reference recordings, source manifest, covers, fonts, composition and pages whose exact bytes the build reads. The independent review of the `v1.2.0` films scored the Chinese edition 96.0 and the English edition 95.8 out of 100, with every dimension, concept fidelity among them, at 95 or above and no material finding. That review scores the audio from automated evidence; human listening is a separate acceptance.
 
-The films of `v1.0.0` are the published editions. A later release that changes only how they are built publishes no films of its own, and its tag names the source that rebuilds them.
+The films of `v1.2.0` are the current editions, and those of `v1.0.0` stay available as that release's assets. A release that changes only how the films are built publishes no films of its own, and its tag names the source that rebuilds them.
 
 ## Rebuilding the films
 
-The films are built by [filmkit](https://github.com/HengYangDS/filmkit), the film engine, at the release that `pyproject.toml` pins by its tag `v0.1.0` and `uv.lock` by its commit; this repository holds the film's sources and none of the engine's. A rebuild needs an Apple-silicon Mac with [mise](https://mise.jdx.dev), which installs the locked Node, Python, uv and ETHOS, and three Homebrew tools: FFmpeg with VideoToolbox, ExifTool and rsync 3.
+The films are built by [filmkit](https://github.com/HengYangDS/filmkit), the film engine, at the release that `pyproject.toml` pins by its tag `v0.5.0` and `uv.lock` by its commit; this repository holds the film's sources and none of the engine's. A rebuild needs an Apple-silicon Mac with [mise](https://mise.jdx.dev), which installs the locked Node, Python, uv and ETHOS, and three Homebrew tools: FFmpeg with VideoToolbox, ExifTool and rsync 3.
 
 ```bash
 brew install mise ffmpeg exiftool rsync
@@ -47,14 +47,14 @@ The stages also run one at a time: `film:narrate`, `film:sound`, `film:picture`,
 Download the release assets into `build/artifacts/release/` and compare:
 
 ```bash
-gh release download v1.0.0 --repo HengYangDS/data-department-work-guidelines-film --dir build/artifacts/release
+gh release download v1.2.0 --repo HengYangDS/data-department-work-guidelines-film --dir build/artifacts/release
 ```
 
 ```bash
 mise run film:compare
 ```
 
-The comparison refuses a published asset or a film-bound source that differs from the release manifest, and accepts a published review only when it binds the published films and the current script and composition. It then compares the rebuild layer by layer: each soundtrack and staged picture document must hold the recorded bytes, the captions, transcripts and covers the published bytes, and each film must have the published frame count, decoded audio, streams, chapters and tags, with every decoded frame's PSNR at or above the floor the manifest records, 45 dB for each film of `v1.0.0`. The picture alone is not byte-identical, because GPU capture and encoding vary between renders of the same stage; the first rebuild's lowest frame measured 51.5 dB. The report goes to `build/evidence/reproduction/report.json`.
+The comparison refuses a published asset or a film-bound source that differs from the release manifest, and accepts a published review only when it binds the published films and the current script and composition. It then compares the rebuild layer by layer: each soundtrack and staged picture document must hold the recorded bytes, the captions, transcripts and covers the published bytes, and each film must have the published frame count, decoded audio, streams, chapters and tags, with every decoded frame's PSNR at or above the floor the manifest records, 45 dB for each film. The picture alone is not byte-identical, because GPU capture and encoding vary between renders of the same stage; the first rebuild of `v1.0.0` measured 51.5 dB at its lowest frame. The report goes to `build/evidence/reproduction/report.json`.
 
 ## Checks
 

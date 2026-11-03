@@ -4,12 +4,20 @@ All notable changes to the DDWG introduction films and their build are recorded 
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-11-03
+
 ### Added
 
 - `CONTRIBUTING.md`: how to prepare the tools, change the films in an ETHOS Work Lane, verify a change, rebuild and compare the films, commit, and cut and publish a release.
+- `content/concepts.toml`, the films' concept contract. It binds each concept of the guidelines that the films name to its passage at the pinned commit, its essence and one rendering per edition, such as 行动依据 and "authority to act", 事实依据 and "authority about facts", and 决策负责人 and "decision owner". The `filmkit` concept check refuses every rendering the contract avoids, in the narration, the captions and the picture's labels, and the review scores concept fidelity as its own dimension.
 
 ### Changed
 
+- Both editions are repaired wherever a rendering narrowed a concept of the guidelines. The Chinese edition no longer asks 谁说了算 for the authority to act or calls the decision owner 有决定权的人, and its collaboration chapter is now 人与人工智能怎样协作 instead of 人与智能体怎样协作; the English edition names the authority to act and the authority about facts where it said "who decides" and "what counts as fact", and its chapter is now "Human–AI collaboration" instead of "Working with Agents". The repair changes 29 Chinese and 14 English thoughts and the Chinese titles of 03, 04, 09 and 14; every other thought keeps its v1.1.0 recording, and each edition still runs exactly 1500 seconds, with its soundtrack at −16.5 LUFS.
+- The pronunciation contract declares the reading of 250 Chinese words over all 1,373 of their occurrences, and each occurrence was checked against an approved reference.
+- The source manifest pins the guidelines at v8.0.0 (`b9da15d`), whose seven guideline documents are byte-identical to the previous pin `2c59ac0`.
+- The picture's labels and cue words follow the repaired terms, and the reviews' findings are fixed: the Chinese order of authority to act ranks the owner's explicit decision, never the owner alone; the English refusals of 17.3 stand on one table that grows about the content centre; and the grid of 06.2 no longer stands high over an empty band, while the inference's premise is shown on its case as it is said.
+- The independent review scored the Chinese edition 96.0 and the English edition 95.8, with every dimension, concept fidelity among them, at 95 or above and no material or minor finding.
 - The repository is now `data-department-work-guidelines-film`, titled "Data Department Work Guidelines: Film", so that its name corresponds to the guidelines' own repository; the old address redirects.
 - The repository runs ETHOS 0.2.0-alpha.28, and its CI workflow uses `jdx/mise-action` 5.2.5.
 - The films are built by `filmkit` 0.5.0, which renders with HyperFrames 0.9.5, and the supply moves to its latest stable releases: Node 26.13.0, uv 0.13.6, hatchling 1.33.0, coverage 7.17.0, pytest 9.2.0 and Mise 2026.10.25 in CI, with both locks at the newest releases their declarations admit. The speech engine stays at mlx-audio 0.5.8 and MLX 0.32.3, so every thought the repair leaves unchanged keeps its recording.
@@ -36,6 +44,7 @@ All notable changes to the DDWG introduction films and their build are recorded 
 - ETHOS governance, with its portable proof projected into GitHub Actions.
 - The MIT License for the code and CC BY 4.0 for the films' content, with the third-party notices and the narrator's provenance in `NOTICE`.
 
-[Unreleased]: https://github.com/HengYangDS/data-department-work-guidelines-film/compare/v1.1.0...HEAD
+[Unreleased]: https://github.com/HengYangDS/data-department-work-guidelines-film/compare/v1.2.0...HEAD
+[1.2.0]: https://github.com/HengYangDS/data-department-work-guidelines-film/releases/tag/v1.2.0
 [1.1.0]: https://github.com/HengYangDS/data-department-work-guidelines-film/releases/tag/v1.1.0
 [1.0.0]: https://github.com/HengYangDS/data-department-work-guidelines-film/releases/tag/v1.0.0
