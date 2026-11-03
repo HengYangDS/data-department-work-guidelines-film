@@ -7596,8 +7596,9 @@ scenes["26"] = function (s, t) {
   if (g2 > 0) {
     // The needs stand on the middle of the fork their lanes draw, between its split and its join. The fork is laid out
     // back from practice's place, which puts the whole stage, from the widest candidate's name to practice's name, about
-    // the centre.
-    const PX = PRACTICE_X, PR = PRACTICE_R, RX = PX - 150, SX = RX - 340, JX = SX - 20, DX = JX - 330, MX = DX + 230, NX = DX - 40, NEED = (SX + RX) / 2;
+    // the centre, and its lanes rejoin far enough before practice that the English name, wider than the seal, stands
+    // clear of the join.
+    const PX = PRACTICE_X, PR = PRACTICE_R, RX = PX - 180, SX = RX - 340, JX = SX - 20, DX = JX - 330, MX = DX + 230, NX = DX - 40, NEED = (SX + RX) / 2;
     const cys = [350, 450, 550, 650], lys = [370, 500, 630];
     const kindNames = en ? ["Rule", "Template", "Tool", "Agent workflow"] : ["规则", "模板", "工具", "智能体流程"];
     const needNames = en ? ["Observed problem", "Material risk with evidence", "Obligation that applies"] : ["真的看到了问题", "有依据的实质风险", "必须履行的义务"];
