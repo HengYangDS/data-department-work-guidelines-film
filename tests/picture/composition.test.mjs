@@ -300,7 +300,7 @@ test("English grows the table of 17's refusals about the content centre", async 
 });
 
 for (const code of ["zh", "en"]) {
-  test(`${code} keeps 06's case standing until the inference's premise takes its place`, async () => {
+  test(`${code} keeps 06's case standing below the grid until the inference begins`, async () => {
     const film = await authoredTimeline(code),
       composition = openComposition(film),
       segment = film.segments.find((v) => v.id === "06");
@@ -315,14 +315,9 @@ for (const code of ["zh", "en"]) {
       return segment.words[index].start;
     };
     const hypothesis = at(code === "zh" ? "供应商发布晚了" : "Late publication"),
-      kind = at(code === "zh" ? "假设" : "hypothesis", hypothesis),
-      premise = at(code === "zh" ? "如果发布准时" : "If publication", kind),
-      inference = at(code === "zh" ? "问题就可能" : "scheduling", premise);
-    // The case leaves on the hypothesis's kind, and the premise takes its place within a second.
-    assert.ok(
-      premise - 0.15 - (kind + 0.18) < 1,
-      `the first row stands alone from ${kind} to ${premise}`,
-    );
+      onTime = at(code === "zh" ? "准时" : "on time", hypothesis),
+      startedLate = at(code === "zh" ? "启动得晚" : "job started late", hypothesis),
+      inference = at(code === "zh" ? "问题就可能" : "scheduling", hypothesis);
     // What 06 paints at t that is lit: its texts and its strokes and fills off the ground, within the content band.
     const lit = (t) => {
       const points = [];
@@ -343,10 +338,18 @@ for (const code of ["zh", "en"]) {
       for (const v of texts) points.push([v.bounds[0], v.bounds[1]], [v.bounds[2], v.bounds[3]]);
       return { points, texts };
     };
-    // While the hypothesis, the premise and the inference are said, the lit picture stands within the reviewers' 12%
-    // balance limit of the content centre (960, 510) and covers at least a tenth of the content band, and no two of its
-    // texts overlap: the grid's first row never stands high over an empty band, and the premise shows as it is said.
-    for (const t of [hypothesis + 1, premise + 0.6, inference - 0.2, inference + 1]) {
+    // While the hypothesis, the premise and the inference are said, and across the cut that clears the case, the lit
+    // picture stands within the reviewers' 12% balance limit of the content centre (960, 510) and covers at least a
+    // tenth of the content band, and no two of its texts overlap: the grid's first row never stands alone over an
+    // empty band.
+    for (const t of [
+      hypothesis + 1,
+      onTime + 0.6,
+      startedLate + 0.4,
+      inference + 0.1,
+      inference + 0.3,
+      inference + 1,
+    ]) {
       const { points, texts } = lit(t);
       const x0 = Math.min(...points.map((v) => v[0])),
         x1 = Math.max(...points.map((v) => v[0])),
@@ -368,16 +371,15 @@ for (const code of ["zh", "en"]) {
             `${t.toFixed(2)} s: "${a.text}" overlaps "${b.text}"`,
           );
     }
-    // The premise stands in the picture while it is said.
+    // The inference's premise is shown on the case as it is said: the hour that was on time, then the late start.
+    const shows = (t, name) => lit(t).texts.some((v) => v.text === name);
     assert.ok(
-      lit(premise + 0.6).texts.some(
-        (v) =>
-          v.whole ===
-          (code === "zh"
-            ? "如果发布准时，任务却启动得晚"
-            : "If publication was on time but the job started late"),
-      ),
-      "the premise is shown as it is said",
+      shows(onTime + 0.4, code === "zh" ? "准时" : "On time"),
+      "the on-time hour is named as it is said",
+    );
+    assert.ok(
+      shows(startedLate + 0.4, code === "zh" ? "启动得晚" : "Job started late"),
+      "the late start is named as it is said",
     );
   });
 }

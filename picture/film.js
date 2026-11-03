@@ -2130,60 +2130,61 @@ scenes["06"] = function (s, t) {
     [["把任务提前启动"], ["把任务提前启动"], ["决策负责人"], ["决策负责人作出的决定"]],
     [["谁在什么时候改好"], ["谁在什么时候"], [], []]]).map(([term, termWords, qual, qualWords]) =>
     [term, termWords.map(w => cue(s, L(w, ""), L("", w))), qual, qualWords.map(w => cue(s, L(w, ""), L("", w)))]);
-  // The inference rests on a premise, said before its term: set above the term in the qualifier's small muted type,
-  // each part on its own words, so the grid shows the condition while it is said. The inference begins with it.
-  const premise = L(["如果发布准时，", "任务却启动得晚"], ["If publication was on time", " but the job started late"]);
-  const premiseAts = L(["如果发布准时", "任务却启动得晚"], ["if publication was on time", "but the job started late"]).map(w => cue(s, L(w, ""), L("", w)));
-  const starts = rows.map(([, termAts, , qualAts], i) => Math.min(...termAts, ...qualAts, ...(i === 2 ? premiseAts : [])));
+  const starts = rows.map(([, termAts, , qualAts]) => Math.min(...termAts, ...qualAts));
   // A kind's place: its mark at (x, y), its name beside the mark and its statement below the name. A statement without
   // a qualifier wraps within its column; one with a qualifier is a term row. A judgment's verdict is set whole from the
   // standard that begins it.
-  const statement = (i, x, y, alpha, listed, kindAt = kindAts[i]) => {
-    const [term, termAts, qual, qualAts] = rows[i], lit = speaking(t, starts, i), left = x + S06R + NAME_GAP, kind = ramp(t, kindAt - .15, .4);
+  const statement = (i, x, y, alpha, listed, kindAt = kindAts[i], termAts = rows[i][1]) => {
+    const [term, , qual, qualAts] = rows[i], lit = speaking(t, starts, i), left = x + S06R + NAME_GAP, kind = ramp(t, kindAt - .15, .4);
     if (lit > 0) ring(x, y, S06R + 10, {color: s06Colour(i), alpha: alpha * lit * .5 * kind, width: 2});
     s06Mark(i, x, y, {alpha: alpha * kind});
     const level = alpha * listLevel(t, starts, i), top = y + labelSize(LABEL) / 2 + 14;
     nameText(kinds[i], left, y, {align: "left", color: s06Colour(i), alpha: level * named(t, kindAt), set: listed ? "kinds" : null});
-    const head = i === 2 ? growName(t, premise, premiseAts, left, top, {size: NOTE, width: S06TEXT, alpha: level, color: P.muted,
-      build: true, set: listed ? "statements" : null}).bottom + 4 : top;
-    if (qual.length) termRow(t, term, termAts, qual, qualAts, left, head, {width: S06TEXT, alpha: level, set: listed ? "statements" : null});
-    else growName(t, term, termAts, left, head, {width: S06TEXT, alpha: level, set: listed ? "statements" : null});
+    if (qual.length) termRow(t, term, termAts, qual, qualAts, left, top, {width: S06TEXT, alpha: level, set: listed ? "statements" : null});
+    else growName(t, term, termAts, left, top, {width: S06TEXT, alpha: level, set: listed ? "statements" : null});
   };
   // 2. The illustrative case, cut in on the words that name its data: last night's price collection stands on the hour
   // it arrived, on a line of the night's hours. When the words say it ran two hours late, the place it was due stands
   // two hours earlier as a dashed outline, and the two hours between them are measured below the line. When the delay
   // is restated as a recorded fact, the span's name gives way to the fact's statement, which takes the first place of
-  // the grid the next stage builds. The case stands below the grid's first row while its second statement is said, and
-  // leaves in one cut on that statement's kind, before the next statement's premise arrives where the case stood.
-  const two = base * stageIn(t, data) * stageOut(t, kindAts[1]);
+  // the grid the next stage builds. The case stands below the grid's first row while the hypothesis is said and while
+  // the inference's premise is shown on it: on its words, the hour it was due is named as on time and the two hours as
+  // the job's late start. It leaves in one cut on the inference's own words.
+  const two = base * stageIn(t, data) * stageOut(t, starts[2]);
   if (two > 0) {
     const ranLate = cue(s, "采集晚了两个小时", "ran two hours late");
     const AY = 720, due = 780, actual = 1140, TW = 300, TH = 190, top = AY - 36 - TH, SY = AY + 36;
     // Once its delay is restated as a fact, the case steps back to the second ink and the fact's statement leads.
     const back = mix(1, SECOND, ramp(t, restate + .05, .7)), on = two * back * ramp(t, data - .15, .4), go = soon(t, ranLate + .05, .6);
-    const late = two * back * ramp(t, ranLate + .05, .3);
+    // The premise's two parts light what they name in full ink: the hour that was on time, and the two hours late.
+    const onTime = cueFrom(s, "准时", "on time", starts[1]), startedLate = cueFrom(s, "启动得晚", "job started late", starts[1]);
+    const late = two * back * ramp(t, ranLate + .05, .3), span = late * mix(1, 1 / back, named(t, startedLate));
     // The night's hours: one line with a tick at each hour, drawn as one stroke.
     stroke(() => { ctx.moveTo(240, AY); ctx.lineTo(1680, AY); for (let x = 240; x <= 1680; x += 180) { ctx.moveTo(x, AY - 7); ctx.lineTo(x, AY + 7); } },
       {color: P.line, alpha: on, width: 3.5});
-    box(due - TW / 2, top, TW, TH, {stroke: P.line, alpha: late, radius: 6, dash: [6, 6]});
+    box(due - TW / 2, top, TW, TH, {stroke: P.line, alpha: late * mix(1, 1 / back, named(t, onTime)), radius: 6, dash: [6, 6]});
+    nameText(L("准时", "On time"), due, top + TH / 2, {valign: "middle", alpha: two * named(t, onTime)});
     line(actual, top + TH, actual, AY, {color: P.line, alpha: on, width: 2});
     tableIcon(actual - TW / 2, top, TW, TH, {alpha: on});
     nameText(L("昨晚的价格数据", "Last night's price collection"), actual, top - NAME_GAP, {valign: "bottom", alpha: two * back * named(t, data)});
     // The two hours, measured below the line from the due hour to the arrival.
-    line(due, SY, mix(due, actual, go), SY, {color: P.unknown, alpha: late, width: 3});
-    line(due, SY - 10, due, SY + 10, {color: P.unknown, alpha: late, width: 3});
-    line(actual, SY - 10, actual, SY + 10, {color: P.unknown, alpha: late * clamp((go - .9) / .1), width: 3});
+    line(due, SY, mix(due, actual, go), SY, {color: P.unknown, alpha: span, width: 3});
+    line(due, SY - 10, due, SY + 10, {color: P.unknown, alpha: span, width: 3});
+    line(actual, SY - 10, actual, SY + 10, {color: P.unknown, alpha: span * clamp((go - .9) / .1), width: 3});
     nameText(L("采集晚了两个小时", "Ran two hours late"), (due + actual) / 2, SY + 10 + NAME_GAP, {valign: "top",
       alpha: two * named(t, ranLate) * (1 - ramp(t, restate + .05, .3))});
+    nameText(L("启动得晚", "Job started late"), (due + actual) / 2, SY + 10 + NAME_GAP, {valign: "top", alpha: two * named(t, startedLate)});
     // In the case the fact's kind arrives within the clause that names it a fact: in English with its restated statement,
-    // at most 1.4 s ahead of its own word; in Chinese with the word that records it.
+    // at most 1.4 s ahead of its own word; in Chinese with the word that records it. The grid takes the fact over on the
+    // hypothesis's first words.
     if (t < starts[1] + STAGE_CUT) statement(0, ...s06Place(0), two * ramp(t, restate + .05, .3), false, en ? Math.max(restate, kindAts[0] - 1.4) : Math.min(kindAts[0], cue(s, "有记录", "")));
   }
   // 3. The case's statements sorted into the six kinds. The stage begins on the second statement's first words, while
   // the case still stands below; the recorded fact stands in its place as the case left it, and each further statement
-  // arrives at its kind's ring on its own words.
+  // arrives at its kind's ring on its own words. The inference's term, whose place the case holds until its words begin,
+  // arrives with the cut that clears it.
   const three = base * stageIn(t, starts[1]) * stageOut(t, conditions);
-  if (three > 0) rows.forEach((_, i) => statement(i, ...s06Place(i), three, true));
+  if (three > 0) rows.forEach((_, i) => statement(i, ...s06Place(i), three, true, kindAts[i], i === 2 ? rows[2][1].map(() => starts[2] + STAGE_CUT + .15) : rows[i][1]));
   // 4. Each kind carries its own conditions. The case's statements leave in one cut on the thought's first words, which
   // begin the conditions in English and in Chinese first say that each kind has its own to account for, named above
   // the grid until the next thought; the six kinds keep their marks, positions and names, and each
