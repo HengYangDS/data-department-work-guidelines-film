@@ -7619,12 +7619,13 @@ scenes["26"] = function (s, t) {
     dot(JX, 500, 6, {color: P.line, alpha: g2 * ramp(t, kinds[0] - .15, .4)});
     lys.forEach((ly, k) => {
       const q = ramp(t, needs[k] - .15, .4) * g2, lit = speaking(t, needs, k), round = soon(t, needs[k] - .15, .9);
-      // The way and its lanes keep the candidates' firm stroke, so the way carries the stage's right while it builds.
-      if (ly === 500) link(JX, 500, PX - PR - 10, 500, {alpha: g2 * ramp(t, kinds[0] - .15, .4), upto: soon(t, kinds[0] + .05, .9), width: 3, end: false,
+      // The four links merge into a way one step firmer than they are, and its lanes keep that stroke: the way carries
+      // the stage's right while it builds, and a thinner way on the middle row is lost in a frame seen small.
+      if (ly === 500) link(JX, 500, PX - PR - 10, 500, {alpha: g2 * ramp(t, kinds[0] - .15, .4), upto: soon(t, kinds[0] + .05, .9), width: 4, end: false,
         flow: t > practice + .6 ? (voiceTime(t) * .3) % 1 : null});
       else {
-        link(JX, 500, RX - 40, ly, {route: "hvh", mid: SX, alpha: q, upto: round, width: 3, end: false});
-        link(RX - 40, ly, PX - PR - 10, 500, {route: "hvh", mid: RX, alpha: q * (round >= 1 ? 1 : 0), width: 3, end: false});
+        link(JX, 500, RX - 40, ly, {route: "hvh", mid: SX, alpha: q, upto: round, width: 4, end: false});
+        link(RX - 40, ly, PX - PR - 10, 500, {route: "hvh", mid: RX, alpha: q * (round >= 1 ? 1 : 0), width: 4, end: false});
       }
       ring(NEED, ly, 14, {color: P.authority, alpha: q, width: 2.5});
       dot(NEED, ly, 6 + 2 * lit, {color: P.authority, alpha: q});
