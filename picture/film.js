@@ -6057,8 +6057,9 @@ scenes["19"] = function (s, t) {
     const rows = en ? [proceeds, stops] : [stops, proceeds];
     const outB = L("停下来问", "Stops and asks");
     // The member stays where the last stage left them. While the first condition builds, the fork stands S1 px right of
-    // its place beside the member, and on the first outcome it moves to S2 px right of that place.
-    const [S1, S2] = en ? [240, 0] : [280, 90], fork = mix(S1, S2, soon(t, (en ? assume : ask) + .05, .7));
+    // its place beside the member, and on the first outcome it moves to S2 px right of that place. The English S1 is
+    // taken from the full-size draft, whose Latin lines run narrower than the headless estimate.
+    const [S1, S2] = en ? [300, 0] : [280, 90], fork = mix(S1, S2, soon(t, (en ? assume : ask) + .05, .7));
     const CW = en ? 520 : 480, mx = 450, rx = mx + 150 + fork, cx0 = rx + 130;
     // Each condition's block: the list's lines, the block's height and width, and the width of its first line, where its
     // outcome's run leaves.
