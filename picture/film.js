@@ -5944,9 +5944,9 @@ scenes["20"] = function (s, t) {
     });
     railNames(en ? ["Context", "Permissions", "Verification", "Result"] : ["用到的信息", "权限", "核验", "结果"], xs, rail - 5,
       {side: -1, gap: NAME_GAP + 24, alpha: i => g4 * listIn(t, owned, i), color: () => P.authority, set: "owned"});
-    // The note under the rail is centred on all four marks. The Chinese says it after them; the English says "owns"
-    // before them, so its note comes with the fourth mark rather than standing off the centre of those shown.
-    nameText(L("负责", "Owns"), 1000, rail + 30, {valign: "top", color: P.muted, size: NOTE, alpha: g4 * named(t, en ? owned.at(-1) : cueFrom(s, "负责", "owns", caller))});
+    // The note under the rail is centred on all four marks and stands on its own word: the English says "owns" before
+    // the marks arrive, so they fill in under it.
+    nameText(L("负责", "Owns"), 1000, rail + 30, {valign: "top", color: P.muted, size: NOTE, alpha: g4 * named(t, cueFrom(s, "负责", "owns", caller))});
   }
   // 5. Submitting work an Agent helped with means you have understood it, checked it and accept its consequences. The
   // person who called the Agent stands at the left, named so until the words address it as you, and the work it submits
