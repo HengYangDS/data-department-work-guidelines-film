@@ -7030,12 +7030,15 @@ scenes["23"] = function (s, t) {
   // from the result to the reader. The reader stands as the result becomes action, just before the words name them.
   // In English the result and the channel stand together from the first words: until the reader comes they stand
   // centred as a pair, and on the words that make the result action they move left to their stations. The Chinese
-  // names the result alone first, at its station.
+  // names the result alone first: it stands centred until the channel is named, the two then stand centred as a pair,
+  // and on the words that make the result action they move to their stations.
   const one = base * stageOut(t, answers);
   if (one > 0) {
     const names = en ? ["Results", "Communication", "What others can act on"] : ["工作的成果", "沟通", "别人能接着做的事"];
-    const pair = en ? (960 - (460 - 60 + 960 + Math.max(42, measure(names[1]) / 2)) / 2) * (1 - soon(t, become + .05, .7)) : 0;
-    const xs = [460 + pair, 960 + pair, 1460], at = [work, comm, others], seen = i => ramp(t, (i === 2 ? Math.min(at[i], become + .05) : at[i]) - .15, .4) * one;
+    const centred = 960 - (460 - 60 + 960 + Math.max(42, measure(names[1]) / 2)) / 2, settle = 1 - soon(t, become + .05, .7);
+    const pair = (en ? centred : mix(960 - 460, centred, soon(t, comm + .05, .7))) * settle;
+    // The channel arrives at its place in the centred pair and stays there until the stations; only the result moves.
+    const xs = [460 + pair, 960 + centred * settle, 1460], at = [work, comm, others], seen = i => ramp(t, (i === 2 ? Math.min(at[i], become + .05) : at[i]) - .15, .4) * one;
     const clear = y => clearOfTitle(s, t, y);
     const go = soon(t, become - .05, .9), ph = voiceTime(t) - voiceTime(become + .9);
     link(xs[0] + 76, RY, xs[2] - 60, RY, {color: P.evidence, alpha: one * ramp(t, become - .05, .3) * clear(RY), upto: go, width: 2.5,
