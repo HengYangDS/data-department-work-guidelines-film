@@ -94,7 +94,9 @@ visual_explanation_and_motion = """\
   develops; restrained but varied, intentional 2D motion; text supports the visual argument."""
 composition_and_typography = """\
   alignment guides, hierarchy, margins, density, modest single-line captions, consistent color \
-  and contrast; collisions or clipping with timecodes."""
+  and contrast; aligned, tidy and beautiful text: the names of a row on one baseline, identical \
+  items at one pitch, each name on its own mark from its first word, compositions centred, cards \
+  padded evenly, balanced line breaks; collisions or clipping with timecodes."""
 sound_picture_continuity = """\
   speech, captions, diagrams and scene changes synchronized; complete thoughts survive the \
   edit; image stays purposeful through transitions and pauses."""

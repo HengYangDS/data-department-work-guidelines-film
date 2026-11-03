@@ -219,8 +219,8 @@ test("a label whose words hold no joint is authored as its lines", async () => {
     "当前的版本",
     "看起来有效的",
     "模型信号",
-    "跑完和说法对得上的",
-    "核验",
+    "跑完和说法",
+    "对得上的核验",
   ])
     assert.ok(texts.has(line), `missing line ${line}`);
   for (const v of texts) assert.ok(!/^的/u.test(v), `a line begins with 的: ${v}`);
