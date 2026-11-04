@@ -38,7 +38,7 @@
 
 ## 7. Release preparation
 
-- [ ] 7.1 Set `VERSION` to 1.2.0, write the CHANGELOG entry, record the release manifest from the accepted films and verify a rebuild against it with `film:compare`; prepare the release folder with `SHA256SUMS` without publishing.
+- [x] 7.1 Set `VERSION` to 1.2.0, write the CHANGELOG entry, record the release manifest from the accepted films and verify a rebuild against it with `film:compare`; prepare the release folder with `SHA256SUMS` without publishing. `content/release.json` records the accepted `c0e118f` films' 17 assets, each edition's soundtrack and stage, the 22 film-bound sources and a 45 dB PSNR floor for each film, and `build/artifacts/release/` holds the assets with `SHA256SUMS`, each checked. On 2026-11-04 a clean clone of `7675d49` rebuilt both editions with the README's commands and `film:compare` passed: every soundtrack, staged picture document, caption, transcript and cover is byte-identical, every film has the published frame count, decoded audio, streams, chapters and tags, the lowest frame measured 51.28 dB, and the tracked tree stayed unchanged (`build/evidence/reproduction/2026-11-04-clean-rebuild-7675d49/`).
 
 ## Workflow follow-up
 
