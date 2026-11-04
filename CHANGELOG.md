@@ -4,7 +4,7 @@ All notable changes to the DDWG introduction films and their build are recorded 
 
 ## [Unreleased]
 
-## [1.2.0] - 2026-11-03
+## [1.2.0] - 2026-11-04
 
 ### Added
 
@@ -17,7 +17,9 @@ All notable changes to the DDWG introduction films and their build are recorded 
 - The pronunciation contract declares the reading of 250 Chinese words over all 1,373 of their occurrences, and each occurrence was checked against an approved reference.
 - The source manifest pins the guidelines at v8.0.0 (`b9da15d`), whose seven guideline documents are byte-identical to the previous pin `2c59ac0`.
 - The picture's labels and cue words follow the repaired terms, and the reviews' findings are fixed: the Chinese order of authority to act ranks the owner's explicit decision, never the owner alone; the English refusals of 17.3 stand on one table that grows about the content centre; and the grid of 06.2 no longer stands high over an empty band, while the inference's premise is shown on its case as it is said.
-- The independent review scored the Chinese edition 96.0 and the English edition 95.8, with every dimension, concept fidelity among them, at 95 or above and no material or minor finding.
+- The picture's text is aligned and tidy, as the owner required on 2026-11-03, by layout alone; the narration and captions are unchanged. The shared naming code sets rail stations at one pitch whenever their names fit, centres each refusal with its cross and hangs line-final marks; in every scene the names of a row stand on one baseline, cards keep equal padding, labels stand clear of their marks, and a cross after a Chinese closing quotation mark follows the mark's ink. Every settled stage stands within 50 px of the content centre, and every build-up shown for 1.5 s or more within 90 px.
+- Every review dimension must score at least 95: the verifier refuses a review whose overall score or any dimension falls below 95.
+- The independent review of the films rendered from that composition scored the Chinese edition 96.1 and the English edition 95.9, with every dimension, concept fidelity among them, at 95 or above and no material or minor finding.
 - The repository is now `data-department-work-guidelines-film`, titled "Data Department Work Guidelines: Film", so that its name corresponds to the guidelines' own repository; the old address redirects.
 - The repository runs ETHOS 0.2.0-alpha.28, and its CI workflow uses `jdx/mise-action` 5.2.5.
 - The films are built by `filmkit` 0.5.0, which renders with HyperFrames 0.9.5, and the supply moves to its latest stable releases: Node 26.13.0, uv 0.13.6, hatchling 1.33.0, coverage 7.17.0, pytest 9.2.0 and Mise 2026.10.25 in CI, with both locks at the newest releases their declarations admit. The speech engine stays at mlx-audio 0.5.8 and MLX 0.32.3, so every thought the repair leaves unchanged keeps its recording.

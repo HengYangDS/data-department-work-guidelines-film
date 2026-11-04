@@ -7,7 +7,7 @@
 
 ## 2. Engine
 
-- [ ] 2.1 Depend on the `filmkit` release that checks concept contracts and readings, through its uv Git source and tag; verify that `uv sync --frozen` installs it and that `mise run check` passes. `filmkit` 0.4.0 is pinned and installs with the supply of design §6; every `mise run check` command passes except the release-manifest test, which waits for 7.1.
+- [x] 2.1 Depend on the `filmkit` release that checks concept contracts and readings, through its uv Git source and tag; verify that `uv sync --frozen` installs it and that `mise run check` passes. `filmkit` 0.5.0 is pinned by its tag `v0.5.0`, as design §6 records, and `uv sync --frozen --check` finds the environment exactly the lock. On 2026-11-04, with the release manifest of 7.1 recorded, every `mise run check` command passes.
 
 ## 3. Script repair
 
@@ -43,5 +43,5 @@
 ## Workflow follow-up
 
 - Archive the Change, prove the archived head once, run the film gates on it, land it and close out.
-- After the user confirms: publish `dev` and `main` to GitHub, tag `v1.2.0` and upload the release; then read back every asset and `SHA256SUMS`.
+- Publish `dev` and `main` to GitHub, tag `v1.2.0` and upload the release; then read back every asset and `SHA256SUMS`. The owner's standing authorization of 2026-10-26 (「授权你以认为的最佳方式操作，无需经过我同意」) covers the publication; on 2026-11-04 the owner accepted the films (6.4) and asked that the work be carried through to its landing (「做完整深度复盘，之后基于最新认知理解，规划后续路径，并推进完整落地」).
 - Form the essentials film's own repository from the outline the user approved on 2026-11-01, with this contract and narrator.
