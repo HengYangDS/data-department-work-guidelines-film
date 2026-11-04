@@ -129,6 +129,8 @@ On 2026-11-02 the owner asked that every supply move to its latest stable releas
 
 The fix of round 27 renders both editions again, so the film moves on 2026-11-03 to `filmkit` 0.5.0, which renders with HyperFrames 0.9.5 and still declares Chrome Headless Shell 152.0.7977.30; the npm lock also moves semver to 7.8.6, and OSV reports no advisory in either lock.
 
+On 2026-11-04 the repository binds ETHOS 0.2.0-alpha.29, whose CI model pins `jdx/mise-action` 5.2.6, and uv moves to 0.13.7, which Mise's 24-hour release age had held back; no film-bound source moves.
+
 The speech engine stays at mlx-audio 0.5.8 and MLX 0.32.3, so that every thought the repair leaves unchanged still reproduces its v1.1.0 recording (task 4.2); the next full production moves it. `uv pip check` reports that override as an incompatibility with the mlx-audio that `filmkit` declares, so `check:dependencies` relies on the frozen sync check, which proves the environment is exactly the lock, until the hold ends. A new renderer can change the frames, so 6.1 renders both editions again on this supply, and the next review compares their frames with the `6702e20` render's.
 
 ## Alternatives Considered

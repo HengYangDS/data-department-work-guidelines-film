@@ -21,8 +21,8 @@ All notable changes to the DDWG introduction films and their build are recorded 
 - Every review dimension must score at least 95: the verifier refuses a review whose overall score or any dimension falls below 95.
 - The independent review of the films rendered from that composition scored the Chinese edition 96.1 and the English edition 95.9, with every dimension, concept fidelity among them, at 95 or above and no material or minor finding.
 - The repository is now `data-department-work-guidelines-film`, titled "Data Department Work Guidelines: Film", so that its name corresponds to the guidelines' own repository; the old address redirects.
-- The repository runs ETHOS 0.2.0-alpha.28, and its CI workflow uses `jdx/mise-action` 5.2.5.
-- The films are built by `filmkit` 0.5.0, which renders with HyperFrames 0.9.5, and the supply moves to its latest stable releases: Node 26.13.0, uv 0.13.6, hatchling 1.33.0, coverage 7.17.0, pytest 9.2.0 and Mise 2026.10.25 in CI, with both locks at the newest releases their declarations admit. The speech engine stays at mlx-audio 0.5.8 and MLX 0.32.3, so every thought the repair leaves unchanged keeps its recording.
+- The repository runs ETHOS 0.2.0-alpha.29, and its CI workflow uses `jdx/mise-action` 5.2.6.
+- The films are built by `filmkit` 0.5.0, which renders with HyperFrames 0.9.5, and the supply moves to its latest stable releases: Node 26.13.0, uv 0.13.7, hatchling 1.33.0, coverage 7.17.0, pytest 9.2.0 and Mise 2026.10.25 in CI, with both locks at the newest releases their declarations admit. The speech engine stays at mlx-audio 0.5.8 and MLX 0.32.3, so every thought the repair leaves unchanged keeps its recording.
 
 ## [1.1.0] - 2026-10-31
 
