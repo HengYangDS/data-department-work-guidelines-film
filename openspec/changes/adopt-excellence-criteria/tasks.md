@@ -2,9 +2,9 @@
 
 ## 1. Criteria
 
-- [ ] 1.1 Declare the twelve review dimensions in `content/film.toml`, each stating what an excellent film shows, with both floors at 95; verify that the declaration loads and that the round prompt renders all twelve for both editions.
-- [ ] 1.2 Add the patterns the owner has rejected to `content/review/prompt.md`, each with the dimension it fails and the clarity method stated in full; verify that `mise run check` passes.
-- [ ] 1.3 State the review requirement in the specification delta; verify `openspec validate adopt-excellence-criteria --strict`.
+- [x] 1.1 Declare the twelve review dimensions in `content/film.toml`, each stating what an excellent film shows, with both floors at 95; verify that the engine's review round reads all twelve in the declared order. `filmkit.review.round.DIMENSIONS` holds the twelve, from `subject_and_faithfulness` to `credits_and_deliverable_craft`.
+- [x] 1.2 Add the patterns the owner has rejected to `content/review/prompt.md`, each with the dimension it fails and the clarity method stated in full; verify that `mise run check` passes. Nine patterns precede the score anchors; the check passed with 15 tests and the Markdown format check.
+- [x] 1.3 State the review requirement in the specification delta; verify `openspec validate adopt-excellence-criteria --strict`. The requirement keeps its name and both scenarios, rewritten for the declared dimensions at 95, and adds two; strict validation passes.
 
 ## 2. Review of the published films
 
