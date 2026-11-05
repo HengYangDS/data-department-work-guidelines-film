@@ -5364,8 +5364,9 @@ scenes["17"] = function (s, t) {
     for (let c = 0; c < 5; c++) {
       const x = OL + c * OW / 5 + 7, w = OW / 5 - 14;
       if (c < 3) {
-        // The cover's tint stays a ground for the cell, under 1.8:1; the cell's outline carries the evidence colour.
-        box(x, OT + 8, w, OH - 16, {fill: P.evidence, alpha: cover * .24, radius: 5});
+        // The cover's tint stays a ground for the cell, under 1.8:1 against the frame's ground (1.70:1 over the row at
+        // 0.16); the cell's outline carries the evidence colour.
+        box(x, OT + 8, w, OH - 16, {fill: P.evidence, alpha: cover * .16, radius: 5});
         box(x, OT + 8, w, OH - 16, {stroke: P.evidence, alpha: cover, radius: 5, width: 2.5});
       } else {
         box(x, OT + 8, w, OH - 16, {stroke: P.unknown, alpha: open, radius: 5, width: 2, dash: [6, 6]});
