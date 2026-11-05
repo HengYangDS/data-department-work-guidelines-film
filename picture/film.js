@@ -312,8 +312,10 @@ const named = (t, at) => ramp(t, at - .15, .4);
 /* A spoken list builds: each item arrives on its own words and stays, so the whole set forms on the screen. While the
  * list is spoken, the item being named stands at full ink and the items already named share one second level; once
  * the last item has been said the whole set returns to full ink, and it leaves as a whole when the argument moves on
- * at `until`. None of these changes falls in a pause. */
-const SECOND = .58;
+ * at `until`. None of these changes falls in a pause. The second level keeps every name legible: at 0.74 of full ink
+ * the muted colour, the faintest colour a list's names take, still reads at 4.6:1 against the ground (ink needs 0.51,
+ * authority 0.62 and evidence 0.69), so the step back never leaves a named item below 4.5:1. */
+const SECOND = .74;
 const listLevel = (t, ats, i, until = Infinity) => {
   // The set has been said once the last item's clause has ended. It is whole again within that item's own thought, so
   // the return never waits through the pause for a next thought that may already show another stage: when the clause
@@ -569,8 +571,8 @@ function link(x1, y1, x2, y2, {route = null, mid = null, r = 14, color = P.line,
   if (flow !== null && flow < upto) { const [px, py] = along(points, flow).point; flowDot(px, py, width + 2, flow, {color, alpha}); }
 }
 
-/* A phrase the guidelines reject, set as a name: muted plain text that dims as it is refused, with a cross beside the
- * words rather than over them. */
+/* A phrase the guidelines reject, set as a name: muted plain text that keeps its full ink as it is refused, so it stays
+ * legible, while the cross beside the words rather than over them carries the refusal. */
 /* A centred refusal centres its words and their cross together on x. `markLeft` stands the cross's left edge at one
  * x instead, so the crosses of a list of refused names form one column after its longest name; by default the cross
  * follows its own name. */
@@ -584,7 +586,7 @@ const closingBlank = (line, size = LABEL) => {
 };
 function rejectedName(v, x, y, {alpha = 1, mark = 1, size = LABEL, align = "center", valign = "middle", width = Infinity, set = null, markLeft = null} = {}) {
   const s = Math.min(26, labelSize(size) * .9), cx = align === "center" && markLeft === null ? x - (16 + s) / 2 : x;
-  const block = nameText(v, cx, y, {align, valign, width, size, color: P.muted, alpha: alpha * mix(1, .7, clamp(mark)), set});
+  const block = nameText(v, cx, y, {align, valign, width, size, color: P.muted, alpha, set});
   const w = Math.max(...block.lines.map(line => measure(line, size))), left = align === "left" ? cx : align === "right" ? cx - w : cx - w / 2;
   // The cross follows the ink of the line that reaches furthest right, and stays 2 px clear of the lines' boxes.
   const reach = Math.max(...block.lines.map(line => {
@@ -732,8 +734,8 @@ function blend(a, b, q) {
 /* A chapter opens on one centred line, its number and title, with a short rule beneath, once the previous chapter has
  * faded. The line then rises and shrinks into the running head it becomes over 1.1 s with an ease-in-out, landing just
  * after the first word, so it travels at most about 11 px per frame; the rule fades in place below it, so nothing
- * crosses. */
-const cardLanding = s => s.voice_start + .1, RISE = 1.1;
+ * crosses. The head stands in the muted colour at 0.8 of full ink, 5.2:1 against the ground, and the line lands on it. */
+const cardLanding = s => s.voice_start + .1, RISE = 1.1, HEAD_INK = .8;
 function chapterCard(s, t) {
   if (!opensChapter(s) || t >= cardLanding(s)) return;
   const enter = ramp(t, s.start, .3);
@@ -743,7 +745,7 @@ function chapterCard(s, t) {
   // The head's own spacing, scaled with the line: the number, two spaces, then the title.
   ctx.save(); ctx.font = font(24, false, `${number}  ${chapter.title}`); const prefix = ctx.measureText(`${number}  `).width; ctx.restore();
   const gap = prefix * size / 24, total = gap + measure(chapter.title, size, false, "chapter");
-  const left = mix(960 - total / 2, 96, q), y = mix(540, 72, q), ink = mix(1, .72, q) * enter;
+  const left = mix(960 - total / 2, 96, q), y = mix(540, 72, q), ink = mix(1, HEAD_INK, q) * enter;
   text(number, left, y, size, {color: blend(P.evidence, P.muted, q), alpha: ink, role: "chapter"});
   text(chapter.title, left + gap, y, size, {color: blend(P.ink, P.muted, q), alpha: ink, role: "chapter"});
   line(900, 600, 1020, 600, {color: P.line, alpha: enter * (1 - ramp(t, cardLanding(s) - RISE, .35))});
@@ -762,7 +764,7 @@ function runningHead(s, t) {
   if (t < film.segments[0].voice_start) return;
   const first = film.segments.find(v => v.chapter === s.chapter);
   // The first chapter's head fades in with the voice; later heads are the chapter titles that rose into place.
-  const a = .72 * (first === film.segments[0] ? ramp(t, first.voice_start, .6) : t >= cardLanding(first) ? 1 : 0);
+  const a = HEAD_INK * (first === film.segments[0] ? ramp(t, first.voice_start, .6) : t >= cardLanding(first) ? 1 : 0);
   const chapter = film.chapters.find(c => c.id === s.chapter);
   text(`${chapterNumber(s.chapter)}  ${chapter.title}`, 96, 72, 24, {color: P.muted, alpha: a, role: "chapter"});
 }
@@ -810,9 +812,9 @@ function reportCard(x, y, {alpha = 1, scale = 1, highlight = 0, unknown = 0, don
     const ry = y + REPORT_ROW(i, scale), hot = i === 2, tone = blend(P.evidence, P.unknown, unknown);
     if (hot && highlight > 0) line(x + 14 * scale, ry - 20 * scale, x + 14 * scale, ry + 20 * scale, {color: tone, alpha: alpha * highlight, width: 4});
     line(x + inset, ry, x + 120 * scale, ry, {color: P.line, alpha, width: 2});
-    // Once one value is in question, the others step back. The values are marks at the name size, so the card adds no
-    // third text size to the frame.
-    text(value, x + w - inset, ry + 1, 26, {role: "mark", align: "right", alpha: hot ? alpha : alpha * mix(1, .42, highlight),
+    // Once one value is in question, the others step back, to 0.51 of full ink, at which ink still reads at 4.6:1
+    // against the ground. The values are marks at the name size, so the card adds no third text size to the frame.
+    text(value, x + w - inset, ry + 1, 26, {role: "mark", align: "right", alpha: hot ? alpha : alpha * mix(1, .51, highlight),
       color: hot ? blend(blend(P.ink, P.evidence, highlight), P.unknown, unknown) : P.ink});
   });
   // The check's stroke ends at the right edge: its long arm reaches 0.55 of its size right of its centre, plus the
@@ -3260,9 +3262,12 @@ scenes["09"] = function (s, t) {
   const base = ramp(t, opening(s), .7);
   const cx = 960, cy = 470, W = 560, H = 340, top = cy - H / 2;
   // Stages 1 to 3 stand about the data. The English open questions' names are long, so in English the data and all that
-  // stands about it ease 55 px left as the first open question is named, and stay there while the six questions ring it:
-  // the second stage and the ring then stand about the centre as they build.
-  ctx.save(); ctx.translate(en ? -55 * soon(t, unknowns[0] + .05, .7) : 0, 0);
+  // stands about it ease 55 px left as the first open question is named, and stay there while the ring's first four
+  // questions are named on its right and below; the ring's English names are short, so the stage eases back to the
+  // centre over the words of the two questions named on its left, in one move from the fifth question to the end of the
+  // sixth: the second stage and the ring then stand about the centre as they build.
+  const back = soon(t, asks[4] + .05, asks[5] - asks[4] + .7);
+  ctx.save(); ctx.translate(en ? -55 * (soon(t, unknowns[0] + .05, .7) - back) : 0, 0);
   // 1-3. The price data stands at the centre while it is questioned: its name above its left edge, the specific use it
   // must be shown fit for above its right edge on the same line, and its trust an open seal on its corner.
   const center = base * stageOut(t, unclear) * clearOfTitle(s, t, top - 60);
@@ -3307,10 +3312,11 @@ scenes["09"] = function (s, t) {
   // 3. Six questions ring the data from the words that count them, replacing the three non-proofs in one cut: the ring
   // is counted in at the structure tier and named as six questions under the data, and each question's station arrives
   // on the ring, filled, when its question is asked; the names build into the whole set and leave with the ring when
-  // unexplained data is named. Each question is named by its key words, short of the whole question its caption shows.
+  // unexplained data is named. Each question is named by its key words, short of the whole question its caption shows;
+  // in English, whose questions lose their sense without their question words, by the noun of what it asks.
   const three = base * stageIn(t, six) * stageOut(t, unclear);
   if (three > 0) {
-    const rx = 460, ry = 320, names = en ? ["Come from", "Become available", "Mean", "Changed it", "How good", "May it be used"]
+    const rx = 460, ry = 320, names = en ? ["Source", "Availability", "Meaning", "Changes", "Quality", "Permitted use"]
       : ["从哪里来", "能拿到", "意思", "改过", "质量", "用在哪"];
     path(Array.from({length: 97}, (_, k) => [cx + Math.cos(k * Math.PI / 48) * rx, cy + Math.sin(k * Math.PI / 48) * ry]),
       {color: P.line, alpha: three, width: 3.5});
@@ -3338,7 +3344,7 @@ scenes["09"] = function (s, t) {
     const scope = cue(s, "可以在授权范围里探索", "may be explored"), uses = cues(s, [["共享", "shared"], ["投产", "production"], ["做决策", "decision work"]]);
     // The exploration side stands right of its place while it builds alone, and the stage eases to 135 px left of it as
     // the work it stays out of is named, so the pair of frames stands centred once that work stands beside it. The
-    // English stands 90 px right, so its table opens over the ring of questions it replaces, which stands 55 px left.
+    // English stands 90 px right, so its table opens over the ring of questions it replaces.
     const build = L(45, 90);
     ctx.save(); ctx.translate(build - (build + 135) * soon(t, uses[0] + .05, .7), 0);
     // The two frames stand on one top, so their names stand on one line above them, and the way from exploration runs
@@ -5574,12 +5580,9 @@ scenes["18"] = function (s, t) {
     // The judgment the change affects, the arc from analysis to decision, draws on as the change's run reaches it.
     const affects = Math.max(judgment, review + .55) - .1;
     ring(cx, cy, R, {color: P.evidence, alpha: one * ramp(t, affects, .3), width: 6, start: -Math.PI / 6, upto: soon(t, affects, .6) / 6});
-    // The loop's way round, a chevron on each side of the ring between the stations.
-    [0, Math.PI].forEach(a => {
-      const px = cx + Math.cos(a) * R, py = cy + Math.sin(a) * R, tx = -Math.sin(a), ty = Math.cos(a), nx = Math.cos(a), ny = Math.sin(a);
-      path([[px - tx * 9 + nx * 10, py - ty * 9 + ny * 10], [px + tx * 9, py + ty * 9], [px - tx * 9 - nx * 10, py - ty * 9 - ny * 10]],
-        {color: P.muted, alpha: one * ramp(t, opening(s) + .6, .4), width: 3});
-    });
+    // Each side of the ring between the stations carries a quiet point, sized as link() ends a relation of the ring's
+    // width, rather than an arrowhead: the way round is read from the steps, named in turn round the ring.
+    [0, Math.PI].forEach(a => dot(cx + Math.cos(a) * R, cy + Math.sin(a) * R, 3 + 2.5, {color: P.muted, alpha: one * ramp(t, opening(s) + .6, .4)}));
     nameText(L("工作循环", "A loop"), cx, cy, {color: P.muted, alpha: one * named(t, loopWord - L(.34, .25))});
     // The loop is not a fixed sequence of stages: that reading is refused under the loop's name on its words.
     const stagesAt = cue(s, "必须分开走的阶段", "a fixed sequence of stages");
@@ -6823,9 +6826,11 @@ scenes["22"] = function (s, t) {
   // named by the key phrase that opens it: in Chinese the names the words give kinds one and two ("说不清", "权限不够")
   // and for the others the condition each opens with, each station standing on the word that numbers its kind; in
   // English, where each number is a clause of its own, each station stands on the words after its number, which open
-  // its condition, so the English kind two is named "Authority is insufficient", as the Chinese names it 权限不够.
+  // its condition, so the English kind two is named "Authority is insufficient", as the Chinese names it 权限不够. Where
+  // those words alone lose the clause that gives them their sense, the English name keeps that sense in a short phrase:
+  // kind three is "Unrecognized work" and kind five "Continuing would harm".
   // The English first name is authored as its two lines, so it keeps two lines like its neighbours within its pitch.
-  const names = en ? [["Instructions", "materially conflict"], "Authority is insufficient", "You find work", "Contradicts expectation", "Continuing"]
+  const names = en ? [["Instructions", "materially conflict"], "Authority is insufficient", "Unrecognized work", "Contradicts expectation", "Continuing would harm"]
     : ["说不清", "权限不够", "来历不明", "核验和预期相反", "再做下去"];
   const nameAts = cues(s, en ? [["", "instructions materially conflict"], ["", "authority is insufficient"], ["", "you find work"], ["", "verification contradicts"], ["", "continuing would"]]
     : [["一是", ""], ["二是", ""], ["三是", ""], ["四是", ""], ["五是", ""]]);
