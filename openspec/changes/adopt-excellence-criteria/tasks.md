@@ -8,13 +8,23 @@
 
 ## 2. Review of the published films
 
-- [ ] 2.1 Rebuild both editions with `film:build` and compare them with the 1.2.0 release assets with `film:compare`; verify that the report passes.
-- [ ] 2.2 Review both editions under the twelve dimensions on the published films; verify that every dimension and the mean are at least 95, that every rejected pattern is reported as checked and that no material finding remains.
-- [ ] 2.3 Record both reviews; verify that the film-media verifier accepts each for its published film.
+- [x] 2.1 Rebuild both editions with `film:build` and compare them with the 1.2.0 release assets with `film:compare`; verify that every layer but the review passes. The rebuild reproduces every soundtrack, staged picture, caption, transcript and cover byte for byte, and each film reaches the PSNR floor against its published film (`build/evidence/reproduction/report.json`); only the review layer fails, since the 1.2.0 reviews hold nine dimensions.
+- [x] 2.2 Review both editions under the twelve dimensions on the published films; verify that each review scores every declared dimension, reports every rejected pattern as checked and cites a finding for every point below 100. Round 30 (`build/evidence/reviews/round-30/`) scored 94.2 in Chinese and 94.4 in English, with material findings in language quality and in visual aesthetics and colour, so the films are repaired (design §5).
 
-## 3. Release and landing
+## 3. Repair edition
 
-- [ ] 3.1 Prepare release 1.3.0: `VERSION`, the CHANGELOG entry, the README's comparison and `content/release.json` naming the 1.2.0 films and the new reviews; verify `film:compare` against the release folder.
-- [ ] 3.2 Run the full proof on the final head and land it on `dev`; verify the landed head on GitHub.
-- [ ] 3.3 Publish release 1.3.0 with the two reviews and `SHA256SUMS`; verify each asset's digest on GitHub against the manifest.
-- [ ] 3.4 Archive the Change and retire the Work Lane; verify that the evidence the CHANGELOG cites is in the canonical checkout's `build/evidence/`.
+- [x] 3.1 Repair the text of 01, 02, 26 and 30 in both editions and of 03 in Chinese (design §6); verify the independent script review at 95 or more in fidelity, concept fidelity, clarity and language with no material finding, and the concept check. After its recheck the review scored 96, 96, 95 and 96 in both editions with no material or minor finding (`build/evidence/script-audit/ddwg-1.3.0-text-review.md`); its repairs are adopted, 09.1 of the English among them, and the concept check passes with 152 declarations.
+- [ ] 3.2 Narrate the changed thoughts and select a whole take of each; verify that each new take ends on its own and opens in quiet, that recognition matches its text, that every unchanged take is reproduced from its seed and that its declared readings are heard as declared.
+- [ ] 3.3 Assemble both soundtracks at exactly 1500 s with their captions; verify the runtime, the pauses within the declared policy, the program level and the caption timing.
+- [ ] 3.4 Keep every text at rest at 4.5:1 or more, cue the changed thoughts, rename the English labels of 09.3 and 22.1–22.2 and end the loop of 18.1 in quiet points (design §7 and §8); verify the picture tests, the geometry check and a contrast scan of the staged frames of both editions.
+- [ ] 3.5 Render, package and verify both editions; verify the technical checks, a contrast scan of each rendered film and that the tracked tree is unchanged.
+- [ ] 3.6 Review both editions under the twelve dimensions; verify that every dimension and the mean are at least 95, that every rejected pattern is reported as checked and that no material finding remains.
+- [ ] 3.7 Record both reviews; verify that the film-media verifier accepts each for its film.
+- [ ] 3.8 Deliver both editions to `~/Documents/ddwg-introduction-film/` and read them back; verify every delivered file's SHA-256 and both players in a real browser.
+
+## 4. Release and landing
+
+- [ ] 4.1 Prepare release 1.3.0: `VERSION`, the CHANGELOG entry, the README's comparison and `content/release.json` naming the new films and their reviews; verify `film:compare` against the release folder.
+- [ ] 4.2 Run the full proof on the final head and land it on `dev`; verify the landed head on GitHub.
+- [ ] 4.3 Publish release 1.3.0 with both films, their reviews and `SHA256SUMS`; verify each asset's digest on GitHub against the manifest.
+- [ ] 4.4 Archive the Change and retire the Work Lane; verify that the evidence the CHANGELOG cites is in the canonical checkout's `build/evidence/`.
