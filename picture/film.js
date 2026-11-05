@@ -220,7 +220,7 @@ function diamond(x, y, r, {color = P.evidence, alpha = 1, solid = false, width =
 /* A work item moving through a process. */
 function token(x, y, {color = P.ink, alpha = 1, r = 14, hollow = false} = {}) {
   dot(x, y, r, {color, alpha, hollow, width: 3});
-  if (!hollow) ring(x, y, r + 7, {color, alpha: alpha * .45, width: 2});
+  if (!hollow) ring(x, y, r + 7, {color, alpha: secondStroke(color, alpha, .45), width: 2});
 }
 function lock(x, y, {closed = 1, color = P.authority, alpha = 1, size = 1} = {}) {
   const w = 34 * size, h = 26 * size, lift = (1 - ease(closed)) * 12 * size;
@@ -232,7 +232,7 @@ function clock(x, y, r, {hand = 0, color = P.ink, alpha = 1} = {}) {
   ring(x, y, r, {color, alpha, width: 2.5});
   const a = -Math.PI / 2 + Math.PI * 2 * hand;
   line(x, y, x + r * .75 * Math.cos(a), y + r * .75 * Math.sin(a), {color, alpha, width: 3});
-  line(x, y, x, y - r * .5, {color, alpha: alpha * .6, width: 2});
+  line(x, y, x, y - r * .5, {color, alpha: secondStroke(color, alpha, .6), width: 2});
 }
 function shield(x, y, r, {color = P.evidence, alpha = 1, fillColor = null} = {}) {
   const build = () => { ctx.moveTo(x, y - r); ctx.lineTo(x + r * .85, y - r * .62); ctx.lineTo(x + r * .72, y + r * .35);
@@ -245,7 +245,7 @@ function shield(x, y, r, {color = P.evidence, alpha = 1, fillColor = null} = {})
  * ring and the check, so a seal's rim can stand before the seal is stamped. */
 function seal(x, y, r, {color = P.authority, alpha = 1, hollow = false, stamp = alpha} = {}) {
   ring(x, y, r, {color, alpha, width: 3});
-  ring(x, y, r * .74, {color, alpha: stamp * .6, width: 1.5, dash: hollow ? [5, 5] : null});
+  ring(x, y, r * .74, {color, alpha: secondStroke(color, stamp, .6), width: 1.5, dash: hollow ? [5, 5] : null});
   if (!hollow) check(x, y + r * .05, r * .8, {color, alpha: stamp});
 }
 function person(x, y, {color = P.ink, alpha = 1, size = 1, solid = true} = {}) {
@@ -316,6 +316,19 @@ const named = (t, at) => ramp(t, at - .15, .4);
  * the muted colour, the faintest colour a list's names take, still reads at 4.6:1 against the ground (ink needs 0.51,
  * authority 0.62 and evidence 0.69), so the step back never leaves a named item below 4.5:1. */
 const SECOND = .74;
+/* A mark drawn in an accent colour keeps a legible level at rest too: authority, evidence and unknown read at 4.6:1
+ * against the ground at 0.62, 0.69 and 0.89 of full ink. A mark that steps back, the halo on the item being said and
+ * an icon's second stroke stand at least at their colour's level, so no accent at rest falls below 4.5:1; the item
+ * being said stands out by its own mark, its size or its halo, never by dimming the others below that level. A colour
+ * without an accent role keeps the level it is given. */
+const MARK_LEVEL = {[P.authority]: .62, [P.evidence]: .69, [P.unknown]: .89};
+const restMark = (color, level = 0) => Math.max(level, MARK_LEVEL[color] ?? 0);
+/* A list's level for a mark in an accent colour: the list's second level maps onto the colour's own level. */
+const markLevel = (color, level) => mix(restMark(color), 1, clamp((level - SECOND) / (1 - SECOND)));
+/* An icon's second stroke (a seal's inner ring, a clock's short hand, a token's outer ring) stands at its colour's
+ * level, or with the icon while the icon is fainter, so it reads wherever the icon does; another colour keeps its own
+ * share of the icon's ink. */
+const secondStroke = (color, alpha, share) => color in MARK_LEVEL ? Math.min(alpha, MARK_LEVEL[color]) : alpha * share;
 const listLevel = (t, ats, i, until = Infinity) => {
   // The set has been said once the last item's clause has ended. It is whole again within that item's own thought, so
   // the return never waits through the pause for a next thought that may already show another stage: when the clause
@@ -343,10 +356,11 @@ const speaking = (t, ats, i) => {
  * one step per part as the parts are named. */
 const saidShare = (t, ats) => ats.reduce((v, at) => v + soon(t, at + .05, .35), 0) / ats.length;
 /* One beat for each part said over a single mark: the mark's ring flashes on the part's words, within its own extent,
- * so a list spoken at one place shows each part arriving. */
+ * so a list spoken at one place shows each part arriving. A beat swells and thins by its width at its colour's level,
+ * as a flow's dot enters by its size, so it never stands as a faint ring. */
 function beats(t, x, y, r, ats, {color = P.ink, alpha = 1} = {}) {
   const flash = Math.max(0, ...ats.map(at => { const p = clamp((t - at - .05) / .5); return p > 0 && p < 1 ? Math.sin(Math.PI * p) : 0; }));
-  if (flash > 0) ring(x, y, r, {color, alpha: alpha * flash * .5, width: 3.5});
+  if (flash > .02) ring(x, y, r, {color, alpha: alpha * restMark(color, .5), width: 3.5 * flash});
 }
 /* A list said member by member keeps its spoken order along its axis and stays balanced while it builds: each member
  * stands at its place in the list's final layout, and the whole list stands `step` px toward its open end for each
@@ -1397,7 +1411,7 @@ scenes["03"] = function (s, t) {
       ats.forEach((at, i) => {
         const y = rows[i], q = ramp(t, at - .15, .4) * g1, lit = speaking(t, ats, i);
         dot(x, y, 10.5, {color, alpha: q});
-        if (lit > 0) ring(x, y, 17, {color, alpha: lit * .5 * g1, width: 2});
+        if (lit > 0) ring(x, y, 17, {color, alpha: lit * restMark(color, .5) * g1, width: 2});
         nameText(names[i], x + 9 + NAME_GAP, y, {align: "left", color, alpha: g1 * listIn(t, ats, i), set});
       });
     });
@@ -1486,7 +1500,7 @@ scenes["03"] = function (s, t) {
         dot(x, y, 11, {color: P.ground, alpha: q});
         dot(x, y, 11, {color: P.line, alpha: q, hollow: true, width: 2});
         dot(x, y, 12.5 - r * 1.5, {color: colors[r], alpha: q});
-        if (lit > 0) ring(x, y, 19, {color: colors[r], alpha: lit * .5 * g2, width: 2});
+        if (lit > 0) ring(x, y, 19, {color: colors[r], alpha: lit * restMark(colors[r], .5) * g2, width: 2});
         beats(t, x, y, 19, members[r].slice(1), {color: colors[r], alpha: g2});
       }});
     // The order's title stands over the frame's corner from the words that announce it and leaves with the ranks.
@@ -1526,7 +1540,7 @@ scenes["03"] = function (s, t) {
         dot(x, y, 11, {color: P.ground, alpha: q});
         dot(x, y, 11, {color: P.line, alpha: q, hollow: true, width: 2});
         if (r < 2) dot(x, y, 12.5, {color: P.evidence, alpha: q}); else ring(x, y, 12.5, {color: P.unknown, alpha: q, width: 3});
-        if (lit > 0) ring(x, y, 19, {color: r < 2 ? P.evidence : P.unknown, alpha: lit * .5 * g3f, width: 2});
+        if (lit > 0) ring(x, y, 19, {color: r < 2 ? P.evidence : P.unknown, alpha: lit * restMark(r < 2 ? P.evidence : P.unknown, .5) * g3f, width: 2});
         beats(t, x, y, 19, parts[r].slice(1), {color: r < 2 ? P.evidence : P.unknown, alpha: g3f});
       }});
     const barY = tops[2] - 26, tried = ramp(t, leads[0] - .15, .4) * g3f;
@@ -1618,7 +1632,7 @@ scenes["03"] = function (s, t) {
       line(...ends[i], x + PW, y, {color: P.line, alpha: g5, width: 2});
       stroke(() => ctx.arc(x, y - 120, 136, Math.PI * .344, Math.PI * .656), {color: P.ink, alpha: g5, width: 3});
       const lit = speaking(t, needAts, i);
-      if (lit > 0) ring(x, y - 24, 32, {color: P.evidence, alpha: lit * .5 * g5, width: 2});
+      if (lit > 0) ring(x, y - 24, 32, {color: P.evidence, alpha: lit * restMark(P.evidence, .5) * g5, width: 2});
     });
     // Competence lands in the left pan and the facts in the right; the facts leave when one is missing, and a question
     // stands in their place until the domain owner's facts land there.
@@ -1777,7 +1791,7 @@ scenes["04"] = function (s, t) {
     rows.forEach(([term, termAts, qual, qualAts], r) => {
       const my = tops[r] + labelSize(LABEL) / 2, lit = speaking(t, rowAt, r);
       dot(LX - 34, my, 8, {color: hue[r], alpha: two * ramp(t, rowAt[r] - .15, .4)});
-      if (lit > 0) ring(LX - 34, my, 17, {color: hue[r], alpha: two * lit * .6, width: 2});
+      if (lit > 0) ring(LX - 34, my, 17, {color: hue[r], alpha: two * lit * restMark(hue[r], .6), width: 2});
       termRow(t, [term], termAts, qual, qualAts, LX, tops[r], {width: W, alpha: two * listLevel(t, rowAt, r), set: "cases", inline: false});
     });
   }
@@ -1794,8 +1808,10 @@ scenes["04"] = function (s, t) {
     // Chinese names the high-risk work before what it needs, English after; English counts its triggers from their
     // second mention, which defines high risk.
     const highFrom = en ? cue(s, "", "high risk means") : high;
-    const triggers = [["生产", "production"], ["资金", "funds"], ["敏感数据", "sensitive data"], ["安全合规", "security or compliance"],
-      ["或者删除覆盖", "deletion or overwrite"], ["对外承诺", "external commitments"], ["后果不可逆", "irreversible consequences"]].map(([zh, e]) => cueFrom(s, zh, e, highFrom));
+    // The English high-risk work is set as one block of four even lines, which break inside "deletion or overwrite",
+    // so that pair is two parts there, each on its own words.
+    const triggers = (en ? ["production", "funds", "sensitive data", "security or compliance", "deletion", "or overwrite", "external commitments",
+      "irreversible consequences"] : ["生产", "资金", "敏感数据", "安全合规", "或者删除覆盖", "对外承诺", "后果不可逆"]).map(w => cueFrom(s, en ? "" : w, en ? w : "", highFrom));
     const lowAts = cues(s, [["局部", "local"], ["可逆", "reversible"], ["不对外承诺", "no external commitment"]]);
     const midAts = cues(s, [["跨角色", "cross-role"], ["有几种方案", "competing options"], ["重大不确定", "material uncertainty"]]);
     const problemAt = en ? recordAt : cueFrom(s, "问题", "", recordAt);
@@ -1806,7 +1822,7 @@ scenes["04"] = function (s, t) {
       [["One clear exchange"], [onceAt], ["Local", ", reversible work", " with no external commitment"], lowAts, onceRows],
       [["A reviewable record"], [recordAt], ["Cross-role or extended work", ", competing options or material uncertainty"], midAts, recordRows],
       [["Written decision", ", authorization", ", rollback or degradation", ", review", ", acceptance"], needs,
-        ["Production", ", funds", ", sensitive data", ", security or compliance,", "deletion or overwrite", ", external commitments",
+        ["Production", ", funds", ", sensitive data", ", security or compliance,", " deletion", " or overwrite", ", external commitments",
           " or irreversible consequences"], triggers, needs]]
     : [
       [["一次讲清", "结论", "、依据", "和做法"], [onceAt, ...onceRows], ["局部", "、可逆", "、不对外承诺的小事"], lowAts, onceRows],
@@ -1821,16 +1837,17 @@ scenes["04"] = function (s, t) {
     // The work column sets each condition as a block of at most two lines; the English column is narrower, so its
     // blocks balance the forms across the spine. The first Chinese tier's work, said long before its process, is a block
     // of two lines too, so it faces the spine's name while its process is still to come. The high-risk work, the
-    // longest, is set as the two groups it is said in, one under the other, each a name of at most two lines that stands
-    // on the words that begin it; in English the pair takes a wider block. The high-risk requirements, five in all with
+    // longest, is set in Chinese as the two groups it is said in, one under the other, each a name of at most two lines
+    // that stands on the words that begin it; in English it is one block of four lines of even width, none shorter than
+    // three quarters of its neighbours, so its free edge does not zigzag. The high-risk requirements, five in all with
     // the rollback or degradation path named whole, take a block wide enough to stay at two lines in English; in Chinese
     // they take three even lines, so their block ends near the lower tiers' processes instead of running past them. The
     // Chinese middle tier's work breaks after its options, and each high-risk group takes two lines in both editions,
     // so no work block reaches far past the others; the Chinese high-risk groups take two even lines each, the first
     // breaking after its funds, so no line stands short among them.
-    const W = 600, QW = i => L([300, 400, 285][i], i === 2 ? 600 : 420), tw = i => i === 2 ? L(360, 760) : W, docs = [[60, 76], [86, 110], [118, 152]], GAP = 45 + 34;
+    const W = 600, QW = i => L([300, 400, 285][i], i === 2 ? 500 : 420), tw = i => i === 2 ? L(360, 760) : W, docs = [[60, 76], [86, 110], [118, 152]], GAP = 45 + 34;
     // The parts that begin each group of a tier's work.
-    const groups = i => i === 2 ? [0, 4] : [0];
+    const groups = i => i === 2 && !en ? [0, 4] : [0];
     // The spine stands where the ladder is balanced. Each tier's work reaches left of the spine and its form right of
     // it; through the first two tiers the ladder stands centred between the first tier and the first two, and once the
     // third tier's first block is whole, on the words of its last part, it moves to stand centred between that block with
@@ -1871,8 +1888,8 @@ scenes["04"] = function (s, t) {
         line(x0, ry, mix(x0, x1, soon(t, at - .1, .5)), ry, {color: P.muted, alpha: q * ramp(t, at - .15, .2), width: 2});
       });
       const level = three * listLevel(t, tierAt, i);
-      // The work and the form it calls for build part by part on their words; the high-risk work, said over several
-      // seconds, stands in its two groups.
+      // The work and the form it calls for build part by part on their words; the Chinese high-risk work, said over
+      // several seconds, stands in its two groups.
       s04Grow(t, qual, qualAts, SX - GAP, mids[i], {width: QW(i), size: NOTE, color: P.muted, align: "right", alpha: level, set: "forms",
         groups: groups(i), build: true});
       s04Grow(t, term, termAts, SX + GAP, mids[i], {width: tw(i), alpha: level, set: "forms", build: true});
@@ -1898,10 +1915,17 @@ scenes["04"] = function (s, t) {
         if (drawn > .01) { ctx.moveTo(x1, y1); ctx.lineTo(mix(x1, x2, drawn), mix(y1, y2, drawn)); }
       });
     }), {color: P.authority, alpha: four4, width: 3 + dutyLit});
-    // Two short names under the row: what risk decides under the lightest tier, and the duty that still applies under
-    // the heaviest, each on its words.
-    nameText(L("只决定手续多少", "Lower risk"), xs[0], CY + S / 2 + NAME_GAP + 18, {valign: "top", alpha: four4 * named(t, cue(s, "只决定手续多少", "lower risk"))});
-    nameText(L("义务一样不能少", "Every duty"), xs[2], CY + S / 2 + NAME_GAP + 18, {valign: "top", alpha: four4 * named(t, notAt)});
+    // Two names, each on its words. What risk decides is the documents' process: it stands over the row, in English at
+    // the lightest tier's end, where the documents grow from. The duty that still applies is the same set of fields
+    // around every tier: it stands under the row, centred on a bracket that spans the three fields, so no field is named
+    // alone and the heaviest tier does not read as the duty itself.
+    const processAt = cue(s, "只决定手续多少", "less process");
+    nameText(L("只决定手续多少", "Less process"), en ? xs[0] - S / 2 : xs[1], CY - S / 2 - NAME_GAP, {valign: "bottom", align: en ? "left" : "center",
+      alpha: four4 * named(t, processAt)});
+    const BY = CY + S / 2 + 26, bracket = four4 * named(t, notAt);
+    stroke(() => { ctx.moveTo(xs[0] - S / 2, BY - 12); ctx.lineTo(xs[0] - S / 2, BY); ctx.lineTo(xs[2] + S / 2, BY); ctx.lineTo(xs[2] + S / 2, BY - 12); },
+      {color: P.authority, alpha: bracket, width: 2.5});
+    nameText(L("义务一样不能少", "Every duty"), xs[1], BY + NAME_GAP, {valign: "top", alpha: bracket});
   }
 };
 /* The groups of a name of `parts`, as [the index of the group's first part, its parts]; `groups` holds the index of the
@@ -1982,7 +2006,7 @@ scenes["05"] = function (s, t) {
     parts.forEach(([at, label, kind], i) => {
       const y = ys[i], q = ramp(t, at - .1, .4) * g, lit = speaking(t, ats, i);
       link(DX + 28, 500, IX - 34, y, {route: "hvh", mid: IX - 50, alpha: g, upto: soon(t, at - .15, .5)});
-      if (lit > 0) ring(IX, y, 36, {color: P.authority, alpha: lit * .5 * g, width: 2});
+      if (lit > 0) ring(IX, y, 36, {color: P.authority, alpha: lit * restMark(P.authority, .5) * g, width: 2});
       if (kind === "who") person(IX, y + 9, {size: .72, alpha: q});
       if (kind === "when") clock(IX, y, 15, {hand: .3, alpha: q});
       if (kind === "what") diamond(IX, y, 15, {color: P.authority, alpha: q, solid: true});
@@ -2037,7 +2061,7 @@ scenes["05"] = function (s, t) {
     if (tree) [2, 3, 4].forEach(i => link(fork, rows[1], N2 - 24, rows[i], {route: "hvh", mid: fork + 70, alpha: two, upto: soon(t, ats[i] - .15, .5)}));
     if (tree) ats.forEach((at, i) => {
       const x = xs[i], y = rows[i], q = ramp(t, at - .1, .4) * two, lit = Math.max(speaking(t, ats, i), i === 1 ? 0 : all);
-      if (lit > 0) ring(x, y, 24, {color: i === 1 ? P.evidence : P.unknown, alpha: lit * .5 * two, width: 2});
+      if (lit > 0) ring(x, y, 24, {color: i === 1 ? P.evidence : P.unknown, alpha: lit * restMark(i === 1 ? P.evidence : P.unknown, .5) * two, width: 2});
       if (i === 1) dot(x, y, 9, {color: P.evidence, alpha: q});
       else ring(x, y, 16, {color: P.unknown, alpha: q, width: 2.5});
       if (i === 0) cross(x, y, 12, {alpha: q, width: 3});
@@ -2090,7 +2114,7 @@ scenes["05"] = function (s, t) {
       const y = ys[i], q = ramp(t, at - .1, .4) * three, lit = Math.max(speaking(t, items, i), i === 2 ? aim : 0);
       // The item's mark; each Chinese pair takes the mark of the English item it opens with.
       const kind = en ? i : [0, 1, 3][i];
-      if (lit > 0) ring(MX, y, 30, {color: i === 2 ? P.authority : P.ink, alpha: lit * .5 * three, width: 2});
+      if (lit > 0) ring(MX, y, 30, {color: i === 2 ? P.authority : P.ink, alpha: lit * restMark(i === 2 ? P.authority : P.ink, .5) * three, width: 2});
       if (kind === 0) { dot(MX - 8, y - 4, 6, {color: P.evidence, alpha: q}); person(MX + 7, y + 6, {size: .45, alpha: q}); }
       if (kind === 1) { line(MX - 12, y - 5, MX + 4, y - 5, {color: P.ink, alpha: q, width: 5}); dashed(MX - 12, y + 6, MX + 12, y + 6, {color: P.muted, alpha: q}); }
       if (kind === 2) { ring(MX, y, 12, {color: P.ink, alpha: q, width: 2.5}); dot(MX, y, 5, {color: P.authority, alpha: q}); }
@@ -2128,7 +2152,7 @@ scenes["05"] = function (s, t) {
     conds.forEach((at, i) => {
       const y = ys[i], q = ramp(t, at - .1, .4) * four, lit = speaking(t, conds, i);
       ring(MX, y, 20, {color: P.unknown, alpha: q, width: 2.5});
-      if (lit > 0) ring(MX, y, 28, {color: P.unknown, alpha: lit * .5 * four, width: 2});
+      if (lit > 0) ring(MX, y, 28, {color: P.unknown, alpha: lit * restMark(P.unknown, .5) * four, width: 2});
       text("?", MX, y + 1, 22, {align: "center", color: P.unknown, alpha: q, role: "mark"});
       nameText(names[i], MX + 20 + NAME_GAP, y, {align: "left", alpha: four * listIn(t, conds, i), set: "unclear"});
     });
@@ -2222,7 +2246,7 @@ function s06Mark(i, x, y, {alpha = 1, lit = 0} = {}) {
   const c = s06Colour(i);
   dot(x, y, S06R, {color: P.ground, alpha});
   ring(x, y, S06R, {color: c, alpha, width: 2.5, dash: i === 1 ? [5, 5] : null});
-  if (lit > 0) ring(x, y, S06R + 10, {color: c, alpha: alpha * lit * .5, width: 2});
+  if (lit > 0) ring(x, y, S06R + 10, {color: c, alpha: alpha * lit * restMark(c, .5), width: 2});
   if (i === 0) check(x, y + 1, 22, {color: c, alpha});
   if (i === 1) text("?", x, y + 1, 26, {role: "mark", align: "center", color: c, alpha});
   if (i === 2) [[-8, 6], [8, 6], [0, -8]].forEach(([dx, dy]) => dot(x + dx, y + dy, 3.5, {color: c, alpha}));
@@ -2282,7 +2306,7 @@ scenes["06"] = function (s, t) {
   // standard that begins it.
   const statement = (i, x, y, alpha, listed, kindAt = kindAts[i], termAts = rows[i][1]) => {
     const [term, , qual, qualAts] = rows[i], lit = speaking(t, starts, i), left = x + S06R + NAME_GAP, kind = ramp(t, kindAt - .15, .4);
-    if (lit > 0) ring(x, y, S06R + 10, {color: s06Colour(i), alpha: alpha * lit * .5 * kind, width: 2});
+    if (lit > 0) ring(x, y, S06R + 10, {color: s06Colour(i), alpha: alpha * lit * restMark(s06Colour(i), .5) * kind, width: 2});
     s06Mark(i, x, y, {alpha: alpha * kind});
     const level = alpha * listLevel(t, starts, i), top = y + labelSize(LABEL) / 2 + S06HEAD;
     s06Kind(kinds[i], i, left, y, {alpha: level * named(t, kindAt), set: listed ? "kinds" : null});
@@ -2305,7 +2329,9 @@ scenes["06"] = function (s, t) {
     const back = mix(1, SECOND, ramp(t, restate + .05, .7)), on = two * back * ramp(t, data - .15, .4), go = soon(t, ranLate + .05, .6);
     // The premise's two parts light what they name in full ink: the hour that was on time, and the two hours late.
     const onTime = cueFrom(s, "准时", "on time", starts[1]), startedLate = cueFrom(s, "启动得晚", "job started late", starts[1]);
-    const late = two * back * ramp(t, ranLate + .05, .3), span = late * mix(1, 1 / back, named(t, startedLate));
+    // The two hours are an accent mark: they step back only to the unknown's level, and light again on their words.
+    const late = two * back * ramp(t, ranLate + .05, .3);
+    const span = two * ramp(t, ranLate + .05, .3) * mix(markLevel(P.unknown, back), 1, named(t, startedLate));
     // The night's hours: one line with a tick at each hour, drawn as one stroke.
     stroke(() => { ctx.moveTo(240, AY); ctx.lineTo(1680, AY); for (let x = 240; x <= 1680; x += 180) { ctx.moveTo(x, AY - 7); ctx.lineTo(x, AY + 7); } },
       {color: P.line, alpha: on, width: 3.5});
@@ -2516,7 +2542,7 @@ scenes["07"] = function (s, t) {
     const node = (x, y, q, lit = 0) => {
       dot(x, y, r, {color: P.row, alpha: q});
       ring(x, y, r, {color: P.ink, alpha: q, width: 2.5});
-      if (lit > 0) ring(x, y, r + 9, {color: P.evidence, alpha: lit * .5 * q, width: 2});
+      if (lit > 0) ring(x, y, r + 9, {color: P.evidence, alpha: lit * restMark(P.evidence, .5) * q, width: 2});
     };
     ats.forEach((at, i) => {
       const x = xs[i], q = two * ramp(t, at - .1, .5), go = soon(t, at + .05, .7), lit = speaking(t, ats, i), loop = (voiceTime(t) * .35) % 1;
@@ -2646,7 +2672,7 @@ scenes["07"] = function (s, t) {
     ats.forEach((at, i) => {
       const y = ys[i], q = five * ramp(t, at - .1, .45), lit = speaking(t, ats, i), go = soon(t, at - .1, .5);
       dot(ax, y, 12, {color: P.evidence, alpha: q});
-      if (lit > 0) ring(ax, y, 21, {color: P.evidence, alpha: lit * .5 * q, width: 2});
+      if (lit > 0) ring(ax, y, 21, {color: P.evidence, alpha: lit * restMark(P.evidence, .5) * q, width: 2});
       link(hx + R + 8, hy, ax - 20, y, {route: "hvh", mid: 650 + sx, alpha: five, upto: go, end: false});
       if (i === 0) {
         // A run of agreeing points and the one that breaks it.
@@ -2733,7 +2759,7 @@ scenes["07"] = function (s, t) {
       const docX = k ? x0 + 90 : x0 + 270, jobX = k ? x0 + 290 : x0 + 330;
       documentIcon(docX - 17, y - 48, 34, 44, {alpha: q, rows: 2, stroke: k ? P.evidence : P.unknown});
       dot(jobX, y + 24, 12, {color: k ? P.unknown : P.muted, alpha: q});
-      if (lit > 0) ring(k ? jobX : docX, k ? y + 24 : y - 26, 30, {color: P.unknown, alpha: lit * .5 * q, width: 2});
+      if (lit > 0) ring(k ? jobX : docX, k ? y + 24 : y - 26, 30, {color: P.unknown, alpha: lit * restMark(P.unknown, .5) * q, width: 2});
       nameText(names[k], x0 + w / 2, y + 52 + NAME_GAP, {valign: "top", width: 380, alpha: seven * listIn(t, why, k), set: "explanations"});
     });
   }
@@ -2830,7 +2856,7 @@ scenes["07"] = function (s, t) {
         ring(gx - 40, y, 30, {color: P.muted, alpha: q * ramp(t, limitsAt - .1, .4), width: 2, dash: [4, 5]});
       }
     });
-    // A refused name dims to 0.7 once crossed, so its list level is floored where a crossed earlier item still reads at 3:1.
+    // A refused name steps back only to the unknown's level, so a crossed earlier item and its cross still read at 4.6:1.
     // Each is refused once its mechanism has shown the error; the last once its missing bounds are named, which its
     // mechanism shows, so the name keeps the trap's key words. A name states the error itself in words its trap says
     // within one clause, so it never reads far ahead of the voice. A name wider than its column wraps onto a second
@@ -2838,7 +2864,7 @@ scenes["07"] = function (s, t) {
     // follows its own name, 16 px after its longer line.
     names.forEach((v, i) => rejectedName(v, i % 2 ? cols[1] + 86 : cols[0] - 128, ys[Math.floor(i / 2)], {align: i % 2 ? "left" : "right", width: NW,
       mark: ramp(t, i === names.length - 1 ? limitsAt + .1 : ats[i] + .7, .3), set: "errors",
-      alpha: eight * ramp(t, ats[i] - .15, .4) * mix(.83, 1, (listLevel(t, ats, i) - SECOND) / (1 - SECOND))}));
+      alpha: eight * ramp(t, ats[i] - .15, .4) * markLevel(P.unknown, listLevel(t, ats, i))}));
   }
   // 9. Bound the conclusion: the same conclusion now carries its bounds, a bracket enclosing a column of five. How far
   // the evidence supports it (a run that ends at a limit), how confident it is (a meter part filled), what remains
@@ -3017,7 +3043,7 @@ scenes["08"] = function (s, t) {
     const QX = xs[2] + CW / 2 + 30, QY = rowY(2), refuse = ramp(t, notProve - .1, .4);
     const qualities = rejectedName(L("新颖、完整、流行", "Novelty, completeness or popularity"), QX, QY, {align: "left", width: 340,
       alpha: cmp * named(t, badgeAts[0]), mark: refuse});
-    nameText(L("证明不了合适", "Do not prove a fit"), QX, qualities.bottom + 12, {align: "left", valign: "top", alpha: cmp * named(t, notProve)});
+    nameText(L("证明不了合适", "do not prove a fit"), QX, qualities.bottom + 12, {align: "left", valign: "top", alpha: cmp * named(t, notProve)});
     ctx.restore();
   }
   // 4. A recommendation states four things: a document whose spine reaches each of its parts, one row each, built in
@@ -3044,7 +3070,7 @@ scenes["08"] = function (s, t) {
       const q = ramp(t, parts[i] - .1, .4) * rec, lit = speaking(t, parts, i) * rec;
       link(spine, y, LX - 34 - 13, y, {alpha: rec * .8, upto: grow(i), end: false});
       dot(LX - 34, y, 13, {color: P.evidence, alpha: q});
-      if (lit > 0) ring(LX - 34, y, 21, {color: P.evidence, alpha: lit * .5, width: 2});
+      if (lit > 0) ring(LX - 34, y, 21, {color: P.evidence, alpha: lit * restMark(P.evidence, .5), width: 2});
       nameText(names[i], LX, y, {align: "left", alpha: rec * listIn(t, parts, i), set: "recommendation"});
     });
     ctx.restore();
@@ -3120,8 +3146,9 @@ scenes["08"] = function (s, t) {
     const from = xs[0] + PW / 2 + 12, to = xs[2] - PW / 2 - 12, facts = (xs[1] - FW / 2 - 12 - from) / (to - from);
     link(from, Y, to, Y, {alpha: fix * .9, upto: mix(facts, 1, soon(t, correct - .1, .6)), end: false,
       flow: t > correct ? (voiceTime(t) * .4) % 1 : null});
-    // The overturned conclusion dims as a cross stands beside it, on the side away from the way, so the two never meet.
-    const old = fix * mix(1, .55, ramp(t, overturned + .05, .4)), fresh = ramp(t, correct - .1, .4) * fix;
+    // The overturned conclusion steps back to the authority's level as a cross stands beside it, on the side away from
+    // the way, so the two never meet.
+    const old = fix * mix(1, restMark(P.authority), ramp(t, overturned + .05, .4)), fresh = ramp(t, correct - .1, .4) * fix;
     documentIcon(xs[0] - PW / 2, Y - PH / 2, PW, PH, {alpha: old, rows: 0});
     seal(xs[0], Y - 8, SR, {alpha: old});
     cross(xs[0] - PW / 2 - 40, Y, 34, {alpha: ramp(t, overturned + .05, .4) * fix, width: 4});
@@ -3227,7 +3254,7 @@ scenes["09"] = function (s, t) {
       dot(x, y, 12, {color: P.ground, alpha: asked});
       dot(x, y, 12, {color: P.evidence, alpha: asked, hollow: true, width: 2.5});
       dot(x, y, 12, {color: P.evidence, alpha: asked});
-      if (lit > 0) ring(x, y, 21, {color: P.evidence, alpha: lit * .5 * three, width: 2});
+      if (lit > 0) ring(x, y, 21, {color: P.evidence, alpha: lit * restMark(P.evidence, .5) * three, width: 2});
       radialName(names[i], cx, cy, rx + 12, a, {ry: ry + 12, alpha: three * listIn(t, asks, i), set: "questions"});
     });
   }
@@ -3381,7 +3408,7 @@ scenes["10"] = function (s, t) {
       icons[i](x, ramp(t, at[i] - .15, .4));
       // The last moment stays lit from its words on: the next thought names it.
       const lit = i === 4 ? ramp(t, at[4] - .15, .3) : speaking(t, at, i);
-      if (lit > 0) ring(x, ICON, R, {color: P.evidence, alpha: lit * .7, width: 2});
+      if (lit > 0) ring(x, ICON, R, {color: P.evidence, alpha: lit * restMark(P.evidence, .7), width: 2});
     });
     railNames(names, xs, RAIL, {side: -1, gap: 28 + NAME_GAP, alpha: i => listIn(t, at, i), set: "moments"});
     nameText(L("可用时间", "Availability time"), xs[4], RAIL + 28 + NAME_GAP + blockHeight(1) + 10, {valign: "top", color: P.evidence,
@@ -3450,7 +3477,7 @@ scenes["10"] = function (s, t) {
       const kept = ramp(t, kinds[i] - .1, .4), lit = speaking(t, kinds, i);
       dot(x, RY, 12, {color: P.ink, alpha: three * kept});
       clock(x, RY - 44, 17, {hand: .15 + i * .2, color: P.muted, alpha: three * kept});
-      if (lit > 0) ring(x, RY, 22, {color: P.evidence, alpha: three * lit * .6, width: 2});
+      if (lit > 0) ring(x, RY, 22, {color: P.evidence, alpha: three * lit * restMark(P.evidence, .6), width: 2});
     });
     // The records' names hang 12 px clear of the ring that lights round the record being said.
     railNames(names, xs, RY, {gap: 22 + 12, alpha: i => three * listIn(t, kinds, i), set: "history"});
@@ -3638,10 +3665,10 @@ scenes["11"] = function (s, t) {
     dot(vx, top, 6, {color: P.unknown, alpha: vq * (1 - gone)});
     nameText(L("某个值", "A value"), vx - 14 - NAME_GAP, top, {align: "right", alpha: three * named(t, valueAt) * (1 - gone)});
     const late = ramp(t, lateAt - .1, .4) * three;
-    dashed(vx, top + 18, vx, AY - 6, {color: P.unknown, alpha: late * .6 * (1 - gone)});
+    dashed(vx, top + 18, vx, AY - 6, {color: P.unknown, alpha: late * restMark(P.unknown, .6) * (1 - gone)});
     line(CORR_DATE, AY - 18, CORR_DATE, AY + 18, {color: P.unknown, width: 4, alpha: late});
     nameText(L("决策之后才拿得到", "Available only after the decision"), CORR_DATE, low, {valign: "top", width: 300, alpha: three * named(t, lateAt)});
-    link(vx + 6, AY - 4, CORR_DATE - 8, AY - 4, {color: P.unknown, alpha: late * .8 * (1 - gone), upto: soon(t, lateAt - .05, .5), dash: [6, 8], end: false});
+    link(vx + 6, AY - 4, CORR_DATE - 8, AY - 4, {color: P.unknown, alpha: late * restMark(P.unknown, .8) * (1 - gone), upto: soon(t, lateAt - .05, .5), dash: [6, 8], end: false});
     // The way from the late value to the decision it would serve, refused halfway.
     const barY = top + 80;
     link(vx + 16, top, dx, barY, {route: "hv", color: P.unknown, alpha: ramp(t, neverAt - .05, .3) * three * (1 - gone), upto: soon(t, neverAt - .05, .6), end: false});
@@ -3742,7 +3769,7 @@ scenes["11"] = function (s, t) {
     dot(xs[2], py(xs[2]), 7, {color: P.unknown, alpha: mark(2)});
     dot(xs[2], py(xs[2]) - 56, 8, {color: P.unknown, alpha: mark(2), hollow: true, width: 2.5});
     dashed(xs[2], py(xs[2]) - 46, xs[2], py(xs[2]) - 10, {color: P.unknown, alpha: mark(2)});
-    xs.forEach((x, i) => { if (speaking(t, ats, i) > 0) ring(x, py(x), 16, {color: P.unknown, alpha: five * speaking(t, ats, i) * .6, width: 2}); });
+    xs.forEach((x, i) => { if (speaking(t, ats, i) > 0) ring(x, py(x), 16, {color: P.unknown, alpha: five * speaking(t, ats, i) * restMark(P.unknown, .6), width: 2}); });
     railNames(en ? ["Missing", "Late", "Conflicting"] : ["缺失", "延迟", "冲突"], xs, AY, {alpha: i => five * listIn(t, ats, i), set: "gaps"});
     // The conclusion spans the series, then keeps only the stretch before the first gap.
     const claim = ramp(t, concAt - .15, .4) * five, back = soon(t, supportsAt + .05, .9), a1 = mix(X1, xs[0] - 60, back);
@@ -4041,7 +4068,7 @@ scenes["12"] = function (s, t) {
       const lit = r === 2 ? Math.max(speaking(t, labels, r), again) : speaking(t, labels, r) * (r === 3 ? 1 - again : 1);
       link(sx, cy, mx - 16, my, {route: "vh", alpha: two, upto: soon(t, labels[r] - .15, .5), end: false});
       dot(mx, my, 11, {color: P.unknown, alpha: q});
-      if (lit > 0) ring(mx, my, 17, {color: P.unknown, alpha: lit * .6 * two, width: 2});
+      if (lit > 0) ring(mx, my, 17, {color: P.unknown, alpha: lit * restMark(P.unknown, .6) * two, width: 2});
       // Limited use returns to full ink when it is spoken again with its qualifier.
       const level = r === 2 ? Math.max(listLevel(t, labels, r), again) : listLevel(t, labels, r);
       termRow(t, term, [labels[r]], quals[r], [limitedAt, permitAt], mx + NAME_GAP + 8, tops[r], {width, inline: false, alpha: two * level, set: "labels"});
@@ -4088,7 +4115,7 @@ scenes["12"] = function (s, t) {
       const q = ramp(t, at - .1, .4) * three;
       dot(x, y, 12, {color: P.ground, alpha: q});
       dot(x, y, 12, {color: P.evidence, alpha: q});
-      if (lit > 0) ring(x, y, 21, {color: P.evidence, alpha: lit * .5 * three, width: 2});
+      if (lit > 0) ring(x, y, 21, {color: P.evidence, alpha: lit * restMark(P.evidence, .5) * three, width: 2});
       // The top and bottom names centre on their stations; a name at the side begins (or ends) a gap from its station and
       // its first line stands level with it, so mirrored names share a line whatever their length.
       const o = {width: 300, alpha: three * listIn(t, steps, i), set: "questions"}, side = Math.sign(Math.round(Math.cos(a) * 10));
@@ -4117,11 +4144,12 @@ scenes["12"] = function (s, t) {
       const row = ramp(t, at - .1, .4) * four, barred = ramp(t, nots[i] + .45, .3);
       ring(lx, y, MR, {color: P.evidence, alpha: row, width: 2.5});
       dot(lx, y, 10, {color: P.evidence, alpha: row});
-      if (lit > 0) ring(lx, y, MR + 10, {color: P.evidence, alpha: lit * .5 * four, width: 2});
+      if (lit > 0) ring(lx, y, MR + 10, {color: P.evidence, alpha: lit * restMark(P.evidence, .5) * four, width: 2});
       link(lx + MR + 12, y, bar - 12, y, {alpha: four, upto: go, end: false});
       line(bar, y - 36, bar, y + 36, {color: P.line, alpha: row * (1 - barred), width: 4});
       line(bar, y - 36, bar, y + 36, {color: P.unknown, alpha: barred * four, width: 4});
-      ring(rx, y, MR, {color: P.muted, alpha: ramp(t, rights[i] - .1, .4) * four, width: 2.5});
+      // What does not follow stands as an unreached outcome, in the dashed outline 17.3 gives one.
+      ring(rx, y, MR, {color: P.muted, alpha: ramp(t, rights[i] - .1, .4) * four, width: 2.5, dash: [6, 6]});
       nameText(pairs[i][0], lx - MR - NAME_GAP, y, {align: "right", alpha: four * listIn(t, lefts, i), set: "holds"});
       // A row is one item: what does not follow enters on its own words and takes its row's level.
       nameText(pairs[i][1], rx + MR + NAME_GAP, y, {align: "left", color: P.muted, alpha: four * named(t, rights[i]) * listLevel(t, lefts, i), set: "follows"});
@@ -4267,7 +4295,7 @@ scenes["13"] = function (s, t) {
       const y = low + 18 + NAME_GAP + labelSize(LABEL) / 2 + i * 70, q = ramp(t, at - .1, .4) * p1, lit = speaking(t, outs, i), mx = rl + 12;
       if (i === 0) dot(mx, y, 13, {color: P.unknown, alpha: q});
       else ring(mx, y, 11, {color: P.unknown, alpha: q, width: 3});
-      if (lit > 0) ring(mx, y, 18, {color: P.unknown, alpha: lit * .5 * p1, width: 2});
+      if (lit > 0) ring(mx, y, 18, {color: P.unknown, alpha: lit * restMark(P.unknown, .5) * p1, width: 2});
       nameText([L("关联到别的公司", "Match the wrong entities"), L("漏掉一些", "Lose some matches")][i], mx + 11 + NAME_GAP, y,
         {align: "left", alpha: p1 * listIn(t, outs, i), set: "outcomes"});
     });
@@ -4399,7 +4427,7 @@ scenes["13"] = function (s, t) {
       const x = xs[i], q = ramp(t, roles[i] - .45, .4) * p3, lit = Math.max(speaking(t, roles, i), these);
       dot(x, Y, TR, {color: P.row, alpha: q});
       ring(x, Y, TR, {color: P.authority, alpha: q, width: 2.5});
-      if (lit > 0) ring(x, Y, TR + 9, {color: P.authority, alpha: lit * .5 * q, width: 2});
+      if (lit > 0) ring(x, Y, TR + 9, {color: P.authority, alpha: lit * restMark(P.authority, .5) * q, width: 2});
       icon(i, x, Y, q);
       nameText(v, x, Y - TR - NAME_GAP, {valign: "bottom", alpha: p3 * listIn(t, roles, i), set: "roles"});
     });
@@ -4715,7 +4743,7 @@ scenes["14"] = function (s, t) {
       // The gate's two posts are one stroke, one gate; its bar lifts into the upper post as its requirements are said.
       stroke(() => { ctx.moveTo(x, LY - 46); ctx.lineTo(x, LY - 16); ctx.moveTo(x, LY + 16); ctx.lineTo(x, LY + 46); }, {color: P.evidence, alpha: q, width: 4});
       if (open < 1) line(x, LY - 16, x, mix(LY + 16, LY - 16, open), {color: P.unknown, alpha: q * clamp((1 - open) / .15), width: 4});
-      ring(x, LY, 58, {color: P.evidence, alpha: speaking(t, starts, k) * .45 * p3, width: 2});
+      ring(x, LY, 58, {color: P.evidence, alpha: speaking(t, starts, k) * restMark(P.evidence, .45) * p3, width: 2});
       // The first control names its subject and impact first; each further part joins its name on its own words, a line
       // nearer the way, so the station keeps changing while its four requirements are spoken: in Chinese the second
       // pair, in English the task lead and then the authority.
@@ -4767,7 +4795,7 @@ scenes["14"] = function (s, t) {
   risky.forEach((at, i) => {
     const y = LY + (i - 2) * 120 + drop, q = ramp(t, at - .15, .4) * p4, lit = speaking(t, risky, i);
     // Each action's mark fills on its own words and lights while it is named, and its way draws on toward the lock.
-    ring(mx, y, 18, {color: P.unknown, alpha: lit * .7 * p4, width: 2});
+    ring(mx, y, 18, {color: P.unknown, alpha: lit * restMark(P.unknown, .7) * p4, width: 2});
     dot(mx, y, 8 + 2 * lit, {color: P.unknown, alpha: q});
     link(mx - 24, y, lockX + 36, LY, {route: "hvh", mid: busX, alpha: q, width: 3, upto: soon(t, at - .1, .7)});
     nameText(actions[i], mx + 18 + NAME_GAP, y, {align: "left", alpha: p4 * listIn(t, risky, i), set: "high-risk"});
@@ -4857,7 +4885,7 @@ scenes["15"] = function (s, t) {
     xs.forEach((x, i) => {
       dot(x, sy, 9, {color: i === 1 ? P.authority : P.evidence, alpha: q(i)});
       const lit = speaking(t, at, i);
-      if (lit > 0) ring(x, sy, 17, {color: i === 1 ? P.authority : P.evidence, alpha: lit * .5 * seats, width: 2});
+      if (lit > 0) ring(x, sy, 17, {color: i === 1 ? P.authority : P.evidence, alpha: lit * restMark(i === 1 ? P.authority : P.evidence, .5) * seats, width: 2});
     });
     railNames(en ? ["Commitment", "Owner", "Completion condition"] : ["承诺", "负责人", "完成条件"], xs, sy,
       {gap: 17 + NAME_GAP, wrap: 320, alpha: i => seats * listIn(t, at, i), set: "visible"});
@@ -4926,7 +4954,7 @@ scenes["15"] = function (s, t) {
       dot(x, y, 17, {color: P.ground, alpha: q});
       dot(x, y, 17, {color: P.evidence, alpha: q, hollow: true, width: 3});
       check(x, y + 1, 18, {alpha: q, upto: clamp((t - at) / .3)});
-      if (lit > 0) ring(x, y, 26, {color: P.evidence, alpha: lit * .5 * four, width: 2});
+      if (lit > 0) ring(x, y, 26, {color: P.evidence, alpha: lit * restMark(P.evidence, .5) * four, width: 2});
       radialName(names[i], cx, cy, rx + 17, a, {ry: ry + 17, alpha: four * listIn(t, checks, i), set: "checks"});
     });
   }
@@ -5061,7 +5089,7 @@ scenes["16"] = function (s, t) {
     if (route > 0) line(xs[0], RY, mix(xs[0], xs[5], route), RY, {color: P.ink, alpha: two, width: 3});
     ats.forEach((at, k) => {
       dot(xs[k], RY, 11, {color: colors[k], alpha: named(t, at) * two});
-      ring(xs[k], RY, 21, {color: colors[k], alpha: speaking(t, ats, k) * .6 * two, width: 2});
+      ring(xs[k], RY, 21, {color: colors[k], alpha: speaking(t, ats, k) * restMark(colors[k], .6) * two, width: 2});
     });
     railNames(en ? ["Unframed", "Planned", "Executing", "Awaiting verification", "Verified", "Accepted"] : ["未界定", "已计划", "执行中", "待核验", "已核验", "已验收"],
       xs, RY, {alpha: i => two * listIn(t, ats, i), color: i => colors[i], set: "states"});
@@ -5169,7 +5197,7 @@ scenes["16"] = function (s, t) {
     const report = en ? ["The gap", "Its impact", "The escalation"] : ["缺什么", "影响什么", "报给了谁"];
     ys.forEach((y, i) => {
       dot(TX, y, 10, {color: P.unknown, alpha: ramp(t, ats[i] - .1, .3) * four});
-      ring(TX, y, 19, {color: P.unknown, alpha: speaking(t, ats, i) * .6 * four, width: 2});
+      ring(TX, y, 19, {color: P.unknown, alpha: speaking(t, ats, i) * restMark(P.unknown, .6) * four, width: 2});
       nameText(report[i], TX + 10 + NAME_GAP + 8, y, {align: "left", alpha: four * listIn(t, ats, i), set: "blocked report"});
     });
     // The escalation reaches the person it goes to.
@@ -5268,7 +5296,7 @@ scenes["17"] = function (s, t) {
     rows.forEach(([term, termAt, qual, qualAt], r) => {
       const side = r % 2 ? 1 : -1, dy = (Math.floor(r / 2) - 1) * GY, y = SY + dy, mx = SX + side * BXo, lit = speaking(t, marks, r);
       box(mx - 14, y - 14, 28, 28, {stroke: colors[r], alpha: named(t, marks[r]) * g1, radius: 5, width: 2.5});
-      if (lit > 0) box(mx - 21, y - 21, 42, 42, {stroke: colors[r], alpha: lit * .6 * g1, radius: 8, width: 2});
+      if (lit > 0) box(mx - 21, y - 21, 42, 42, {stroke: colors[r], alpha: lit * restMark(colors[r], .6) * g1, radius: 8, width: 2});
       check(mx, y, 20, {color: colors[r], alpha: g1, upto: ramp(t, holds[r] + .05, .4)});
       // Once the condition holds, its box feeds its arc along one straight run to the ring.
       link(mx - side * 22, y, SX + side * Math.sqrt(R * R - dy * dy), y, {color: colors[r], alpha: g1 * .9, upto: soon(t, holds[r] + .1, .4)});
@@ -5336,7 +5364,8 @@ scenes["17"] = function (s, t) {
     for (let c = 0; c < 5; c++) {
       const x = OL + c * OW / 5 + 7, w = OW / 5 - 14;
       if (c < 3) {
-        box(x, OT + 8, w, OH - 16, {fill: P.evidence, alpha: cover * .3, radius: 5});
+        // The cover's tint stays a ground for the cell, under 1.8:1; the cell's outline carries the evidence colour.
+        box(x, OT + 8, w, OH - 16, {fill: P.evidence, alpha: cover * .24, radius: 5});
         box(x, OT + 8, w, OH - 16, {stroke: P.evidence, alpha: cover, radius: 5, width: 2.5});
       } else {
         box(x, OT + 8, w, OH - 16, {stroke: P.unknown, alpha: open, radius: 5, width: 2, dash: [6, 6]});
@@ -5381,7 +5410,7 @@ scenes["17"] = function (s, t) {
     rows.forEach((i, k) => {
       const [term, qual] = left[i], y = ys[k], lit = speaking(t, lights, k);
       dot(DL, y, DOT + 1, {color: P.evidence, alpha: ramp(t, nots[i] + .05, .3) * a});
-      if (lit > 0) ring(DL, y, DOT + 9, {color: P.evidence, alpha: lit * .6 * a, width: 2});
+      if (lit > 0) ring(DL, y, DOT + 9, {color: P.evidence, alpha: lit * restMark(P.evidence, .6) * a, width: 2});
       ring(DR, y, RING, {color: P.muted, alpha: named(t, rightAts[i]) * a, width: 2.5, dash: [6, 6]});
       link(from, y, to, y, {alpha: a, upto: reach * soon(t, nots[i] + .05, Math.max(.4, stops[i] - nots[i])), end: false});
       line(BAR, y - 50, BAR, y + 50, {color: P.unknown, alpha: ramp(t, stops[i] + .05, .3) * a, width: 4});
@@ -5621,7 +5650,10 @@ scenes["18"] = function (s, t) {
     nameText(L("发布", "Publication"), px, YB + 20 + NAME_GAP, {valign: "top", alpha: ex * named(t, publish)});
     if (warnQ > 0) for (let k = 0; k < 3; k++) {
       const w = (voiceTime(t) * 1.2 + k / 3) % 1;
-      ring(AX, MY + 42, 74 + 34 * w, {color: P.unknown, alpha: warnQ * ex * pass(w, .25) * .8, width: 2.5, start: -Math.PI * .8, upto: .3});
+      // Each pulse enters and leaves by its length at the unknown's level, centred on the same arc, as a flow's dot
+      // enters by its size.
+      const p = pass(w, .25);
+      ring(AX, MY + 42, 74 + 34 * w, {color: P.unknown, alpha: warnQ * ex * restMark(P.unknown), width: 2.5, start: -Math.PI * (.5 + .3 * p), upto: .3 * p});
     }
   }
   // 4. What not to build: a directory nobody uses and a report nobody reads, made on one desk by one person for the
@@ -6275,9 +6307,10 @@ scenes["20"] = function (s, t) {
     const lx = 300, rx = 1080, fw = 540, move = soon(t, cue(s, "转移", "transfers") + .05, .6);
     person(lx + 120, 506, {alpha: g6, color: P.authority, size: 1.2});
     agent(rx + fw - 120, 500, {alpha: g6, size: 1.3});
-    // The work travels along the delegation from the person's side to the Agent's, covering the way as it passes.
+    // The work travels along the delegation from the person's side to the Agent's, covering the way as it passes. The
+    // way rises from the person, runs over both sides and comes down to the Agent, where it ends in a point.
     const wx = mix(lx + 330, rx + 170, move);
-    link(lx + fw + 10, 402, rx - 10, 402, {alpha: g6, upto: soon(t, transfers + .05, .5), end: false});
+    link(lx + 120, 458, rx + fw - 120, 464, {route: "vhv", mid: 402, alpha: g6, upto: soon(t, transfers + .05, .6)});
     nameText(L("委托", "Delegation"), (lx + fw + rx) / 2, 330, {valign: "bottom", alpha: g6 * named(t, transfers)});
     s17Page(wx - 50, 340, 100, 124, {alpha: g6, rows: 3});
     nameText(L("工作", "The work"), wx, 340 + 124 + NAME_GAP, {valign: "top", alpha: g6 * named(t, cueFrom(s, "工作", "the work", transfers))});
@@ -6540,7 +6573,7 @@ scenes["21"] = function (s, t) {
     line(headX + measure(head) + NAME_GAP, Y, xs[4] + 70, Y, {color: P.muted, alpha: three, width: 3});
     nameText(head, headX, Y, {align: "left", color: P.evidence, alpha: three * named(t, own)});
     [0, 2, 3, 4].forEach(i => {
-      if (speaking(t, way, i) > 0) ring(xs[i], Y, 24, {color: P.evidence, alpha: speaking(t, way, i) * .5 * three, width: 2});
+      if (speaking(t, way, i) > 0) ring(xs[i], Y, 24, {color: P.evidence, alpha: speaking(t, way, i) * restMark(P.evidence, .5) * three, width: 2});
     });
     // The four things it confirms first, one box each, ticked on its own word.
     ticks.forEach((at, k) => {
@@ -6619,7 +6652,7 @@ scenes["21"] = function (s, t) {
       text("?", x, QY + 1, 22, {align: "center", color: P.unknown, alpha: asked, role: "mark"});
       agent(x, AY, {alpha: four, size: 1.15});
       const lit = speaking(t, roles, i);
-      if (lit > 0) ring(x, AY, 38, {color: P.evidence, alpha: lit * .5 * four, width: 2});
+      if (lit > 0) ring(x, AY, 38, {color: P.evidence, alpha: lit * restMark(P.evidence, .5) * four, width: 2});
       nameText(rnames[i], x + 30 + NAME_GAP, AY, {align: "left", alpha: four * listIn(t, roles, i), set: "roles"});
       lock(x, KY, {alpha: shut, color: P.evidence, closed: soon(t, readOnly, .5)});
       link(x, KY + 20, xs[1], OY - 42, {route: "vhv", mid: (KY + OY - 22) / 2, alpha: four * ramp(t, integrate - .1, .3), upto: join, flow: join >= 1 ? (voiceTime(t) * .3 + i / 3) % 1 : null});
@@ -6816,7 +6849,7 @@ scenes["22"] = function (s, t) {
       // The harm widens in voice time, so a widening still under way when the thought ends rests in the quiet.
       const worseAt = cue(s, "扩大损害", "worsen the harm"), grow = standard((voiceTime(t) - voiceTime(worseAt + .05)) / .8), worse = ramp(t, worseAt - .15, .4) * g;
       dot(x + 32, y + 28, 5, {color: P.unknown, alpha: worse});
-      [13, 22].forEach((r, i) => ring(x + 32, y + 28, mix(5, r, grow), {color: P.unknown, alpha: worse * (1 - i * .35), width: 2}));
+      [13, 22].forEach((r, i) => ring(x + 32, y + 28, mix(5, r, grow), {color: P.unknown, alpha: worse * restMark(P.unknown, 1 - i * .35), width: 2}));
     }];
   // The conditions each kind holds, stacked in its column beneath its station.
   const kinds = [[0, 1], [2, 3], [4], [5], [6]];
@@ -6838,7 +6871,7 @@ scenes["22"] = function (s, t) {
     const current = i => ramp(t, signAt(i) + .2, .3) * (i + 1 < xs.length ? 1 - ramp(t, signAt(i + 1) + .2, .3) : 1);
     // The person lights as each escalation arrives.
     const arrived = Math.max(...xs.map((_, i) => ramp(t, rise(i) + .75, .15) * (1 - ramp(t, rise(i) + 1.1, .45))));
-    if (arrived > 0) ring(PX, OY - 19, 30, {color: P.authority, alpha: arrived * .6 * g1, width: 2});
+    if (arrived > 0) ring(PX, OY - 19, 30, {color: P.authority, alpha: arrived * restMark(P.authority, .6) * g1, width: 2});
     nameText(L("停下", "Stop"), xs[0] - SR - NAME_GAP, SY, {align: "right", alpha: named(t, stopAt - .1) * g1});
     // The group's name stands muted in the Agent's column on the names' baseline, its lines centred on the Agent's axis
     // as the row's other names centre on their stations, so it stands clear of the first kind's name and never reads
@@ -6850,11 +6883,11 @@ scenes["22"] = function (s, t) {
       line(x, SY + SR + 2, x, WY - 2, {color: P.line, alpha: sign, width: 2});
       stopSign(x, SY, SR, {alpha: sign});
       const lit = current(i);
-      if (lit > 0) ring(x, SY, SR + 10, {color: P.unknown, alpha: lit * .5 * g1, width: 2});
+      if (lit > 0) ring(x, SY, SR + 10, {color: P.unknown, alpha: lit * restMark(P.unknown, .5) * g1, width: 2});
       // The escalation of the current station keeps one point travelling up to the person; an escalation already
       // delivered recedes as the next station stands.
       const up = soon(t, rise(i) + .05, .8), sent = (voiceTime(t) - voiceTime(rise(i) + .85)) * .45;
-      link(x, SY - SR - 4, PX, OY + 34, {route: "vhv", mid: BUS, color: P.authority, alpha: g1 * mix(.45, 1, lit), upto: up, width: 2.5,
+      link(x, SY - SR - 4, PX, OY + 34, {route: "vhv", mid: BUS, color: P.authority, alpha: g1 * mix(restMark(P.authority), 1, lit), upto: up, width: 2.5,
         flow: up < 1 ? (up > 0 ? up * .999 : null) : lit > .5 && sent > 0 ? sent % 1 : null});
       const held = kinds[i];
       held.forEach((k, n) => glyphs[k](x, GY + (held.length > 1 ? (n ? PAIR : -PAIR) : 0), g1));
@@ -6919,7 +6952,7 @@ scenes["22"] = function (s, t) {
     nameText(L("汇报完成或交接", "A report"), px0 + 28, PT + HEAD / 2, {align: "left", alpha: g2 * named(t, handoff)});
     items.forEach(([v, kind], k) => {
       const y = PT + FIRST + k * PITCH, x = px0 + IX, q = ramp(t, told[k] - .15, .4) * g2, lit = speaking(t, told, k);
-      if (lit > 0) ring(x, y, 25, {color: P.evidence, alpha: lit * .6 * g2, width: 2});
+      if (lit > 0) ring(x, y, 25, {color: P.evidence, alpha: lit * restMark(P.evidence, .6) * g2, width: 2});
       if (kind === "work") documentIcon(x - 14, y - 19, 28, 38, {alpha: q, rows: 2});
       if (kind === "state") { stroke(() => ctx.arc(x, y + 8, 17, Math.PI, Math.PI * 2), {color: P.authority, alpha: q, width: 3}); line(x, y + 8, x + 10, y - 5, {color: P.ink, alpha: q, width: 3}); dot(x, y + 8, 3.5, {color: P.ink, alpha: q}); }
       if (kind === "evidence") check(x, y, 26, {alpha: q});
@@ -7085,7 +7118,7 @@ scenes["23"] = function (s, t) {
       // The setting covers the arc where it sits as it arrives.
       dot(x, y, 12, {color: P.ground, alpha: on});
       dot(x, y, 12, {color: P.authority, alpha: on});
-      if (lit > 0) ring(x, y, 21, {color: P.authority, alpha: lit * .5 * three, width: 2});
+      if (lit > 0) ring(x, y, 21, {color: P.authority, alpha: lit * restMark(P.authority, .5) * three, width: 2});
       radialName(names[i], cx, cy, r + 12, g, {alpha: three * listIn(t, purposes, i), set: "purposes"});
     });
     // The needle turns from the hub toward the setting being named and stays on the last.
@@ -7380,7 +7413,7 @@ scenes["24"] = function (s, t) {
     ys.forEach((ly, i) => {
       const on = ramp(t, layers[i] - .15, .4) * two, lit = speaking(t, layers, i);
       dot(CX, ly, 7 + 2 * lit, {color: P.ink, alpha: on});
-      if (lit > 0) ring(CX, ly, 20, {color: P.unknown, alpha: lit * .6 * two, width: 2});
+      if (lit > 0) ring(CX, ly, 20, {color: P.unknown, alpha: lit * restMark(P.unknown, .6) * two, width: 2});
       nameText(layerNames[i], CX + 12 + NAME_GAP, ly, {align: "left", alpha: two * listIn(t, layers, i), set: "layers"});
     });
     // The probe searches the layers from the split: a branch reaches each layer as it is named, the branch being said
@@ -7388,7 +7421,7 @@ scenes["24"] = function (s, t) {
     // ends, rests in the quiet and finishes on the next words.
     layers.forEach((at, i) => {
       const from = i ? at + .05 : Math.max(locate, split, at - .15) + .05, grown = voiceTime(t) - voiceTime(from);
-      link(sx + 22, y, CX - 26, ys[i], {route: "hvh", mid: CX - 50, color: P.unknown, alpha: two * ease(grown / .3) * mix(.45, 1, speaking(t, layers, i)),
+      link(sx + 22, y, CX - 26, ys[i], {route: "hvh", mid: CX - 50, color: P.unknown, alpha: two * ease(grown / .3) * mix(restMark(P.unknown), 1, speaking(t, layers, i)),
         upto: standard(grown / .6)});
     });
   }
@@ -7596,7 +7629,7 @@ scenes["25"] = function (s, t) {
       const lit = span(t, starts[c] - .15, c < 2 ? starts[c + 1] - .2 : example - .2, .3), hx = L0 + 15;
       ring(hx, HY, 15, {color: colors[c], alpha: g1, width: 2.5});
       dot(hx, HY, 6 + 2 * lit, {color: colors[c], alpha: g1});
-      if (lit > 0) ring(hx, HY, 23, {color: colors[c], alpha: lit * .5 * g1, width: 2});
+      if (lit > 0) ring(hx, HY, 23, {color: colors[c], alpha: lit * restMark(colors[c], .5) * g1, width: 2});
       const hh = termRowLayout([aims[c]], heads[c], 330, inline).height;
       termRow(t, [aims[c]], [Math.min(starts[c], fidelity)], heads[c], [means[c]], hx + 15 + NAME_GAP, HY - hh / 2,
         {width: 330, color: colors[c], alpha: g1 * listLevel(t, starts, c), set: "aims", inline});
@@ -7820,7 +7853,7 @@ scenes["25"] = function (s, t) {
       const got = named(t, restate[i]), lit = speaking(t, restate, i);
       link(CX - 30, mids[i], CX - 13, mids[i], {alpha: gr * .8 * got, end: false, r: 0});
       dot(CX, mids[i], 6 + 2 * lit, {color: P.evidence, alpha: got * gr});
-      if (lit > 0) ring(CX, mids[i], 18, {color: P.evidence, alpha: lit * .5 * gr, width: 2});
+      if (lit > 0) ring(CX, mids[i], 18, {color: P.evidence, alpha: lit * restMark(P.evidence, .5) * gr, width: 2});
       nameText(v, CX + 11 + NAME_GAP, mids[i], {align: "left", alpha: gr * got * Math.max(listLevel(t, restate, i), whole), set: "restate"});
     });
   }
@@ -7859,8 +7892,8 @@ scenes["25"] = function (s, t) {
     {
       const x = gx + attach(0), y = mids[0];
       dot(x, y, 13, {color: P.unknown, alpha: on(risk)});
-      ring(x, y, 26, {color: P.unknown, alpha: on(risk) * .8, width: 2.5});
-      ring(x, y, 38, {color: P.unknown, alpha: on(risk) * .4, width: 2});
+      ring(x, y, 26, {color: P.unknown, alpha: on(risk) * restMark(P.unknown, .8), width: 2.5});
+      ring(x, y, 38, {color: P.unknown, alpha: on(risk) * restMark(P.unknown, .4), width: 1.5});
     }
     // The facts, the impact spreading from the risk, and the latest time a decision is still in time: the time from
     // now runs safe up to its mark and unsafe after it.
@@ -7966,7 +7999,7 @@ scenes["26"] = function (s, t) {
     box(EARLY, BAND, OLD, BH, {stroke: P.line, alpha: g1 * ramp(t, less + .25, .4), radius: 5, width: 2});
     line(EARLY, Y - 38, EARLY, Y + 38, {color: P.evidence, alpha: found, width: 4});
     ring(EARLY, Y, 24, {color: P.evidence, alpha: g1 * ramp(t, judge - .05, .4), width: 2.5});
-    box(EARLY, BAND, mix(OLD, NEW, shrink), BH, {fill: P.unknown, alpha: g1 * .55 * ramp(t, less - .15, .3), radius: 5});
+    box(EARLY, BAND, mix(OLD, NEW, shrink), BH, {fill: P.unknown, alpha: g1 * restMark(P.unknown, .55) * ramp(t, less - .15, .3), radius: 5});
     // Found earlier, then judged more easily: one name above the mark, each part on its own words. It begins on the
     // mark's line, where the rescue's band begins, and the rescue's name below begins there too.
     const parts = [L("更早被发现", "Find it earlier"), L("、更容易判断", ", judge it more easily")];
@@ -8115,7 +8148,7 @@ scenes["26"] = function (s, t) {
       termRow(t, term, [safeguards], qual, cues(s, [["比如法规和安全要求", ""], ["规定必须做的", ""]]), E,
         CONTENT_CY - SR - NAME_GAP - termRowLayout(term, qual, NW).height, {width: NW, alpha: g4, color: P.evidence});
       const lit = span(t, cue(s, "这类保障", "") - .15, onlyAt - .1, .3);
-      if (lit > 0) ring(SX, CONTENT_CY, SR + 16, {color: P.evidence, alpha: lit * .5 * g4, width: 2});
+      if (lit > 0) ring(SX, CONTENT_CY, SR + 16, {color: P.evidence, alpha: lit * restMark(P.evidence, .5) * g4, width: 2});
     }
     // The two later events, each on its own words.
     const names = en ? ["An incident", "A new practice to be approved"] : ["出事", "新做法批下来"];
@@ -8250,7 +8283,7 @@ scenes["27"] = function (s, t) {
     xs.forEach((x, i) => {
       const q = ramp(t, signals[i] - .15, .3), lit = speaking(t, signals, i);
       dot(x, yAt(x), 7, {color: P.unknown, alpha: q * one});
-      if (lit > 0) ring(x, yAt(x), 15, {color: P.unknown, alpha: lit * .6 * one, width: 2});
+      if (lit > 0) ring(x, yAt(x), 15, {color: P.unknown, alpha: lit * restMark(P.unknown, .6) * one, width: 2});
     });
     railNames(names, xs, Y0, {wrap, alpha: i => one * listIn(t, signals, i), set: "signals"});
   }
@@ -8344,7 +8377,7 @@ scenes["27"] = function (s, t) {
     const held = on(conds[1]) * (1 - .5 * gone);
     person(START, R[1] + 12, {alpha: held, solid: false});
     if (gone < 1) dot(START, R[1] + 12 - 15 * 1.15, 15, {color: P.ink, alpha: held * (1 - gone)});
-    line(START + 30, R[1], C[2], R[1], {color: P.authority, alpha: on(cue(s, "只靠少数人", "rests on the tacit"), .1) * (1 - .6 * gone), width: 2.5});
+    line(START + 30, R[1], C[2], R[1], {color: P.authority, alpha: on(cue(s, "只靠少数人", "rests on the tacit"), .1) * mix(1, restMark(P.authority), gone), width: 2.5});
     [0, 1, 2].forEach(k => diamond(C[k], R[1], 17, {color: P.authority, alpha: on(conds[1] + .2 * k, k ? -.05 : .15), width: 2.5}));
     box(START - 17, R[1] + 40, 34, 44, {stroke: P.muted, alpha: on(unwritten), radius: 4, width: 2, dash: [5, 4]});
     // Once the person is forgotten, the next judgment has nothing to rest on and fails: a material loss.
@@ -8394,7 +8427,7 @@ scenes["27"] = function (s, t) {
     // The threshold of material risk, and the failure still ahead at the line's end, drawn on the words that say nothing
     // has failed yet. The failure has not happened, so it stands as a dashed outline at the end of the dashed course,
     // never a cross, which would read as refusing the case.
-    line(X0, TY, FX - 40, TY, {color: P.unknown, alpha: five * .8 * named(t, material), width: 2});
+    line(X0, TY, FX - 40, TY, {color: P.unknown, alpha: five * restMark(P.unknown, .8) * named(t, material), width: 2});
     // The name stands 8 px above a name's gap, so its ink keeps 8 px clear of the axis's top tick, which ends at its edge.
     nameText(L("实质风险", "Material risk"), X0, TY - NAME_GAP - 8, {align: "left", valign: "bottom", alpha: five * named(t, material)});
     const FY = B - climb(FX - 40);
@@ -8526,7 +8559,7 @@ scenes["28"] = function (s, t) {
       const y = rows[i], lit = speaking(t, starts, i), on = named(t, starts[i]);
       const color = [P.evidence, P.authority, P.ink, P.evidence][i];
       dot(x, y, 9, {color, alpha: g1 * on});
-      if (lit > 0) ring(x, y, 17, {color, alpha: g1 * lit * .6, width: 2});
+      if (lit > 0) ring(x, y, 17, {color, alpha: g1 * lit * restMark(color, .6), width: 2});
       const level = g1 * listLevel(t, starts, i);
       let top = y + NAME_GAP + 18;
       if (names[i][0]) top = nameText(names[i][0], x, top, {valign: "top", size: NOTE, color: P.muted, alpha: level * named(t, moments[i]), set: "stations"}).bottom + 8;
@@ -8577,7 +8610,7 @@ scenes["28"] = function (s, t) {
     xs.forEach((x, i) => {
       const lit = speaking(t, fb, i);
       dot(x, R, 9, {color: P.evidence, alpha: g2 * named(t, fb[i])});
-      if (lit > 0) ring(x, R, 17, {color: P.evidence, alpha: g2 * lit * .6, width: 2});
+      if (lit > 0) ring(x, R, 17, {color: P.evidence, alpha: g2 * lit * restMark(P.evidence, .6), width: 2});
     });
     railNames(names, xs, R, {alpha: i => g2 * listIn(t, fb, i), color: () => P.evidence, set: "feedback"});
     // The list reads as the sentence: what feedback names, then the stations it names.
@@ -8740,7 +8773,7 @@ scenes["28"] = function (s, t) {
       // Each row draws on from its rhythm's first words and runs on until the next rhythm is named.
       const rowAt = ats[i][0], lit = speaking(t, cadence, i), draw = soon(t, rowAt - .05, i < 2 ? 1.3 : .9);
       line(RX0, y, mix(RX0, RX1, draw), y, {color: P.line, alpha: g5 * named(t, rowAt), width: 2});
-      if (lit > 0) line(RX0, y, RX1, y, {color: colors[i], alpha: g5 * lit * .5, width: 2});
+      if (lit > 0) line(RX0, y, RX1, y, {color: colors[i], alpha: g5 * lit * restMark(colors[i], .5), width: 2});
       for (let k = 1; k <= ticks[i]; k++) {
         const x = RX0 + RW * k / ticks[i], near = shown * clamp(1 - Math.abs(x - sx) / 40);
         dot(x, y, 7 + 3 * near, {color: colors[i], alpha: g5 * clamp(draw * ticks[i] - k + 1)});
@@ -8829,7 +8862,7 @@ scenes["29"] = function (s, t) {
         // The station covers its rail where it sits as it arrives.
         dot(x, ry, 8, {color: P.ground, alpha: q});
         dot(x, ry, 8, {color: P.authority, alpha: q});
-        if (lit > 0) ring(x, ry, 17, {color: P.authority, alpha: lit * .5 * one, width: 2});
+        if (lit > 0) ring(x, ry, 17, {color: P.authority, alpha: lit * restMark(P.authority, .5) * one, width: 2});
       });
     });
     // The top row's marks: a compass turning to its heading, priority bars, a bounded frame and a stack of resources.
@@ -8841,7 +8874,7 @@ scenes["29"] = function (s, t) {
         fill(() => { ctx.moveTo(x + Math.cos(a) * 24, y + Math.sin(a) * 24); ctx.lineTo(x + Math.cos(a + 1.57) * 6, y + Math.sin(a + 1.57) * 6);
           ctx.lineTo(x - Math.cos(a) * 16, y - Math.sin(a) * 16); ctx.lineTo(x - Math.cos(a + 1.57) * 6, y - Math.sin(a + 1.57) * 6); ctx.closePath(); }, {color: P.authority, alpha: q});
       }
-      else if (i === 1) [88, 64, 40].forEach((w, k) => box(x - 44, y - 26 + k * 18, w, 12, {fill: P.authority, alpha: q * (1 - k * .2), radius: 3}));
+      else if (i === 1) [88, 64, 40].forEach((w, k) => box(x - 44, y - 26 + k * 18, w, 12, {fill: P.authority, alpha: q * mix(1, restMark(P.authority), k / 2), radius: 3}));
       else if (i === 2) { box(x - 46, y - 32, 92, 64, {stroke: P.authority, alpha: q, radius: 10}); dot(x, y, 6, {color: P.ink, alpha: q}); }
       else [[64, 0], [50, -21], [36, -42]].forEach(([w, dy]) => box(x - w / 2, y + 12 + dy, w, 18, {stroke: P.authority, alpha: q, radius: 4}));
     });
@@ -8933,8 +8966,9 @@ scenes["29"] = function (s, t) {
     misuse.forEach((at, i) => {
       const my = tops[i] + labelSize(LABEL) / 2, q = ramp(t, at - .15, .4) * four, lit = speaking(t, misuse, i);
       dot(LX - 40, my, 6 + 2 * lit, {color: P.unknown, alpha: q});
-      // A refused name already dims as its cross lands, so the named ones step back only a little and stay legible.
-      const level = mix(.85, 1, clamp((listLevel(t, misuse, i) - SECOND) / (1 - SECOND)));
+      // A refused name steps back only to the unknown's level, so its cross stays at 4.6:1; the dot of the one being
+      // said grows.
+      const level = markLevel(P.unknown, listLevel(t, misuse, i));
       rejectedName(names[i], LX, my, {align: "left", alpha: four * ramp(t, at - .15, .4) * level, mark: ramp(t, at + .05, .3), set: "misuse", markLeft});
     });
   }
@@ -9081,7 +9115,7 @@ scenes["29"] = function (s, t) {
     uses.forEach((at, i) => {
       const q = ramp(t, at - .15, .4) * seven, x = xs[i];
       link(ox, sy + 42, x, ly - 34, {route: "vhv", mid: by + 40, r: 18, alpha: seven * ramp(t, at - .15, .2), upto: soon(t, at - .15, .6), end: false});
-      if (i === 0) [0, 1, 2].forEach(k => ring(x, ly, 8 + k * 9, {color: P.unknown, alpha: q * (1 - k * .25), width: 2}));
+      if (i === 0) [0, 1, 2].forEach(k => ring(x, ly, 8 + k * 9, {color: P.unknown, alpha: q * mix(1, restMark(P.unknown), k / 2), width: 2}));
       else check(x, ly + 2, 26, {color: P.evidence, alpha: q, upto: soon(t, at - .05, .5)});
     });
     railNames(names, xs, ly + 8, {wrap: 400, alpha: i => seven * listIn(t, uses, i), set: "uses"});
@@ -9270,7 +9304,7 @@ scenes["30"] = function (s, t) {
       const y = tops[i] + labelSize(LABEL) / 2, on = ramp(t, needs[i] - .15, .4) * g1, lit = speaking(t, needs, i);
       ring(QX, y, 17, {color: P.evidence, alpha: on, width: 2.5});
       check(QX, y + 1, 18, {color: P.evidence, alpha: on, upto: soon(t, needs[i] - .1, .5)});
-      if (lit > 0) ring(QX, y, 25, {color: P.evidence, alpha: lit * .5 * g1, width: 2});
+      if (lit > 0) ring(QX, y, 25, {color: P.evidence, alpha: lit * restMark(P.evidence, .5) * g1, width: 2});
       nameText(v, QX + 17 + NAME_GAP, y, {align: "left", alpha: g1 * listIn(t, needs, i), set: "needs"});
     });
   }
@@ -9342,7 +9376,7 @@ scenes["30"] = function (s, t) {
       const lit = Math.max(speaking(t, asked, i) * (i ? 1 : settle), answered);
       dot(x, Y, R, {color: P.ground, alpha: g3 * ramp(t, from, .1)});
       ring(x, Y, R, {color: P.evidence, alpha: on, width: 2.5});
-      if (lit > 0) ring(x, Y, R + 10, {color: P.evidence, alpha: lit * .45 * g3, width: 2});
+      if (lit > 0) ring(x, Y, R + 10, {color: P.evidence, alpha: lit * restMark(P.evidence, .45) * g3, width: 2});
       // The question stands open until the words that answer it yes; the check then draws on in its place.
       if (!done) text("?", x, Y + 2, 40, {role: "mark", align: "center", color: P.ink, alpha: on});
       else check(x, Y + 3, 36, {color: P.evidence, alpha: g3, upto: soon(t, yes + .05, .5)});

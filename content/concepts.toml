@@ -24,7 +24,7 @@ id = "held-scope"
 term = "authority; permission"
 essence = "The range within which a person or Agent may act or use something; urgency, delegation and acceptance never enlarge it."
 source = { path = "docs/charter.md", quote = "factual evidence does not itself grant permission to act" }
-zh = { rendering = "权限", forms = ["获准"], avoid = ["许可"] }
+zh = { rendering = "权限", forms = ["获准", "有权", "权力"], avoid = ["许可"] }
 en = { rendering = "authority", forms = ["permission", "permissions", "permitted"] }
 
 [[concept]]
