@@ -612,11 +612,6 @@
             "dictionary_disagreement": "当时 is dāng; the dictionary's segmenter takes 了当 in 用了当时 and reads dàng."
           },
           {
-            "term": "影片",
-            "kind": "contextual-mandarin-word",
-            "target_reading": "yǐng piàn"
-          },
-          {
             "term": "待决定",
             "kind": "contextual-mandarin-word",
             "target_reading": "dài jué dìng"
@@ -836,11 +831,6 @@
             "target_reading": "zhèng zài"
           },
           {
-            "term": "正是",
-            "kind": "contextual-mandarin-word",
-            "target_reading": "zhèng shì"
-          },
-          {
             "term": "正确",
             "kind": "contextual-mandarin-word",
             "target_reading": "zhèng què"
@@ -869,11 +859,6 @@
             "term": "没有",
             "kind": "contextual-mandarin-word",
             "target_reading": "méi yǒu"
-          },
-          {
-            "term": "沿着",
-            "kind": "contextual-mandarin-word",
-            "target_reading": "yán zhe"
           },
           {
             "term": "流行",
@@ -1259,11 +1244,6 @@
             "term": "那种",
             "kind": "contextual-mandarin-word",
             "target_reading": "nà zhǒng"
-          },
-          {
-            "term": "部分",
-            "kind": "contextual-mandarin-word",
-            "target_reading": "bù fèn"
           },
           {
             "term": "都",
