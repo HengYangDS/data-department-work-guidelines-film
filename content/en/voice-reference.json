@@ -70,30 +70,14 @@
           "seed": 186844,
           "text_sha256": "b318e06b90ae91d4a7f825dcf4f9db5f3b30e97e681a87e5b1c5d2f6216c078e"
         },
-        "2": {
-          "seed": 163087,
-          "text_sha256": "0c83d83fce53639088f024359ea4a477e7fde7d030179479e7a1debf8b083fff"
-        },
-        "6": {
+        "5": {
           "seed": 242277,
           "text_sha256": "6c16ace1ad6a41beaece2818a189001bbcd4220dcc288fff36be9f1239cbbb25"
-        },
-        "8": {
-          "seed": 171006,
-          "text_sha256": "e2a1247cc12ece20017c8aea366e0bcff234dc752c628f7726ca77658a0a0dad"
-        },
-        "3": {
-          "seed": 107654,
-          "text_sha256": "30b5742667e3514354f96e106a104e0021386f22d441f0289c9070ee41768df8"
         }
       }
     },
     "02": {
       "groups": {
-        "1": {
-          "seed": 99707,
-          "text_sha256": "fbe6c6b9d0f9eaf5204fdfe89cdfc9122eb14ef1052f83aa6c905c4b9eb98064"
-        },
         "3": {
           "seed": 258087,
           "text_sha256": "7350f679905e9732975343e46a2c979deb6127a673cfd4fbe9dc063e369947f5"
