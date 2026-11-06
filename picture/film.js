@@ -1826,28 +1826,26 @@ scenes["04"] = function (s, t) {
           " or irreversible consequences"], triggers, needs]]
     : [
       [["一次讲清", "结论", "、依据", "和做法"], [onceAt, ...onceRows], ["局部", "、可逆", "、不对外承诺的小事"], lowAts, onceRows],
-      [["在现有的工作记录里写清", "问题", "、方案", "、做法", "和验收"], [recordAt, ...recordRows], ["工作跨角色", "、做得久", "、有几种方案", "，或者有重大不确定"],
-        [midAts[0], cue(s, "做得久", ""), ...midAts.slice(1)], recordRows],
+      [["在现有的工作记录里写清", "问题", "、方案", "、做法", "和验收"], [recordAt, ...recordRows], ["工作跨角色", "、做得久", "、有几种方案", "，或者", "有重大不确定"],
+        [midAts[0], cue(s, "做得久", ""), midAts[1], cueFrom(s, "或者", "", midAts[1]), midAts[2]], recordRows],
       [["书面决定", "、明确授权", "、回滚或降级运行的预案", "、独立评审", "，最后由人验收"], needs,
         ["涉及生产", "、资金", "、敏感数据", "、安全合规，", "或者删除覆盖", "、对外承诺", "、后果不可逆的事"], triggers, needs]];
     // Risk rises down one spine through the three documents; the work stands on its left, one spoken part to a line set
     // against the document, and the form it calls for on its right, so every row reads across and grows toward its mark.
     // Each side is set as a balanced block of a few lines, so the highest tier's requirements face the conditions that
     // call for them as two even blocks, and each document is large enough to read as its rung of the ladder.
-    // The work column sets each condition as a block of at most two lines; the English column is narrower, so its
-    // blocks balance the forms across the spine. The first Chinese tier's work, said long before its process, is a block
-    // of two lines too, so it faces the spine's name while its process is still to come. The high-risk work, the
-    // longest, is set in Chinese as the two groups it is said in, one under the other, each a name of at most two lines
-    // that stands on the words that begin it; in English it is one block of four lines of even width, none shorter than
-    // three quarters of its neighbours, so its free edge does not zigzag. The high-risk requirements, five in all with
-    // the rollback or degradation path named whole, take a block wide enough to stay at two lines in English; in Chinese
-    // they take three even lines, so their block ends near the lower tiers' processes instead of running past them. The
-    // Chinese middle tier's work breaks after its options, and each high-risk group takes two lines in both editions,
-    // so no work block reaches far past the others; the Chinese high-risk groups take two even lines each, the first
-    // breaking after its funds, so no line stands short among them.
-    const W = 600, QW = i => L([300, 400, 285][i], i === 2 ? 500 : 420), tw = i => i === 2 ? L(360, 760) : W, docs = [[60, 76], [86, 110], [118, 152]], GAP = 45 + 34;
+    // The work column sets each condition as a block of even lines; the English column is narrower, so its blocks
+    // balance the forms across the spine. In Chinese the first tier's work stands on one line; the middle tier's breaks
+    // into three lines that step evenly in from the spine, the last after its 「或者」; and the high-risk work, the
+    // longest, is one block of three even lines, each part joining it on its words, so no line of a block stands under
+    // four fifths of its longest and no last line under three fifths. In English the high-risk work is one block of four
+    // lines of even width, none shorter than three quarters of its neighbours, so its free edge does not zigzag. The
+    // high-risk requirements, five in all with the rollback or degradation path named whole, take a block wide enough
+    // to stay at two lines in English; in Chinese they take three even lines, so their block ends near the lower tiers'
+    // processes instead of running past them.
+    const W = 600, QW = i => L([340, 280, 320][i], i === 2 ? 500 : 420), tw = i => i === 2 ? L(360, 760) : W, docs = [[60, 76], [86, 110], [118, 152]], GAP = 45 + 34;
     // The parts that begin each group of a tier's work.
-    const groups = i => i === 2 && !en ? [0, 4] : [0];
+    const groups = () => [0];
     // The spine stands where the ladder is balanced. Each tier's work reaches left of the spine and its form right of
     // it; through the first two tiers the ladder stands centred between the first tier and the first two, and once the
     // third tier's first block is whole, on the words of its last part, it moves to stand centred between that block with
@@ -2195,7 +2193,7 @@ scenes["05"] = function (s, t) {
     for (let k = 0; k < 18; k++) {
       const useful = k % 5 === 1, x = LX + 40 + (k % 6) * 52, y = AY - 30 + Math.floor(k / 6) * 30;
       dot(x, y, 8, {color: useful ? blend(P.muted, P.evidence, tied) : P.muted,
-        alpha: five * ramp(t, collect - .1 + k * .04, .35) * (useful ? 1 : mix(.85, .5, tied))});
+        alpha: five * ramp(t, collect - .1 + k * .04, .35) * (useful ? 1 : mix(.85, .6, tied))});
     }
     nameText(L("收集信息", "Collecting information"), LX, AY - H / 2 - NAME_GAP, {align: "left", valign: "bottom", alpha: five * named(t, collect)});
     // Collecting is not the goal: the goal it is taken for stands struck where the judgment will stand, and gives way to
@@ -2781,12 +2779,12 @@ scenes["07"] = function (s, t) {
     const kinds = en ? [0, 1, 2, 3, 5] : [0, 1, 2, 3, 4, 5];
     const limitsAt = cue(s, "在这里适不适用", "its limits");
     const PW = 240, PH = 230, py = 480, cols = [740, 1180], ys = [360, 460, 560, 660], NW = 450, BY = 710, EY = 760;
-    // The English second trap stands in two authored lines in both renderers, so its cross stands after its longer line.
-    // The third trap, the widest name to stand while its row's right-hand trap is still to come, stands on two authored
-    // lines too, so the stage stays balanced as it builds.
+    // The English second trap stands in two authored lines in both renderers, so its cross stands after its longer line,
+    // and its third trap, the widest name to stand while its row's right-hand trap is still to come, stands on two
+    // authored lines too, so the stage stays balanced as it builds. Each Chinese trap stands on one line, as said.
     const names = en ? ["A correlation presented as a cause", ["One case taken", "for the whole"], ["Necessary taken", "as sufficient"],
       "Blamed on a single cause", "Best practice without its limits"]
-      : ["把相关看成因果", "把个案看成全部", ["把必要条件", "看成充分条件"], "认定只有一个原因", "只找对自己有利", "搬出“最佳实践”"];
+      : ["把相关看成因果", "把个案看成全部", "把必要条件看成充分条件", "认定只有一个原因", "只找对自己有利的证据", "搬出“最佳实践”"];
     documentIcon(960 - PW / 2, py - PH / 2, PW, PH, {alpha: eight, rows: 0});
     seal(960, py - 6, 50, {alpha: eight});
     // The heading stands clear above the traps' first row, its taller name or its marks, so it heads the page and the
@@ -2999,9 +2997,11 @@ scenes["08"] = function (s, t) {
   // completeness and popularity follow beside the table and are refused there: they do not prove a fit.
   const cmp = base * stageIn(t, choose) * stageOut(t, recommend);
   if (cmp > 0) {
-    // The table stands 20 px right of its place while it builds alone, and eases 115 px left on the words that bring
-    // the refused qualities beside it, so the table alone and the table with them each stand about the centre.
-    ctx.save(); ctx.translate(20 - 115 * soon(t, badgeAts[0] + .05, .7), 0);
+    // The table stands 20 px right of its place while it builds alone, and eases left to make room for the refused
+    // qualities beside it, so the table alone and the table with them each stand about the centre and inside the safe
+    // area: 115 px in Chinese, on the words that bring them, and 185 px in English, whose qualities stand on one line
+    // over their verdict, on its last criterion's words, so the table stands in its place before they arrive.
+    ctx.save(); ctx.translate(20 - L(115, 185) * soon(t, L(badgeAts[0], criteria.at(-1)) + .05, .7), 0);
     // The options' headers hang from one line near the cards' top, so a header of two lines shares its first line with
     // the one-line headers; the status quo's header takes two lines in both editions, which keeps clear card on either
     // side of it. The cards stay narrow enough to read as cards rather than containers.
@@ -3041,7 +3041,7 @@ scenes["08"] = function (s, t) {
     });
     // The qualities that do not prove a fit, said as one phrase: one name beside the table, refused with its verdict.
     const QX = xs[2] + CW / 2 + 30, QY = rowY(2), refuse = ramp(t, notProve - .1, .4);
-    const qualities = rejectedName(L("新颖、完整、流行", "Novelty, completeness or popularity"), QX, QY, {align: "left", width: 340,
+    const qualities = rejectedName(L("新颖、完整、流行", "Novelty, completeness or popularity"), QX, QY, {align: "left", width: L(340, Infinity),
       alpha: cmp * named(t, badgeAts[0]), mark: refuse});
     nameText(L("证明不了合适", "do not prove a fit"), QX, qualities.bottom + 12, {align: "left", valign: "top", alpha: cmp * named(t, notProve)});
     ctx.restore();
@@ -5182,7 +5182,7 @@ scenes["16"] = function (s, t) {
     const lane = ramp(t, Math.min(independent, moving) - .15, .5) * four;
     line(300, BY, 1620, BY, {color: P.line, alpha: lane, width: 2});
     // The work turns while it executes and stops turning on the word that blocks it.
-    const halted = mix(.8, .35, ramp(t, blocked + .05, .4));
+    const halted = mix(.8, .4, ramp(t, blocked + .05, .4));
     for (let k = 0; k < 3; k++) { const a = voiceTime(Math.min(t, blocked + .05)) * 2.4 + k * 2.09; stroke(() => ctx.arc(TX, AY, 32, a, a + 1.2), {color: P.ink, alpha: four * halted, width: 2.5}); }
     box(TX - 17, AY - 17, 34, 34, {fill: P.ink, alpha: four, radius: 7});
     const head = nameText(L("执行中", "Executing"), TX, AY - 40 - NAME_GAP, {valign: "bottom", alpha: four * named(t, called)});
@@ -5387,10 +5387,10 @@ scenes["17"] = function (s, t) {
   // make is named on "the wrong thing".
   const stopWords = en ? ["is not", "still", "is not", "is not", "does not"] : ["不等于", "也不等于", "不等于", "不等于", "也不等于"];
   const stops = nots.map((at, i) => cueFrom(s, stopWords[i], stopWords[i], at));
-  // A reached state given as lines keeps them, one under the other, each ending at the column's edge: the Chinese
-  // Agent's report, so the second table, whose other names are short, stands about the centre.
+  // A reached state given as lines would keep them, one under the other, each ending at the column's edge; every state
+  // stands on one line, as said, the Chinese Agent's report among them.
   const left = en ? [[["A passing test"], []], [["An exact copy"], []], [["A merged change"], []], [["Published"], []], [["An Agent reports completion"], []]]
-    : [[["测试通过"], []], [["两个文件一字不差"], []], [["改动合并了"], []], [["发布了"], []], [["智能体", "说完成了"], []]];
+    : [[["测试通过"], []], [["两个文件一字不差"], []], [["改动合并了"], []], [["发布了"], []], [["智能体说完成了"], []]];
   const right = en ? [["Acceptance", "acceptance"], ["The right meaning", "the wrong thing"], ["Published", "published"], ["Effective or adopted", "effective or adopted"], ["Work complete", "work complete"]]
     : [["整体正确或已验收", "整体正确或已验收"], ["含义就对", "含义就对"], ["发布了", "发布了"], ["用上了", "用上了"], ["完成了", "完成了"]];
   const rightAts = right.map(([, v], i) => cueFrom(s, v, v, stops[i]));
