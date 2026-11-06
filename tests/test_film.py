@@ -18,7 +18,7 @@ CHINESE = re.compile(r"[\u3000-\u303f\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff\uff
 ENGINE_SOURCE = re.compile(r"^https://github\.com/HengYangDS/filmkit\?tag=v([^#]+)#[0-9a-f]{40}$")
 # The SHA-256 of the listening plan derived from the v1.3.0 repair's scripts, casts, contract and
 # readings.
-PLAN_SHA256 = "f7c48ae6f9c5c4a6bbfed0d89ddbefc5e1948e0f374b878e9e0c67bf700ce5b8"
+PLAN_SHA256 = "7b3b307d407c8fa43926689ef721e5eada8e4615abc671b6979b4a6d80ab88bb"
 
 
 def test_the_declaration_loads_with_both_editions():
