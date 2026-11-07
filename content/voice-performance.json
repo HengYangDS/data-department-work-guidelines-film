@@ -275,11 +275,6 @@
             "target_reading": "chuàng zào"
           },
           {
-            "term": "别为",
-            "kind": "contextual-mandarin-word",
-            "target_reading": "bié wèi"
-          },
-          {
             "term": "到了",
             "kind": "contextual-mandarin-word",
             "target_reading": "dào le"
@@ -382,6 +377,11 @@
             "term": "只缺",
             "kind": "contextual-mandarin-word",
             "target_reading": "zhǐ quē"
+          },
+          {
+            "term": "只需",
+            "kind": "contextual-mandarin-word",
+            "target_reading": "zhǐ xū"
           },
           {
             "term": "只能",

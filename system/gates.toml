@@ -43,7 +43,7 @@ writes_files = false
 network_policy = "offline"
 version_source = "product"
 
-# The film's own checks of its declaration, players, narration receipts and release manifest,
+# The film's own checks of its declaration, narration receipts and release manifest,
 # through the installed engine. They are Python but test no production Python of this repository,
 # so they run here rather than in native-behavior; -B and no cache keep the tree unchanged.
 [[gates]]
@@ -71,7 +71,7 @@ policy = "required"
 profile = "repository"
 toolchain = "uv-python"
 asset_classes = ["film-sources"]
-dimensions = ["declaration", "players", "narration-receipts", "release-manifest"]
+dimensions = ["declaration", "narration-receipts", "release-manifest"]
 execution_mode = "adapter"
 evidence_class = "proof"
 trust_bearing = true

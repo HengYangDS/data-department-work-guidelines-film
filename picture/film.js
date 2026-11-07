@@ -45,6 +45,12 @@ const GLIDE_PEAK = 450, GLIDE_MIN = .6;
 const smoother = q => { q = clamp(q); return q * q * q * (q * (q * 6 - 15) + 10); };
 const glideTime = (d, min = GLIDE_MIN) => Math.max(min, 1.875 * Math.abs(d) / GLIDE_PEAK);
 const glide = (t, start, d, min = GLIDE_MIN) => smoother((voiceTime(t) - voiceTime(start)) / glideTime(d, min));
+/* A stroke drawing on, solid or dashed, as only its tip moves: the smoothstep curve in voice time, at least `least`
+ * seconds and long enough that its tip peaks at DRAW_PACE px/s, under the 900 px/s at which a mark races, with its
+ * pickup bounded at DRAW_PICKUP px/s². Returns the share of a stroke `length` px long drawn at t from `at`. */
+const DRAW_PACE = 820, DRAW_PICKUP = 2400;
+const drawTime = (length, least = .4) => Math.max(least, 1.5 * Math.abs(length) / DRAW_PACE, Math.sqrt(6 * Math.abs(length) / DRAW_PICKUP));
+const drawShare = (t, at, length, least = .4) => ease((voiceTime(t) - voiceTime(at)) / drawTime(length, least));
 /* Visible from `a` to `b`. A fade that would run into the quiet between two thoughts waits for the next thought's
  * words (see pauseHold), so neither edge changes the picture in a pause. */
 const span = (t, a, b, fade = .45) => ramp(t, pauseHold(a, fade), fade) * (1 - ramp(t, pauseHold(b - fade, fade), fade));
@@ -727,12 +733,13 @@ function rejectedName(v, x, y, {alpha = 1, mark = 1, size = LABEL, align = "cent
   const s = Math.min(26, labelSize(size) * .9), cx = align === "center" && markLeft === null ? x - (16 + s) / 2 : x;
   const block = nameText(v, cx, y, {align, valign, width, size, color: P.muted, alpha, set});
   const w = Math.max(...block.lines.map(line => measure(line, size))), left = align === "left" ? cx : align === "right" ? cx - w : cx - w / 2;
-  // The cross follows the ink of the line that reaches furthest right, and stays 2 px clear of the lines' boxes.
+  // The cross follows the ink of the line that reaches furthest right, and its stroke stays 3 px clear of the lines'
+  // boxes, as a mark keeps clear of a name.
   const reach = Math.max(...block.lines.map(line => {
     const lw = measure(line, size);
     return (align === "left" ? left + lw : align === "right" ? cx : cx + lw / 2) - closingBlank(line, size);
   }));
-  const at = markLeft ?? Math.max(reach + 16, left + w + 2);
+  const at = markLeft ?? Math.max(reach + 16, left + w + 5);
   cross(at + s / 2, (block.top + block.bottom) / 2, s, {alpha: alpha * mark, width: 3});
   return {...block, left, right: at + s};
 }
@@ -860,7 +867,7 @@ const clearOfTitle = (s, t, y = 400) => {
 
 function titleSignature(alpha, signed = alpha) {
   text("DDWG", 237, 300, 300, {bold: true, tracking: -4, alpha, baseline: "top", role: "title"});
-  line(260, 652, 1624, 652, {color: P.line, width: 1, alpha});
+  line(260, 652, 1624, 652, {color: P.line, width: 2, alpha});
   text(L("数据部门工作指南", "Data Department Work Guidelines"), 260, 724, en ? 42 : 50, {alpha, role: "title"});
   text("Yang HENG", 1624, 846, 34, {align: "right", alpha: signed, role: "title"});
 }
@@ -938,7 +945,8 @@ const PRICES = ["101.18", "100.94", "101.37", "101.06"];
  * question: a bar at its row lights as each number is asked about, and it turns unknown when nobody can explain it. The
  * card's content keeps one inset on each side: the title, the rule and the row marks start at one left edge, the rule,
  * the values and the check end at one right edge, and the content block stands at equal padding from the card's top
- * and bottom. */
+ * and bottom. The rows are ruled in one stroke, the card's one table, so they are part of the named card rather than
+ * repeated marks each waiting for a name of its own. */
 const REPORT_ROW = (i, scale = 1) => (119 + i * 66) * scale;
 function reportCard(x, y, {alpha = 1, scale = 1, highlight = 0, unknown = 0, done = 0, rows = PRICES, named = alpha} = {}) {
   if (alpha < .01) return;
@@ -947,10 +955,11 @@ function reportCard(x, y, {alpha = 1, scale = 1, highlight = 0, unknown = 0, don
   box(x, y, w, h, {stroke: P.ink, alpha: alpha * .9, radius: 10});
   line(x + inset, rule, x + w - inset, rule, {color: P.line, alpha, width: 2});
   nameText(L("历史价格", "Price history"), x + inset, head, {align: "left", color: P.muted, alpha: named});
+  stroke(() => rows.forEach((_, i) => { ctx.moveTo(x + inset, y + REPORT_ROW(i, scale)); ctx.lineTo(x + 120 * scale, y + REPORT_ROW(i, scale)); }),
+    {color: P.line, alpha, width: 2});
   rows.forEach((value, i) => {
     const ry = y + REPORT_ROW(i, scale), hot = i === 2, tone = blend(P.evidence, P.unknown, unknown);
     if (hot && highlight > 0) line(x + 14 * scale, ry - 20 * scale, x + 14 * scale, ry + 20 * scale, {color: tone, alpha: alpha * highlight, width: 4});
-    line(x + inset, ry, x + 120 * scale, ry, {color: P.line, alpha, width: 2});
     // Once one value is in question, the others step back, to 0.51 of full ink, at which ink still reads at 4.6:1
     // against the ground. The values are marks at the name size, so the card adds no third text size to the frame.
     text(value, x + w - inset, ry + 1, 26, {role: "mark", align: "right", alpha: hot ? alpha : alpha * mix(1, .51, highlight),
@@ -1061,8 +1070,9 @@ scenes["01"] = function (s, t) {
   // names production and platforms apart. The rail is the chain's span, one firm rail standing whole on the
   // words that open it, its first role in Chinese and "every step" in English, so the chain is in view from its first
   // words. Each role stands at its station on its own words, and the way to it from the one before draws on over the
-  // rail. On the words that every step hands something to the next person, one person hands a point to the next above
-  // the rail, named as every step, and from those words one point runs along each span toward the next station.
+  // rail. On the words that every step hands something to the next person, a person named as every step stands above
+  // the rail, the next person joins it on their own words and a point passes from the one to the other; from the
+  // hand-over's first words one point runs along each span toward the next station.
   if (stage2 > 0) {
     // The English names stand whole, each on one line, so they stand on two baselines at one even pitch, every other
     // name a row lower on a short stem from its station, within the height two lines of a name would take.
@@ -1081,14 +1091,21 @@ scenes["01"] = function (s, t) {
     });
     if (en) xs.forEach((x, i) => { if (i % 2) line(x, y + R + 8, x, y + R + NAME_GAP + 26 + RAIL_ROW - 6, {alpha: stage2 * ramp(t, roles[i] - .15, .4), width: 2}); });
     railNames(names, xs, y + R, {gap: i => NAME_GAP + 26 + (en && i % 2 ? RAIL_ROW : 0), alpha: i => stage2 * listIn(t, roles, i), set: "roles"});
-    // The hand-over is named under its two persons, its name standing well clear of the stations below it, so it names
-    // the whole chain's hand-over rather than reading as one station's name. The persons reach 21 px below their line.
-    const mid = (xs[0] + xs.at(-1)) / 2, every = stage2 * named(t, hand), nameBottom = y - R - HEAD_CLEAR;
-    const HY = nameBottom - labelSize(LABEL) - NAME_GAP - 21;
-    nameText(L("每个环节", "Every step"), mid, nameBottom, {valign: "bottom", alpha: every});
-    [-1, 1].forEach(k => person(mid + k * 60, HY + 6, {alpha: every, size: .6}));
-    const q = loopPhase(since(t, hand), 72);
-    if (q !== null) flowDot(mix(mid - 36, mid + 36, q), HY - 2, 6, q, {color: P.evidence, alpha: every}, 72);
+    // The hand-over stands over the chain, its two persons named on one baseline well clear of the stations below, so
+    // it names the whole chain's hand-over rather than reading as one station's name: every step at the left and the
+    // next person at the right, each on its own words and standing over its own name, 48 px apart, so each person has
+    // the name the voice gives it; the point passes from the one to the other once both stand. The persons reach 21 px
+    // below their line.
+    const mid = (xs[0] + xs.at(-1)) / 2, nextAt = cueFrom(s, "下一个人", "the next person", hand), nameBottom = y - R - HEAD_CLEAR;
+    const HY = nameBottom - labelSize(LABEL) - NAME_GAP - 21, pair = [L("每个环节", "Every step"), L("下一个人", "The next person")];
+    const D = (measure(pair[0]) + measure(pair[1])) / 4 + 24, way = 2 * D - 72;
+    [hand, nextAt].forEach((at, k) => {
+      const on = stage2 * named(t, at), x = mid + (k ? D : -D);
+      person(x, HY + 6, {alpha: on, size: .6});
+      nameText(pair[k], x, nameBottom, {valign: "bottom", alpha: on});
+    });
+    const q = loopPhase(since(t, nextAt), way);
+    if (q !== null) flowDot(mix(mid - D + 36, mid + D - 36, q), HY - 2, 6, q, {color: P.evidence, alpha: stage2}, way);
   }
   // 4. Where the value lies. The value of the work is named over the way that leads to the work's next user, who stands
   // at its end with the name the opening gave them: what is handed over is weighed by whether they can rely on it. What
@@ -1288,11 +1305,13 @@ scenes["02"] = function (s, t) {
   if (out > 0) {
     const reports = cue(s, "三份报告", "three reports");
     // Each outcome is named by its key words: in English as a result, so its name reads at a glance rather than repeating
-    // the spoken command, and in Chinese by the words that state it; the third, a sentence in Chinese, takes a short name
-    // with the sentence as its gloss, as the second does, its parts broken after their commas if it wraps.
+    // the spoken command, and in Chinese by the words that state it; the second, a clause in Chinese, keeps under its
+    // name only what the test must state, when the judgment holds, so its row does not repeat the spoken clause whole;
+    // the third, a sentence in Chinese, takes a short name with the sentence as its gloss, its parts broken after their
+    // commas if it wraps.
     const rows = en ? [[["Problem solved"], []], [["Judgment tested"], ["with its limits"]],
       [["System left better"], ["able to recognize", " or handle", " the next occurrence"]]]
-      : [[["解决问题"], []], [["检验判断"], ["说清它在什么情况下成立"]], [["改进系统"], ["下次再遇到", "，能更早发现", "，或者应对得更好"]]];
+      : [[["解决问题"], []], [["检验判断"], ["在什么情况下成立"]], [["改进系统"], ["下次再遇到", "，能更早发现", "，或者应对得更好"]]];
     const termAts = en ? [[cue(s, "", "solve the problem")], [cue(s, "", "test the judgment")], [cue(s, "", "and leave the system")]]
       : [[cue(s, "解决问题", "")], [cue(s, "检验判断", "")], [cue(s, "下次再遇到", "")]];
     // The third gloss stands whole from its first words; its second cue, "handled better", settles the outcome's centre.
@@ -1477,12 +1496,13 @@ scenes["03"] = function (s, t) {
   const [two, apart, decideQ, factQ] = cues(s, [["两种依据", "two kinds of authority"], ["分开看", "stay apart"], ["行动依据", "authority to act"],
     ["事实依据", "authority about facts"]]);
   const ranks = cues(s, [["法律", "law"], ["这件事的决策负责人", "explicit decision"], ["有效的契约", "then contracts"], ["工作计划、临时约定", "plans provisional agreements"]]);
-  // Both editions name authority to act again as the thought that answers it begins. Chinese announces its order on
-  // those words, so the two kinds give way as that thought begins; English first says what that authority answers, so
-  // the two kinds stand through it and give way as the order is announced. The frame of the order opens on its
-  // announcement and takes it as its title.
+  // Both editions name authority to act again as the thought that answers it begins. Chinese announces its order right
+  // after those words, so the two kinds give way to the order's head as the name ends, on 「依据」, and its frame stands
+  // alone only briefly before its first rank; English first says what that authority answers, so the two kinds stand
+  // through it and give way as the order is announced. The frame of the order opens on its announcement and takes it
+  // as its title.
   const order = cue(s, "有先后", "it has an order"), actQ = cueFrom(s, "行动依据", "authority to act", factQ);
-  const orderCut = en ? order : actQ;
+  const orderCut = en ? order : cueFrom(s, "依据", "", actQ);
   // The second kind is named again where its answer begins.
   const truthQ = cueFrom(s, "事实依据", "authority about facts", ranks[3]);
   // English says what each kind answers as the thought about it begins, where Chinese says both as it names the two.
@@ -1499,7 +1519,7 @@ scenes["03"] = function (s, t) {
   const release = cue(s, "已经定了今天发布", "if a release is set for today");
   const [expert, missing, domainOwner, alone] = cues(s, [["专业判断", "professional judgment belongs"], ["缺了哪一样", "either is missing"],
     ["相应领域的负责人", "bring in the domain owner"], ["懂行", "expertise alone"]]);
-  // Chinese says first that expertise is not authority, English last.
+  // Both editions say first that expertise is not authority.
   const noPower = cueFrom(s, "不等于有权", "no authority to decide", alone), judgeAt = Math.min(expert, alone);
 
   // 1. The guidelines bind members and the Agents they delegate to: one frame holds both figures, joined by the
@@ -1629,7 +1649,7 @@ scenes["03"] = function (s, t) {
       [["The explicit decision"], ["of the decision owner"]],
       [["Contracts,"], [" policies", ", specifications", " and decision records in force"]],
       [["Plans,"], [" provisional agreements", " and personal preferences"]]]
-      : [[["法律、"], ["监管", "、安全要求", "和公司的强制性制度"]], [["这件事的决策负责人作出的明确决定"], []],
+      : [[["法律、"], ["监管、安全要求", "和公司的强制性制度"]], [["这件事的决策负责人作出的明确决定"], []],
         [["有效的契约、"], ["制度", "、规范", "和决策记录"]], [["工作计划、"], ["临时约定", "和个人偏好"]]];
     // What each rank holds, as it is said: its station beats once for each member after the first, on the words that
     // bring that member to the rank's qualifier.
@@ -1637,10 +1657,11 @@ scenes["03"] = function (s, t) {
       ["policies", "specifications", "decision records"], ["provisional agreements", "personal preferences"]]
       : [["监管", "安全要求", "公司的强制性制度"], [], ["制度", "规范", "决策记录"], ["临时约定", "个人偏好"]])
       .map((rest, r) => [ranks[r], ...rest.map(v => cueFrom(s, v, v, ranks[r]))]);
-    // The words each qualifier's parts join on: each further member's. English names its first rank's members in two
-    // parts, so the frame stands near its full width from the first and the rank still grows while the rest is said.
+    // The words each qualifier's parts join on: each further member's. Both editions name their first rank's members
+    // in two parts, so the frame stands near its full width from the first and the rank still grows while the rest is
+    // said, and the order's opening frame, its head alone, never stands thin for long.
     const parts = members.map(m => m.slice(1));
-    if (en) parts[0] = [members[0][1], members[0][3]];
+    parts[0] = [members[0][1], members[0][3]];
     const head = s03Order(t, g2, {FT: L(320, 280), leave: truthQ, width: L(640, 960), color: P.authority, question: L("行动依据", "Authority to act"), questionAt: decideQ, frameAt: order,
       build: true, joined: en ? [true, false, true, true] : true, rows: names.map(([term, qual], r) => [term, [ranks[r]], qual, parts[r], ranks[r], 0, colors[r], "ranks"]),
       station: (x, y, r, q, lit) => {
@@ -1669,12 +1690,13 @@ scenes["03"] = function (s, t) {
   // the seal stops at the bar. The leads are a list: each is named on its own words where the row's qualifier stands,
   // and the name that calls them only leads comes last, on its own words. The Chinese rows are set within the width of
   // the order of authority to act, so the leads stand under their name and the frame stands nearer the centre while its
-  // first rows build. The order holds until authority and fact are set against each other.
-  const g3f = stageIn(t, record) * stageOut(t, versus);
+  // first rows build. The English leads, five names of one list, each begin with a capital, as Agent output must. The
+  // order holds until the first refusal of the next thought is said.
+  const g3f = stageIn(t, record) * stageOut(t, noTrue);
   if (g3f > 0) {
     const facts = en ? [[["Primary records"], [record], [], []],
       [["Repeatable observations"], [observe], ["with a source", ", time", ", subject", " and scope"], attrs],
-      [["Only leads"], [onlyLeads], ["Second-hand accounts", ", caches", ", generated views", ", Agent output", ", memory"], leads]]
+      [["Only leads"], [onlyLeads], ["Second-hand accounts", ", Caches", ", Generated views", ", Agent output", ", Memory"], leads]]
       : [[["原始记录"], [record], [], []], [["能重复的观察"], [observe], ["并说清来源", "、时间", "、对象和范围"], attrs],
         [["只能算线索"], [onlyLeads], ["转述", "、记忆", "、缓存", "、派生视图", "、智能体的输出"], leads]];
     const starts = facts.map(([, termAts, , qualAts]) => Math.min(...termAts, ...qualAts));
@@ -1691,7 +1713,7 @@ scenes["03"] = function (s, t) {
         beats(t, x, y, 19, parts[r].slice(1), {color: r < 2 ? P.evidence : P.unknown, alpha: g3f});
       }});
     const barY = tops[2] - 26, tried = ramp(t, leads[0] - .15, .4) * g3f;
-    link(SX, ys[2] - 14, SX, barY + 12, {color: P.unknown, alpha: tried, upto: soon(t, leads[0] - .1, .7), end: false, dash: [6, 6]});
+    link(SX, ys[2] - 14, SX, barY + 12, {color: P.unknown, alpha: tried, upto: drawShare(t, leads[0] - .1, Math.abs(barY + 12 - (ys[2] - 14)), .7), end: false, dash: [6, 6]});
     line(SX - 24, barY, SX + 24, barY, {color: P.unknown, alpha: ramp(t, leads[0] + .45, .3) * g3f, width: 4});
   }
 
@@ -1701,13 +1723,15 @@ scenes["03"] = function (s, t) {
   // them. In the example the release set for today beats on authority's seal and the verification that finds the data
   // wrong on the fact's; the conflict then stands in the middle and is reported with its impact, while its ways down to
   // altering the record or quietly acting for one side stop at their bars. No one is named to settle it here. The stage
-  // holds until the words on expertise begin. The middle stands at the frame's centre; authority, its way and its refused
-  // name stand alone first, so until the fact is named they stand 240 px right of their place, balanced on the centre,
-  // and they glide to it as the fact is named.
-  const g4c = stageIn(t, versus) * stageOut(t, judgeAt);
+  // holds until the words on expertise begin. It cuts in on the words of the first refusal, so authority's seal never
+  // stands alone without the way it is refused, and the seals stand 480 px either side of the middle in both editions,
+  // so the pair covers the band as soon as the fact joins. The middle stands at the frame's centre; authority, its way
+  // and its refused name stand alone first, so until the fact is named they stand 240 px right of their place, balanced
+  // on the centre, and they glide to it as the fact is named.
+  const g4c = stageIn(t, noTrue) * stageOut(t, judgeAt);
   if (g4c > 0) {
-    const M = 960, Y = 520, AX = M - L(420, 480), BX = M + L(400, 480), R = 44, PY = 300, DY = 770, xs = [M - 260, M + 260];
-    const factAt = cueFrom(s, "事实依据", "a fact does not", versus), grant = cue(s, "给不了去做的权限", "grant permission");
+    const M = 960, Y = 520, AX = M - 480, BX = M + 480, R = 50, PY = 300, DY = 770, xs = [M - 260, M + 260];
+    const factAt = cueFrom(s, "事实依据", "a fact does not", versus), grant = cue(s, "给不了动手的权限", "grant permission");
     const ox = 240 * (1 - glide(t, factAt + .05, 240));
     seal(AX + ox, Y - 14, R, {alpha: g4c});
     nameText(L("行动依据", "Authority to act"), AX + ox, Y - 14 + R + NAME_GAP, {valign: "top", color: P.authority, alpha: g4c * named(t, versus)});
@@ -1715,14 +1739,16 @@ scenes["03"] = function (s, t) {
     nameText(L("事实依据", "A fact"), BX, Y - 14 + R + NAME_GAP, {valign: "top", color: P.evidence, alpha: g4c * named(t, factAt)});
     beats(t, AX + ox, Y - 14, R + 10, [release], {color: P.authority, alpha: g4c});
     beats(t, BX, Y - 14, R + 10, [conflict], {color: P.evidence, alpha: g4c});
-    // The two refused names stand alike, two lines each in Chinese and one line each in English, whose seals stand far
-    // enough apart to take them whole, so no line splits the phrase it refuses; their crosses, centred on their names, stand
-    // level, and they mirror each other about the middle: each cross stands toward the middle beside its way's bar, its
-    // name beyond it, the left name's lines ending 16 px before its cross as the right name's lines begin 16 px after its own.
-    [[AX + R + 14, M - 35, noTrue, noTrue, L("把假的变成真的", "Make a false fact true"), L(200, Infinity), -1, ox],
-      [BX - R - 14, M + 35, factAt, grant, L(["去做的", "权限"], "Grant permission to act"), L(280, Infinity), 1, 0]]
+    // The two refused names stand alike, one line each, whose seals stand far enough apart to take them whole, so no
+    // line splits the phrase it refuses; their crosses, centred on their names, stand level, and they mirror each other
+    // about the middle: each cross stands toward the middle beside its way's bar, its name beyond it, the left name
+    // ending 16 px before its cross as the right name begins 16 px after its own. The fact's way sets off on the fact's
+    // words, or half a second before what it cannot grant is named where that comes later, as in English, so the way
+    // never stands long before its name.
+    [[AX + R + 14, M - 35, noTrue, noTrue, L("把假的变成真的", "Make a false fact true"), Infinity, -1, ox],
+      [BX - R - 14, M + 35, Math.max(factAt, grant - .5), grant, L("动手的权限", "Grant permission to act"), Infinity, 1, 0]]
       .forEach(([x0, bar, go, at, v, width, side, dx]) => {
-        link(x0 + dx, Y, bar + dx, Y, {color: P.unknown, alpha: ramp(t, go - .1, .3) * g4c, upto: soon(t, go + .05, .7), end: false, dash: [8, 8]});
+        link(x0 + dx, Y, bar + dx, Y, {color: P.unknown, alpha: ramp(t, go - .1, .3) * g4c, upto: drawShare(t, go + .05, Math.abs(bar + dx - (x0 + dx)), .7), end: false, dash: [8, 8]});
         line(bar + dx, Y - 24, bar + dx, Y + 24, {color: P.unknown, alpha: ramp(t, at + .45, .3) * g4c, width: 4});
         const cross = 26;
         rejectedName(v, (side < 0 ? M - 40 - cross - 16 : M + 40 + cross + 16) + dx, Y - 36, {align: side < 0 ? "right" : "left", valign: "bottom", width,
@@ -1733,16 +1759,17 @@ scenes["03"] = function (s, t) {
     ring(M, Y, 24 + 3 * Math.sin(voiceTime(t) * 4), {color: P.unknown, alpha: c, width: 3});
     dot(M, Y, 7, {color: P.unknown, alpha: c});
     // The conflict and its impact are reported: the way up from the conflict draws on as the report is named, and the
-    // report stands at its end.
+    // report stands at its end, named by what it reports; in English by its key words, since the clause is a caption
+    // cue of its own.
     const RW = 64, RH = 84, RX = M - RW / 2, RY = PY - RH / 2;
     link(M, Y - 36, M, RY + RH + 12, {color: P.evidence, alpha: ramp(t, report - .1, .3) * g4c, upto: soon(t, report + .05, .8), width: 2.5});
     documentIcon(RX, RY, RW, RH, {alpha: ramp(t, report + .3, .4) * g4c, rows: 2});
-    nameText(L("讲出冲突和影响", "Report the conflict and its impact"), RX + RW + NAME_GAP, PY, {align: "left", alpha: g4c * named(t, report)});
+    nameText(L("讲出冲突和影响", "Conflict and impact"), RX + RW + NAME_GAP, PY, {align: "left", alpha: g4c * named(t, report)});
     // The quiet ways out stop at their bars: the record is not altered, and no side is quietly acted for.
     const alter = cue(s, "篡改记录", "alter the record");
     [[alter, L("篡改记录", "Alter the record")], [quiet, L("悄悄按决定或核验结果去做", "Silently act as if one side had won")]].forEach(([at, v], k) => {
-      link(M, Y + 36, xs[k], DY - 40, {route: "vhv", mid: Y + 150, color: P.unknown, alpha: ramp(t, at - .1, .3) * g4c, upto: soon(t, at + .05, .7),
-        end: false, dash: [8, 8]});
+      link(M, Y + 36, xs[k], DY - 40, {route: "vhv", mid: Y + 150, color: P.unknown, alpha: ramp(t, at - .1, .3) * g4c,
+        upto: drawShare(t, at + .05, Math.abs(xs[k] - M) + Math.abs(DY - 40 - (Y + 36)), .7), end: false, dash: [8, 8]});
       line(xs[k] - 24, DY - 40, xs[k] + 24, DY - 40, {color: P.unknown, alpha: ramp(t, at + .45, .3) * g4c, width: 4});
       rejectedName(v, xs[k], DY, {valign: "top", width: 440, alpha: g4c * named(t, at), mark: ramp(t, at + .45, .3)});
     });
@@ -1753,8 +1780,8 @@ scenes["03"] = function (s, t) {
   // and settles level only when both are in. When one is missing its weight leaves the pan, a question stands there and
   // the beam tips again; the domain owner is brought in on the right and carries the missing facts into the pan, and
   // the beam levels. Below, expertise alone runs toward the power to decide or act and stops at a bar short of it; that
-  // power's hollow seal stands below on the words that deny it. Chinese says this first and English last, so the stage
-  // cuts in on whichever opens the thought. The balance stands at the content centre, so the picture is balanced from
+  // power's hollow seal stands below on the words that deny it. Both editions say this first, so the stage cuts in on
+  // the thought's opening words. The balance stands at the content centre, so the picture is balanced from
   // its first words; the domain owner then stands at the right, so on the owner's words the whole stage moves left by
   // as much as centres the finished stage, from the needs' names at its left to the owner's name at its right.
   const g5 = stageIn(t, judgeAt);
@@ -1775,11 +1802,14 @@ scenes["03"] = function (s, t) {
     line(...ends[0], ...ends[1], {color: P.ink, alpha: g5, width: 4});
     dot(PX, PY, 7, {color: P.ink, alpha: g5});
     nameText(L("专业判断", "Professional judgment"), PX, PY - 30 - NAME_GAP, {valign: "bottom", alpha: g5 * named(t, expert)});
-    // Each pan hangs from its end of the beam on two strings: a shallow bowl through the strings' feet.
+    // Each pan hangs from its end of the beam on two strings: a shallow bowl through the strings' feet. The four strings
+    // are one stroke and the two bowls another, so the balance is one instrument rather than repeated strings and bowls
+    // each waiting for a name of its own.
+    const BOWL = [Math.PI * .344, Math.PI * .656];
+    stroke(() => pans.forEach(([x, y], i) => [-PW, PW].forEach(d => { ctx.moveTo(...ends[i]); ctx.lineTo(x + d, y); })), {color: P.line, alpha: g5, width: 2});
+    stroke(() => pans.forEach(([x, y]) => { ctx.moveTo(x + 136 * Math.cos(BOWL[0]), y - 120 + 136 * Math.sin(BOWL[0])); ctx.arc(x, y - 120, 136, ...BOWL); }),
+      {color: P.ink, alpha: g5, width: 3});
     pans.forEach(([x, y], i) => {
-      line(...ends[i], x - PW, y, {color: P.line, alpha: g5, width: 2});
-      line(...ends[i], x + PW, y, {color: P.line, alpha: g5, width: 2});
-      stroke(() => ctx.arc(x, y - 120, 136, Math.PI * .344, Math.PI * .656), {color: P.ink, alpha: g5, width: 3});
       const lit = speaking(t, needAts, i);
       if (lit > 0) ring(x, y - 24, 32, {color: P.evidence, alpha: lit * restMark(P.evidence, .5) * g5, width: 2});
     });
@@ -1802,7 +1832,7 @@ scenes["03"] = function (s, t) {
     const fx0 = OX - 64, fy0 = OY - 2, fx = fx0 + back * back * (rx - fx0), fy = fy0 - 2 * back * (1 - back) * 280 + back * back * (ry - fy0);
     documentIcon(fx - 17, fy - 50, 34, 44, {alpha: come * lost, rows: 3});
     // Expertise alone does not reach the power to decide or act.
-    link(PX, BASE + 10, PX, barY, {color: P.unknown, alpha: ramp(t, alone - .1, .3) * g5, upto: soon(t, alone + .05, .7), end: false, dash: [8, 8]});
+    link(PX, BASE + 10, PX, barY, {color: P.unknown, alpha: ramp(t, alone - .1, .3) * g5, upto: drawShare(t, alone + .05, Math.abs(barY - (BASE + 10)), .7), end: false, dash: [8, 8]});
     line(PX - 28, barY, PX + 28, barY, {color: P.unknown, alpha: ramp(t, noPower + .05, .3) * g5, width: 4});
     nameText(L("懂行", "Expertise alone"), PX - 24, (BASE + 10 + barY) / 2, {align: "right", alpha: g5 * named(t, alone)});
     seal(PX, SY, 34, {alpha: g5 * .9 * named(t, noPower), hollow: true});
@@ -1825,7 +1855,7 @@ scenes["04"] = function (s, t) {
   // blocks are about one width, so it builds as one block.
   const boundaryRows = en ? [
     ["Tell the truth", ["no fabrication", ", hiding", ", cherry-picking", " or false certainty"]],
-    ["Stay within your limits", ["of subject", ", time", ", competence", ", permission", ", data", ", security", ", compliance", " and action"]],
+    ["Stay within your limits", ["subject and time", ", competence and permission", ", data, security, compliance", " and action"]],
     ["Name the owner", ["every important judgment", ", decision", ", change", " and acceptance"]],
     ["Do not claim false completion", ["without current evidence", " matching the claim", ", call nothing complete", ", correct",
       ", usable", " or adopted"]]]
@@ -1837,10 +1867,11 @@ scenes["04"] = function (s, t) {
   const caseRows = en ? [["Inside them", ["autonomy", ", exploration", ", creative work"]],
     ["When an action would cross one", ["stop", ", make it visible", ", escalate"]],
     ["After a breach", ["stop", ", disclose", ", correct within authority", ", escalate by risk"]]]
-  : [["在这四条底线之内", ["欢迎自主", "、探索", "和创造"]], ["快要越线时", ["停下来", "，讲出来", "，往上报"]],
+  : [["底线之内", ["欢迎自主", "、探索", "和创造"]], ["快要越线", ["停下来", "，讲出来", "，往上报"]],
     ["已经越线", ["就停下受影响的事", "，如实说明", "，在权限内纠正", "，并按风险上报"]]];
-  // The Chinese cases are the narrower column, so it stands nearer the field. The English columns take a qualifier of up
-  // to 620 px on one line, since none of their two-line breaks would stand even.
+  // The Chinese cases are named by their key words, 底线之内, 快要越线 and 已经越线, so no case row repeats its spoken
+  // clause whole; they are the narrower column, so it stands nearer the field. The English columns take a qualifier of
+  // up to 620 px on one line, since none of their two-line breaks would stand even.
   const W1 = L(480, 620), W2 = L(360, 620), LX1 = 840, LX2 = L(900, 940);
   // The field and its column stand centred between the column's first picture and its whole one: in the first stage the
   // first boundary alone and all four, in the second the cases before the breach and all three (in English, whose last
@@ -1858,8 +1889,7 @@ scenes["04"] = function (s, t) {
   // What each boundary rules out or covers, part by part as it is said.
   const said = en ? [
     cues(s, [["", "no fabrication"], ["", "no hiding"], ["", "no cherry-picking"], ["", "no uncertainty"]]),
-    cues(s, [["", "subject and time"], ["", "time"], ["", "competence and permission"], ["", "permission"], ["", "and data"], ["", "security"],
-      ["", "compliance"], ["", "and action"]]),
+    cues(s, [["", "subject and time"], ["", "competence and permission"], ["", "data security compliance"], ["", "and action"]]),
     cues(s, [["", "every important"], ["", "decision"], ["", "change"], ["", "acceptance"]]),
     cues(s, [["", "without current evidence"], ["", "matching the claim"], ["", "call nothing complete"], ["", "correct"], ["", "usable"],
       ["", "or adopted"]])] : [
@@ -1874,17 +1904,27 @@ scenes["04"] = function (s, t) {
   // On "four boundaries" the four sides are counted in one after another at the structure tier; each side lights while
   // its line is spoken and turns gold as its parts are said, keeping the colour once named.
   // While only counted the square is drawn as two strokes that meet at its corners, its horizontal and its vertical
-  // sides, read as one field under its name; from the first boundary's cut each side is its own stroke.
+  // sides, read as one field under its name. From the first boundary's cut its settled sides are one stroke and the
+  // gold of the sides already whole another, so the field stays one mark under its name rather than four repeated sides
+  // each waiting for a name of its own; the side being spoken, drawn wider, and a side still turning gold stand on their
+  // own, so each change is drawn where it is seen.
   const counted = j => soon(t, Math.min(four - .1, opening(s) + .3) + j * .25, .5);
-  if (!formed) [0, 1].forEach(k => stroke(() => corner.forEach(([x1, y1], j) => {
-    const [x2, y2] = corner[(j + 1) % 4], q = counted(j);
-    if (j % 2 === k && q > .01) { ctx.moveTo(x1, y1); ctx.lineTo(mix(x1, x2, q), mix(y1, y2, q)); }
-  }), {color: P.line, alpha: field, width: 4}));
-  else corner.forEach(([x1, y1], j) => {
-    const [x2, y2] = corner[(j + 1) % 4], q = counted(j), lit = speaking(t, starts, j), g = gold(j);
-    line(x1, y1, mix(x1, x2, q), mix(y1, y2, q), {color: P.line, alpha: field, width: 4 + 2 * lit, cap: "round"});
-    if (g > 0) line(x1, y1, mix(x1, x2, g), mix(y1, y2, g), {color: P.authority, alpha: field, width: 4 + 2 * lit, cap: "round"});
-  });
+  const sideTo = (j, q) => { const [x1, y1] = corner[j], [x2, y2] = corner[(j + 1) % 4]; return [x1, y1, mix(x1, x2, q), mix(y1, y2, q)]; };
+  const sides = (share, keep, o) => stroke(() => corner.forEach((_, j) => {
+    const q = share(j);
+    if (keep(j) && q > .01) { const [x1, y1, x2, y2] = sideTo(j, q); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); }
+  }), {alpha: field, width: 4, ...o});
+  if (!formed) [0, 1].forEach(k => sides(counted, j => j % 2 === k, {color: P.line}));
+  else {
+    const lits = corner.map((_, j) => speaking(t, starts, j)), golds = corner.map((_, j) => gold(j)), quiet = j => lits[j] <= 0;
+    sides(counted, quiet, {color: P.line});
+    sides(gold, j => quiet(j) && golds[j] >= 1, {color: P.authority});
+    corner.forEach((_, j) => {
+      const width = 4 + 2 * lits[j];
+      if (!quiet(j)) line(...sideTo(j, counted(j)), {color: P.line, alpha: field, width});
+      if (golds[j] > 0 && (!quiet(j) || golds[j] < 1)) line(...sideTo(j, golds[j]), {color: P.authority, alpha: field, width});
+    });
+  }
   // 1. The four boundaries build into one column beside the field, each a key term and, smaller, what it rules out or
   // covers in its key words. Each row's mark is the field in small with that boundary's own side drawn as a solid gold
   // edge, standing with its boundary's words.
@@ -1925,19 +1965,21 @@ scenes["04"] = function (s, t) {
       const x = FX + 96 + Math.sin(voiceTime(t) * .6 + k * 1.9) * 52, y = FY + FS / 2 - 10 + Math.cos(voiceTime(t) * .47 + k * 2.4) * 110;
       dot(x, y, 8, {color: P.evidence, alpha: free * .9});
     }
-    // The owner stands inside the field's top right corner; both escalations end at it.
+    // The owner stands inside the field's top right corner; both escalations end at it. Each escalation leaves its action
+    // 14 px clear of the action's ring, so the way up is a mark of the field in its own right and never takes over the
+    // action it starts from.
     const OX = FX + FS - 46, OY = FY + 70, owner = ramp(t, nearAts[2] - .15, .4) * two;
     person(OX, OY, {color: P.authority, alpha: owner, size: .8});
     const nx = mix(FX + FS * .5, FX + FS - 46, soon(t, near - .1, 1.0)), ny = FY + FS * .6, nq = ramp(t, near - .15, .4) * two;
     dot(nx, ny, 10, {color: P.ink, alpha: nq});
     ring(nx, ny, 20, {color: P.authority, alpha: ramp(t, nearAts[1] - .15, .3) * two, width: 2});
-    link(nx, ny - 26, OX, OY + 42, {color: P.authority, alpha: two, upto: soon(t, nearAts[2] - .1, .6), width: 2.5});
+    link(nx, ny - 34, OX, OY + 42, {color: P.authority, alpha: two, upto: soon(t, nearAts[2] - .1, .6), width: 2.5});
     // The breach crosses the bottom side on its words, stops outside and returns inside when it is corrected.
     const bx = FX + 210, out = soon(t, breach - .1, .7), back = soon(t, outAts[2] - .1, .8), by = mix(FY + FS - 60, FY + FS + 46, out * (1 - back));
     const bq = ramp(t, breach - .15, .3) * two;
     dot(bx, by, 10, {color: blend(P.ink, P.unknown, clamp(out * 2) * (1 - back)), alpha: bq});
     ring(bx, by, 20, {color: P.authority, alpha: ramp(t, outAts[1] - .15, .3) * two, width: 2});
-    link(bx, by - 26, OX - 30, OY, {route: "vh", color: P.authority, alpha: two, upto: soon(t, outAts[3] - .1, .8), width: 2.5});
+    link(bx, by - 34, OX - 30, OY, {route: "vh", color: P.authority, alpha: two, upto: soon(t, outAts[3] - .1, .8), width: 2.5});
     const rows = caseRows.map(([term, qual], r) => [term, [[inside, near, breach][r]], qual, [freeAts, nearAts, outAts][r]]);
     // Every case's parts stand under its name, as the boundaries' qualifiers do, since the breach's are too long to run
     // on its line; they take two lines, so the whole column is about as wide as its first two cases.
@@ -1976,12 +2018,12 @@ scenes["04"] = function (s, t) {
     const tiers = en ? [
       [["One clear exchange"], [onceAt], ["Local", ", reversible work", " with no external commitment"], lowAts, onceRows],
       [["A reviewable record"], [recordAt], ["Cross-role or extended work", ", competing options or material uncertainty"], midAts, recordRows],
-      [["Written decision", ", authorization", ", rollback or degradation", ", review", ", acceptance"], needs,
+      [["Written decision", "Explicit authorization", "Rollback or degradation", "Independent review", "Human acceptance"], needs,
         ["Production", ", funds", ", sensitive data", ", security or compliance,", " deletion", " or overwrite", ", external commitments",
           " or irreversible consequences"], triggers, needs]]
     : [
       [["一次讲清", "结论", "、依据", "和做法"], [onceAt, ...onceRows], ["局部", "、可逆", "、不对外承诺的小事"], lowAts, onceRows],
-      [["在现有的工作记录里写清", "问题", "、方案", "、做法", "和验收"], [recordAt, ...recordRows], ["工作跨角色", "、做得久", "、有几种方案", "，或者", "有重大不确定"],
+      [["在现有的工作记录里写清", "问题", "、方案", "、做法", "和验收"], [recordAt, ...recordRows], ["工作跨角色", "、做得久", "、有几种方案", "，或者", "有重大不确定性"],
         [midAts[0], cue(s, "做得久", ""), midAts[1], cueFrom(s, "或者", "", midAts[1]), midAts[2]], recordRows],
       [["书面决定", "、明确授权", "、回滚或降级运行的预案", "、独立评审", "，最后由人验收"], needs,
         ["涉及生产", "、资金", "、敏感数据", "、安全合规，", "或者删除覆盖", "、对外承诺", "、后果不可逆的事"], triggers, needs]];
@@ -1996,34 +2038,47 @@ scenes["04"] = function (s, t) {
     // four fifths of its longest and no last line under three fifths. In English the first tier's work stands on one line,
     // which no break would keep even, and the high-risk work is one block of four
     // lines of even width, none shorter than three quarters of its neighbours, so its free edge does not zigzag. The
-    // high-risk requirements, five in all with the rollback or degradation path named whole, take a block wide enough
-    // to stay at two lines in English; in Chinese they take three even lines, so their block ends near the lower tiers'
-    // processes instead of running past them.
+    // high-risk requirements, five in all, keep the words they are said in; in English, where no break of five such names
+    // keeps a block's shape, they stand as a list, one name to a line; in Chinese they take three even lines, so their
+    // block ends near the lower tiers' processes instead of running past them.
     // The Chinese work column is 360 px for the first and last tiers, which takes the first tier's fourteen characters on
     // one line and breaks the last tier's thirty-seven into lines of twelve, eleven and twelve; the middle tier's 280 px
-    // breaks its twenty-four into nine, eight and six.
+    // breaks its twenty-five into nine, eight and seven.
     const W = 600, QW = i => L([360, 280, 360][i], [620, 420, 500][i]), tw = i => i === 2 ? L(360, 760) : W, docs = [[60, 76], [86, 110], [118, 152]], GAP = 45 + 34;
-    // The parts that begin each group of a tier's work.
-    const groups = () => [0];
+    // The parts that begin each group of a tier's work, and each name of a tier's form: the English high-risk
+    // requirements are five names, one to a line.
+    const groups = () => [0], forms = i => en && i === 2 ? [0, 1, 2, 3, 4] : [0];
     // The spine stands where the ladder is balanced. Each tier's work reaches left of the spine and its form right of
-    // it; through the first two tiers the ladder stands centred between the first tier and the first two, and once the
-    // third tier's first block is whole, on the words of its last part, it moves to stand centred between that block with
-    // the tiers above it and the whole ladder, so no state leans further one way than the next leans the other. It ends
-    // within 25 px of the centre, where the next stage's middle document stands, so that document continues it.
+    // it, and where a side holds no block yet the spine's own names and documents reach half their width. The ladder's
+    // pictures follow the words: each tier's work and then its form, except the English high-risk tier, which says its
+    // form first, and in Chinese, which lists the tiers before it speaks of each, the spine with its documents before
+    // them. Through each of three stretches, before the first form is said, until the third tier's first block is whole
+    // and after it, the ladder stands so that no picture of the stretch leans further one way than another leans the
+    // other, so the first work never leans far while its form is still to come, and it glides to the next stretch's
+    // place on the words that begin it: the first form's, and those of that block's last part, which leave the whole
+    // ladder centred. The English spine stands alone only until the first work is said, too briefly to count. The next
+    // stage re-forms in its cut, so the ladder need not end where that stage's middle document stands.
     const blockW = (parts, width, size, g = [0]) => Math.max(...s04Groups(parts, g).flatMap(([, v]) =>
       growTexts(v, width, size).map(line => line.reduce((sum, [, piece]) => sum + measure(piece, size), 0))));
-    const lefts = tiers.map(([, , qual], i) => blockW(qual, QW(i), NOTE, groups(i))), rights = tiers.map(([term], i) => blockW(term, tw(i), LABEL));
-    // The offset from the spine of the centre of a picture holding the work of tiers `l` and the forms of tiers `r`.
-    const lean = (l, r) => (Math.max(...r.map(i => rights[i])) - Math.max(...l.map(i => lefts[i]))) / 2;
+    const lefts = tiers.map(([, , qual], i) => blockW(qual, QW(i), NOTE, groups(i))), rights = tiers.map(([term], i) => blockW(term, tw(i), LABEL, forms(i)));
+    const head = L("要留多少记录、走多少手续", "The process"), foot = L("风险", "Risk");
+    const axis = Math.max(measure(head) / 2, measure(foot) / 2, docs[2][0] / 2);
+    const reach = (blocks, widths) => blocks.length ? GAP + Math.max(...blocks.map(i => widths[i])) : axis;
+    // The offset from the spine of the centre of a picture holding the work of tiers `l` and the forms of tiers `r`, and
+    // the place that centres a set of pictures so that none leans further one way than another leans the other.
+    const lean = ([l, r]) => (reach(r, rights) - reach(l, lefts)) / 2;
+    const centred = pictures => -(Math.min(...pictures.map(lean)) + Math.max(...pictures.map(lean))) / 2;
     const workFirst = !en, third = workFirst ? triggers.at(-1) : needs.at(-1);
-    const before = -(lean([0], [0]) + lean([0, 1], [0, 1])) / 2;
-    const after = Math.max(-25, Math.min(25, -((workFirst ? lean([0, 1, 2], [0, 1]) : lean([0, 1], [0, 1, 2])) + lean([0, 1, 2], [0, 1, 2])) / 2));
-    const SX = 960 + mix(before, after, soon(t, third + .05, .6));
+    const pictures = en ? [[[0], []], [[0], [0]], [[0, 1], [0]], [[0, 1], [0, 1]], [[0, 1], [0, 1, 2]], [[0, 1, 2], [0, 1, 2]]]
+      : [[[], []], [[0], []], [[0], [0]], [[0, 1], [0]], [[0, 1], [0, 1]], [[0, 1, 2], [0, 1]], [[0, 1, 2], [0, 1, 2]]];
+    const first = pictures.findIndex(([, r]) => r.length), last = pictures.length - 2;
+    const [alone, built, whole] = [pictures.slice(0, first), pictures.slice(first, last + 1), pictures.slice(last)].map(centred);
+    const SX = 960 + alone + (built - alone) * glide(t, tiers[0][1][0] + .05, built - alone) + (whole - built) * glide(t, third + .05, whole - built);
     // Each tier is spoken in its own thought, which opens with its work in English and with its tier's name in Chinese.
     const tierAt = en ? tiers.map(([, , , qualAts], i) => i < 2 ? qualAts[0] : cue(s, "", "high-risk work"))
       : [cue(s, "轻量档", ""), cue(s, "标准档", ""), cue(s, "高风险档", "")];
     const listedAt = en ? [] : cues(s, [["轻量", ""], ["标准", ""], ["高风险", ""]]);
-    const heights = tiers.map(([term, , qual], i) => Math.max(docs[i][1], s04Height(term, tw(i), LABEL), s04Height(qual, QW(i), NOTE, groups(i))));
+    const heights = tiers.map(([term, , qual], i) => Math.max(docs[i][1], s04Height(term, tw(i), LABEL, forms(i)), s04Height(qual, QW(i), NOTE, groups(i))));
     const tops = stackTops(heights, CONTENT_CY - 20, 40), mids = tops.map((y, i) => y + heights[i] / 2), end = tops[2] + heights[2] + 24;
     // Risk rises down the spine through three levels; the stage's words name the spine above it. The point that travels
     // down the spine stands at full size on the spine from the stage's cut, already entered, and runs down the part
@@ -2031,8 +2086,9 @@ scenes["04"] = function (s, t) {
     const grow = soon(t, form + .05, .35), from = tops[0] - 24;
     link(SX, from, SX, end, {alpha: three, upto: grow, flowing: since(t, form + STAGE_CUT), lag: -.12});
     // In Chinese the thought opens by asking how much record and process the work needs; that question names the spine.
-    nameText(L("要留多少记录、走多少手续", "Risk sets the process"), SX, from - NAME_GAP, {valign: "bottom", alpha: three * named(t, form)});
-    nameText(L("风险", "Risk"), SX, end + NAME_GAP, {valign: "top", color: P.muted, alpha: three * named(t, cueFrom(s, "风险", "risk", form))});
+    // In English the process that risk sets names it, since the sentence that says so is a caption cue of its own.
+    nameText(head, SX, from - NAME_GAP, {valign: "bottom", alpha: three * named(t, form)});
+    nameText(foot, SX, end + NAME_GAP, {valign: "top", color: P.muted, alpha: three * named(t, cueFrom(s, "风险", "risk", form))});
     tiers.forEach(([term, termAts, qual, qualAts, rowAts], i) => {
       // Chinese names the three tiers in one list before it speaks of each, so each tier's document stands on the spine
       // on its name there; English brings each document with the form its tier calls for.
@@ -2041,16 +2097,18 @@ scenes["04"] = function (s, t) {
       // The document masks the spine behind it as it stands, so the spine runs unbroken until then.
       box(x, y, w, h, {fill: P.ground, alpha: q, radius: 4});
       documentIcon(x, y, w, h, {alpha: q, rows: 0, stroke: blend(P.ink, P.evidence, lit)});
-      rowAts.forEach((at, k) => {
-        const ry = y + h * (.3 + k * .55 / rowAts.length), x0 = x + w * .14, x1 = x + w * (k % 2 ? .62 : .82);
-        line(x0, ry, mix(x0, x1, soon(t, at - .1, .5)), ry, {color: P.muted, alpha: q * ramp(t, at - .15, .2), width: 2});
-      });
+      // Its rows are written in turn as one hand's lines, one stroke, so the document stays one mark rather than
+      // repeated rows each waiting for a name of its own.
+      stroke(() => rowAts.forEach((at, k) => {
+        const ry = y + h * (.3 + k * .55 / rowAts.length), x0 = x + w * .14, x1 = x + w * (k % 2 ? .62 : .82), drawn = soon(t, at - .1, .5);
+        if (drawn > .01) { ctx.moveTo(x0, ry); ctx.lineTo(mix(x0, x1, drawn), ry); }
+      }), {color: P.muted, alpha: q, width: 2});
       const level = three * listLevel(t, tierAt, i);
       // The work and the form it calls for build part by part on their words; the Chinese high-risk work, said over
       // several seconds, stands in its two groups.
       s04Grow(t, qual, qualAts, SX - GAP, mids[i], {width: QW(i), size: NOTE, color: P.muted, align: "right", alpha: level, set: "forms",
         groups: groups(i), build: true});
-      s04Grow(t, term, termAts, SX + GAP, mids[i], {width: tw(i), alpha: level, set: "forms", build: true});
+      s04Grow(t, term, termAts, SX + GAP, mids[i], {width: tw(i), alpha: level, set: "forms", groups: forms(i), build: true});
     });
   }
   // 4. Lower risk means less process, and every duty still applies: the three tiers stand side by side in one row,
@@ -2065,11 +2123,12 @@ scenes["04"] = function (s, t) {
       const [w, h] = docs[i];
       documentIcon(x - w / 2, CY - h / 2, w, h, {alpha: four4, rows: 3 + i, stroke: blend(P.ink, P.evidence, formLit)});
     });
-    // The same four lines around every tier: one stroke for the three fields, so they read as one set of duties.
+    // The same four lines around every tier: one stroke for the three fields, so they read as one set of duties. Their
+    // tops are already drawing on in the cut's first frame, so the fields come in with the cut rather than a frame after.
     stroke(() => xs.forEach(x => {
       const c = [[x - S / 2, CY - S / 2], [x + S / 2, CY - S / 2], [x + S / 2, CY + S / 2], [x - S / 2, CY + S / 2]];
       c.forEach(([x1, y1], j) => {
-        const [x2, y2] = c[(j + 1) % 4], drawn = soon(t, duty + STAGE_CUT + j * .12, .5);
+        const [x2, y2] = c[(j + 1) % 4], drawn = soon(t, duty + STAGE_CUT - .1 + j * .12, .5);
         if (drawn > .01) { ctx.moveTo(x1, y1); ctx.lineTo(mix(x1, x2, drawn), mix(y1, y2, drawn)); }
       });
     }), {color: P.authority, alpha: four4, width: 3 + dutyLit});
@@ -2198,15 +2257,18 @@ scenes["05"] = function (s, t) {
     // centred while the catalog and then its users stand alone; its tree grows from the catalog where it stands and the
     // stage moves back as it grows, its answers standing within the frame's balance. The tree then stands centred on its
     // questions from the words of the first, and on the whole tree as the fixes join it, moving left on those words. The
-    // team's far edge stands 277 px left of the catalog's centre, the catalog's 111 px right of it.
+    // team stands TEAM px left of the catalog's centre, its far edge 62 px further, and the catalog's edge 111 px right of
+    // it; in English, where the team and the catalog stand alone until the first question, the team stands further out,
+    // so the pair covers a tenth of the band.
     const fixW = Math.max(13, ...wrapName(L("办法却各不相同", ["Each needs", "a different fix"]), 260).map(v => measure(v) / 2));
-    const opened = L(830, 960 + (277 - 111) / 2), centred = right => 960 - (520 - 277 + right) / 2;
+    const TEAM = L(215, 310), far = TEAM + 62;
+    const opened = L(830, 960 + (far - 111) / 2), centred = right => 960 - (520 - far + right) / 2;
     const lone = en ? 0 : (960 - opened) * glide(t, catalog + STAGE_CUT, 960 - opened) * (1 - glide(t, notFound + STAGE_CUT, 960 - opened));
     const answered = en ? centred(Math.max(ends[0], ends[1])) : opened - 520, asked = centred(Math.max(...ends)), whole = centred(FX0 + fixW);
     const T = answered + (asked - answered) * glide(t, meaning + .05, asked - answered) + (whole - asked) * glide(t, differ + .05, whole - asked) + lone;
     // The fixes join the tree at their final place, as it moves to stand centred with them.
     const CX = tree ? 520 + T : opened + lone, N1 = 800 + T, N2 = 1160 + T, FX = FX0 + whole;
-    const together = cue(s, "同时存在", "both can be true"), team = named(t, teamAt) * two, TX = CX - 215;
+    const together = cue(s, "同时存在", "both can be true"), team = named(t, teamAt) * two, TX = CX - TEAM;
     [TX - 45, TX, TX + 45].forEach(x => person(x, 325, {alpha: team, size: .75}));
     nameText(L("大家", "A team"), TX, 342 + NAME_GAP, {valign: "top", alpha: team});
     // The catalog stands on its own words.
@@ -2256,7 +2318,9 @@ scenes["05"] = function (s, t) {
   if (three > 0) {
     // The frame's sides grow down with each item by the padding above the first, so the items stand centred between its
     // top and the sides' feet as they build, and its bottom edge stands that far below the last item.
-    const FL = 560, FR = 1360, FT = 370, ys = en ? [435, 505, 575, 645, 715] : [470, 575, 680], PADV = ys[0] - FT, FB = ys.at(-1) + PADV;
+    // The English frame keeps 75 px round its items, its items 10 px higher, so its first picture, the frame round one
+    // item, covers a tenth of the band while its bottom edge stands where the limits have room above the next stage.
+    const FL = 560, FR = 1360, FT = L(370, 350), ys = en ? [425, 495, 565, 635, 705] : [470, 575, 680], PADV = ys[0] - FT, FB = ys.at(-1) + PADV;
     const commitQ = ramp(t, commit - .1, .6), tone = blend(P.ink, P.authority, commitQ);
     // Each item's first words.
     const items = en ? [subject, present, cueFrom(s, "", "the goal", present), criteria, outScope] : [subject, present, criteria];
@@ -2269,8 +2333,10 @@ scenes["05"] = function (s, t) {
     path([[FR, FT], [FR, low], [FR - 46, low]], {color: tone, alpha: three, width: 3});
     nameText(L("问题", "The problem"), FL, FT - NAME_GAP, {align: "left", valign: "bottom", alpha: three * named(t, frame)});
     nameText(L("能执行的承诺", "Executable commitment"), FR, FT - NAME_GAP, {align: "right", valign: "bottom", color: P.authority, alpha: three * named(t, commit)});
+    // Each item is named by its key words; the Chinese pairs, each a caption cue of its own, take the names of what they
+    // ask, as the English items do.
     const names = en ? ["Its subject and who is affected", "Present state and baseline", "The goal", "The success criteria", "What is out of scope"]
-      : ["针对什么，影响谁", "现在怎样，跟什么比", "怎样算成功，哪些不做"];
+      : ["对象和受影响的人", "现状和基准", "成功标准和不做的事"];
     const MX = 960 + 22 - (50 + NAME_GAP + Math.max(...names.map(v => measure(v, LABEL)))) / 2, NX = MX + 28 + NAME_GAP;
     // The goal lights again when the limits sentence names it, and stays lit until the stage cut; in Chinese the goal
     // is the pair that says what counts as success, which is also the third item.
@@ -2306,6 +2372,8 @@ scenes["05"] = function (s, t) {
   // untaken, and one quiet link rises from it to the person who decides above, who appears when that person is asked.
   // The bar stands far enough right that the conditions and the lane are balanced while the action moves, and the way
   // on is short, so the stopped stage is balanced too; the person who decides is named at their left, over the lane.
+  // The halo on the condition being said stands 10 px clear of its mark, as the frame's halos do, so it never matches
+  // the moving action's outer ring and the action stays one mark with the lane it runs on.
   const four = base * stageIn(t, unSubject) * stageOut(t, collect);
   if (four > 0) {
     const LY = 650, BX = 1380, HX = BX - 44, PY = 390, MX = 480, ys = [380, 470, 560];
@@ -2317,7 +2385,7 @@ scenes["05"] = function (s, t) {
     conds.forEach((at, i) => {
       const y = ys[i], q = ramp(t, at - .1, .4) * four, lit = speaking(t, conds, i);
       ring(MX, y, 20, {color: P.unknown, alpha: q, width: 2.5});
-      if (lit > 0) ring(MX, y, 28, {color: P.unknown, alpha: lit * restMark(P.unknown, .5) * four, width: 2});
+      if (lit > 0) ring(MX, y, 30, {color: P.unknown, alpha: lit * restMark(P.unknown, .5) * four, width: 2});
       text("?", MX, y + 1, 22, {align: "center", color: P.unknown, alpha: q, role: "mark"});
       nameText(names[i], MX + 20 + NAME_GAP, y, {align: "left", alpha: four * listIn(t, conds, i), set: "unclear"});
     });
@@ -2348,10 +2416,10 @@ scenes["05"] = function (s, t) {
       1210 + 30 + NAME_GAP + measure(L("提案", "A proposal")) + 16 + 26];
     const sx = 960 - (379 + Math.max(...ends)) / 2;
     const LX = 380 + sx, RX = 1210 + sx, AY = 450, BY = 690, W = 340, H = 120;
-    // Until the judgment it could change arrives, the tray and the goal it is taken for stand centred as a pair, from
-    // the tray's left edge to the goal's cross, and they move to their places with the judgment, on its words; the pair
+    // Until the judgment it could change arrives, the tray and the aim it is taken for stand centred as a pair, from
+    // the tray's left edge to the aim's cross, and they move to their places with the judgment, on its words; the pair
     // stands no further right than keeps the judgment's name, arriving there, inside the safe area.
-    const goalW = measure(L("目的", "The goal")) + 16 + Math.min(26, labelSize(LABEL) * .9);
+    const goalW = measure(L("目的", "The aim")) + 16 + Math.min(26, labelSize(LABEL) * .9);
     const pair = Math.min(960 - (LX + RX + goalW / 2) / 2, 1800 - (ends[0] + sx));
     ctx.save(); ctx.translate(pair * (1 - glide(t, change + .05, pair)), 0);
     const unnamed = cueFrom(s, "说不清要解决什么", "names no subject", shiny), tray = ramp(t, collect + .05, .5) * five;
@@ -2363,10 +2431,10 @@ scenes["05"] = function (s, t) {
         alpha: five * ramp(t, collect - .1 + k * .04, .35) * (useful ? 1 : mix(.85, .6, tied))});
     }
     nameText(L("收集信息", "Collecting information"), LX, AY - H / 2 - NAME_GAP, {align: "left", valign: "bottom", alpha: five * named(t, collect)});
-    // Collecting is not the goal: the goal it is taken for stands struck where the judgment will stand, and gives way to
+    // Collecting is not the aim: the aim it is taken for stands struck where the judgment will stand, and gives way to
     // the judgment it could change.
-    const notGoal = cue(s, "不是目的", "is not the goal"), judged = cueFrom(s, "判断", "judgment", notGoal);
-    rejectedName(L("目的", "The goal"), RX, AY - 64, {alpha: five * named(t, notGoal) * (1 - ramp(t, judged - .2, .3)),
+    const notGoal = cue(s, "不是目的", "is not the aim"), judged = cueFrom(s, "判断", "judgment", notGoal);
+    rejectedName(L("目的", "The aim"), RX, AY - 64, {alpha: five * named(t, notGoal) * (1 - ramp(t, judged - .2, .3)),
       mark: ramp(t, notGoal + .3, .3)});
     link(LX + W + 12, AY, RX - 30, AY, {alpha: five * ramp(t, change - .1, .3), upto: soon(t, change - .05, .6), flowing: since(t, change + .55)});
     diamond(RX, AY, 18, {color: P.authority, alpha: ramp(t, change - .1, .4) * five, solid: true});
@@ -2453,7 +2521,7 @@ scenes["06"] = function (s, t) {
   const rows = (en ? [
     [["Two hours late"], ["two hours late is"], ["recorded"], ["recorded"]],
     [["Late publication by the vendor"], ["late publication"], ["untested"], ["untested"]],
-    [["Scheduling may explain the delay"], ["scheduling may explain"], ["other explanations still need ruling out"], ["other explanations"]],
+    [["Scheduling may explain the delay"], ["scheduling may explain"], ["name the other explanations"], ["name the other explanations"]],
     [["Delivery failed"], ["by the timeliness"], ["by the timeliness standard"], ["by the timeliness"]],
     [["Starting the job earlier"], ["starting the job"], ["the decision owner"], ["the decision owner"]],
     [["Who makes the change, and by when"], ["who makes the change"], [], []]]
@@ -2480,12 +2548,12 @@ scenes["06"] = function (s, t) {
     else growName(t, term, termAts, left, top, {width: S06TEXT, alpha: level, set: listed ? "statements" : null});
   };
   // 2. The illustrative case, cut in on the words that name its data: last night's price collection stands on the hour
-  // it arrived, on a line of the night's hours. When the words say it ran two hours late, the place it was due stands
-  // two hours earlier as a dashed outline, and the two hours between them are measured below the line. When the delay
-  // is restated as a recorded fact, the span's name gives way to the fact's statement, which takes the first place of
-  // the grid the next stage builds. The case stands below the grid's first row while the hypothesis is said and while
-  // the inference's premise is shown on it: on its words, the hour it was due is named as on time and the two hours as
-  // the job's late start. It leaves in one cut on the inference's own words.
+  // it arrived, on a line of the night's hours. When the words say it ran two hours late, the two hours are measured
+  // below the line, from the hour it was due to the arrival. When the delay is restated as a recorded fact, the span's
+  // name gives way to the fact's statement, which takes the first place of the grid the next stage builds. The case
+  // stands below the grid's first row while the hypothesis is said and while the inference's premise is shown on it: on
+  // its words, the place it was due stands as a dashed outline named on time, an empty place that arrives with its
+  // name, and the two hours are named as the job's late start. It leaves in one cut on the inference's own words.
   const two = base * stageIn(t, data) * stageOut(t, starts[2]);
   if (two > 0) {
     const ranLate = cue(s, "采集晚了两个小时", "ran two hours late");
@@ -2495,15 +2563,15 @@ scenes["06"] = function (s, t) {
     // The premise's two parts light what they name in full ink: the hour that was on time, and the two hours late.
     const onTime = cueFrom(s, "准时", "on time", starts[1]), startedLate = cueFrom(s, "启动得晚", "job started late", starts[1]);
     // The two hours are an accent mark: they step back only to the unknown's level, and light again on their words.
-    const late = two * back * ramp(t, ranLate + .05, .3);
     const span = two * ramp(t, ranLate + .05, .3) * mix(markLevel(P.unknown, back), 1, named(t, startedLate));
     // The night's hours: one line with a tick at each hour, drawn as one stroke.
     stroke(() => { ctx.moveTo(240, AY); ctx.lineTo(1680, AY); for (let x = 240; x <= 1680; x += 180) { ctx.moveTo(x, AY - 7); ctx.lineTo(x, AY + 7); } },
       {color: P.line, alpha: on, width: 3.5});
-    box(due - TW / 2, top, TW, TH, {stroke: P.line, alpha: late * mix(1, 1 / back, named(t, onTime)), radius: 6, dash: [6, 6]});
+    box(due - TW / 2, top, TW, TH, {stroke: P.line, alpha: two * named(t, onTime), radius: 6, dash: [6, 6]});
     nameText(L("准时", "On time"), due, top + TH / 2, {valign: "middle", alpha: two * named(t, onTime)});
     line(actual, top + TH, actual, AY, {color: P.line, alpha: on, width: 2});
-    tableIcon(actual - TW / 2, top, TW, TH, {alpha: on});
+    // The table's rules are one stroke with it, so the table reads as one mark under its name.
+    tableIcon(actual - TW / 2, top, TW, TH, {alpha: on, joined: true});
     // The collection is named beside its table, clear of the grid's first row, whose statements stand over the table,
     // and within the night's line, whole on one line.
     nameText(L("昨晚的价格数据", "Last night's price collection"), actual + TW / 2 + NAME_GAP, top + TH / 2, {align: "left", width: 360,
@@ -2702,28 +2770,32 @@ scenes["07"] = function (s, t) {
       width: L(360, 440), alpha: one * named(t, model)});
   }
   // 2. Model the relationships: the knot is re-formed at the centre, now named as the relationships to model, and the
-  // small mechanisms the words name build one row beneath it, each drawn on its own words and named below it: five in
-  // English, four in Chinese, which names no feedback. They stand left to right in the order spoken, and the row reflows
+  // small mechanisms the words name build one row beneath it, each drawn on its own words and named below it, five in
+  // both editions. They stand left to right in the order spoken, and the row reflows
   // toward its centre as they arrive. One concept keeps one meaning (a second meaning stops at a bar); a cause
-  // drives its effect; a dependent hangs from what it needs; a constraint stops a way at its limit; feedback runs back
-  // to where it began.
+  // drives its effect; a dependent hangs from the smaller node of what it needs, its own size among the row's nodes, so
+  // the pair reads as one mechanism under its name; a constraint stops a way at its limit; feedback runs back to where
+  // it began.
   const two = base * stageIn(t, relations) * stageOut(t, interacting);
   if (two > 0) {
     const ats = cues(s, [["一个概念只用一个意思", "one meaning per concept"], ["谁影响谁", "causes"], ["谁依赖谁", "dependencies"],
-      ["受什么限制", "constraints"], ...(en ? [["", "feedback"]] : [])]);
+      ["受什么限制", "constraints"], ["有哪些反馈回路", "feedback"]]);
     // The row steps half its 260 px pitch toward its open end for each mechanism still to come, so the mechanisms
     // already shown stand centred under the knot at every step.
-    const shift = building(t, ats, 130), xs = (en ? [440, 700, 960, 1220, 1480] : [570, 830, 1090, 1350]).map(x => x + shift);
+    const shift = building(t, ats, 130), xs = [440, 700, 960, 1220, 1480].map(x => x + shift);
+    // A mechanism's flow begins once the row has closed up under the knot, as the last mechanism's glide ends, so its
+    // point never rides the row's glide, which would carry it back against its own way and stop it dead.
+    const still = ats.at(-1) - .1 + glideTime(130);
     const cy = 650, r = 20, h = 70;
     s07Knot(960, 390, two);
     nameText(L("先理关系", "Relationships"), 960, 390 + 92 + NAME_GAP, {valign: "top", alpha: two * named(t, relations)});
-    const node = (x, y, q, lit = 0) => {
-      dot(x, y, r, {color: P.row, alpha: q});
-      ring(x, y, r, {color: P.ink, alpha: q, width: 2.5});
-      if (lit > 0) ring(x, y, r + 9, {color: P.evidence, alpha: lit * restMark(P.evidence, .5) * q, width: 2});
+    const node = (x, y, q, lit = 0, size = r) => {
+      dot(x, y, size, {color: P.row, alpha: q});
+      ring(x, y, size, {color: P.ink, alpha: q, width: 2.5});
+      if (lit > 0) ring(x, y, size + 9, {color: P.evidence, alpha: lit * restMark(P.evidence, .5) * q, width: 2});
     };
     ats.forEach((at, i) => {
-      const x = xs[i], q = two * ramp(t, at - .1, .5), go = soon(t, at + .05, .7), lit = speaking(t, ats, i), drawn = since(t, at + .75);
+      const x = xs[i], q = two * ramp(t, at - .1, .5), go = soon(t, at + .05, .7), lit = speaking(t, ats, i), drawn = since(t, Math.max(at + .75, still));
       if (i === 0) {
         // One concept, one meaning: the way to a second meaning stops at a bar. The mark stands 6 px right of its
         // station, so the node's ring and the meanings' dots stand centred on the station and its name.
@@ -2738,9 +2810,9 @@ scenes["07"] = function (s, t) {
         node(x - h, cy, q, lit); node(x + h, cy, q * go);
         link(x - h + r + 6, cy, x + h - r - 6, cy, {alpha: q, upto: go, flowing: drawn});
       } else if (i === 2) {
-        // The dependent hangs below what it needs.
-        node(x, cy - 44, q * go); node(x, cy + 44, q, lit);
-        link(x, cy + 44 - r - 6, x, cy - 44 + r + 6, {alpha: q, upto: go});
+        // The dependent hangs below what it needs, a node of radius 16.
+        node(x, cy - 44, q * go, 0, 16); node(x, cy + 44, q, lit);
+        link(x, cy + 44 - r - 6, x, cy - 44 + 16 + 6, {alpha: q, upto: go});
       } else if (i === 3) {
         // The node and the limit its way stops at stand 66 px either side of the station, so the mark centres on its name.
         const from = x - 46, limit = x + 64;
@@ -2758,19 +2830,21 @@ scenes["07"] = function (s, t) {
     });
     // The names share one baseline below the row, set from left to right; each takes its level from its spoken turn. The
     // Chinese first name stands whole on one line, which its station's room takes.
-    const names = en ? ["One meaning per concept", "Causes", "Dependencies", "Constraints", "Feedback"] : [["一个概念只用一个意思"], "谁影响谁", "谁依赖谁", "受什么限制"];
+    const names = en ? ["One meaning per concept", "Causes", "Dependencies", "Constraints", "Feedback"] : [["一个概念只用一个意思"], "谁影响谁", "谁依赖谁", "受什么限制", "有哪些反馈回路"];
     railNames(names, xs, cy + 64, {alpha: i => two * listIn(t, ats, i), set: "relations"});
   }
   // 3. Two refused ways, one above the other. Above, two parts influence each other around one loop; forced into
   // separate boxes, the loop is cut at the wall between them. Below, one effect reaches two tallies; the second count
   // stops at a bar. The two parts stand from the cut, which falls on the words that name them; the loop's way from the
-  // first part to the second draws on from the cut and its way back on "因素" ("interacting parts" in English), just
-  // before the refused boxes are named under it. The loop is drawn at 3 px, so the stage reads, and balances, while it
-  // is the only structure. The effect and its two tallies stand on the effect's words.
+  // first part to the second draws on from the cut and its way back on 影响, the words that make the influence mutual
+  // (in English with the first, from the cut), so the loop stands whole about the centre before the refused boxes are
+  // named under it. The loop is drawn at 3 px, so the stage reads, and balances, while it is the only structure. The
+  // effect and its two tallies stand on the effect's words.
   const three = base * stageIn(t, interacting) * stageOut(t, observe);
   if (three > 0) {
-    const [force, boxes, effect, twice, back] = cues(s, [["硬拆成", "force interacting parts"], ["互不相干的几块", "separate boxes"],
-      ["同一个影响", "one effect"], ["算两次", "twice"], ["因素", "interacting parts"]]);
+    const [force, boxes, effect, twice] = cues(s, [["硬拆成", "force interacting parts"], ["互不相干的几块", "separate boxes"],
+      ["同一个影响", "one effect"], ["算两次", "twice"]]);
+    const back = en ? interacting : cueFrom(s, "影响", "", interacting);
     const cy = 470, ax = 640, bx = 1280, r = 36, LY = 100, wall = 960;
     const loop = soon(t, interacting + .2, .8), loopBack = soon(t, back + .2, .8), cut = ramp(t, boxes + .05, .4), walls = soon(t, boxes + .05, .6);
     [ax, bx].forEach(x => { dot(x, cy, r, {color: P.row, alpha: three}); ring(x, cy, r, {color: P.ink, alpha: three, width: 2.5}); });
@@ -2808,9 +2882,9 @@ scenes["07"] = function (s, t) {
   const four = base * stageIn(t, observe) * stageOut(t, hypotheses);
   if (four > 0) {
     const [facts, sourceTime, unknown, affects, decision] = cues(s, [["重要的事实", "important facts"], ["来源和时间", "source and time"],
-      ["每个未知", "each unknown"], ["对这个决定", "affects the decision"], ["这个决定", "the decision"]]);
+      ["每个未知因素", "each unknown"], ["对这个决定", "affects the decision"], ["这个决定", "the decision"]]);
     const EX = 960, EY = 360, LY = 530, fy = 610, dy = 765, dr = 40, em = labelSize(LABEL);
-    const factNames = [L("重要的事实", "Facts"), L("带上来源和时间", "source and time")], unknownNames = [L("每个未知", "Unknowns"), L("对决定的影响", "effect on the decision")];
+    const factNames = [L("重要的事实", "Facts"), L("带上来源和时间", "source and time")], unknownNames = [L("每个未知因素", "Unknowns"), L("对决定的影响", "effect on the decision")];
     // The facts and the unknowns hang from the record as one pair, each name over its qualifier, and the pair stands
     // centred on the record: it runs from the facts' point, 10 px left of their drop, to the end of the unknowns' names.
     const wide = ([name, note]) => Math.max(measure(name), measure(note, NOTE)), fx = 960 - (500 + 40 + wide(unknownNames) + 10) / 2 + 10, ux = fx + 500;
@@ -2825,12 +2899,16 @@ scenes["07"] = function (s, t) {
     documentIcon(fx + 28, fy - 20, 32, 40, {alpha: sq, rows: 2});
     clock(fx + 96, fy, 16, {hand: .62, color: P.evidence, alpha: sq});
     termRow(t, [factNames[0]], [facts], [factNames[1]], [sourceTime], fx + 130, fy - em / 2, {alpha: four, inline: false});
-    // The unknowns: an open question hanging from the record, whose way runs down to the decision.
-    link(ux, LY + 4, ux, fy - 20, {color: P.unknown, alpha: uq, upto: soon(t, unknown - .1, .4), end: false, dash: [4, 4]});
-    ring(ux, fy, 16, {color: P.unknown, alpha: uq, width: 2.5, dash: [4, 4]});
+    // The unknowns: an open question hanging from the record, whose way runs down to the decision. Its drop and its ring
+    // are one dashed stroke, so the question and the line it hangs from read as one mark under its name.
+    const hang = soon(t, unknown - .1, .4);
+    stroke(() => {
+      if (hang > 0) { ctx.moveTo(ux, LY + 4); ctx.lineTo(ux, mix(LY + 4, fy - 20, hang)); }
+      ctx.moveTo(ux, fy - 16); ctx.arc(ux, fy, 16, -Math.PI / 2, Math.PI * 1.5);
+    }, {color: P.unknown, alpha: uq, width: 2.5, dash: [4, 4]});
     text("?", ux, fy + 1, 22, {align: "center", color: P.unknown, alpha: uq, role: "mark"});
     termRow(t, [unknownNames[0]], [unknown], [unknownNames[1]], [affects], ux + 40, fy - em / 2, {alpha: four, inline: false});
-    link(ux, fy + 20, ux, dy - dr - 10, {alpha: uq, upto: soon(t, affects + .05, .6), dash: [6, 6], flowing: since(t, affects + .65)});
+    link(ux, fy + 20, ux, dy - dr - 10, {alpha: uq, upto: drawShare(t, affects + .05, Math.abs(dy - dr - 10 - (fy + 20)), .6), dash: [6, 6], flowing: since(t, affects + .65)});
     const dq = four * ramp(t, decision - .1, .45);
     diamond(ux, dy, dr, {color: P.authority, alpha: dq, width: 3});
     nameText(L("这个决定", "The decision"), ux + dr + NAME_GAP, dy, {align: "left", color: P.authority, alpha: four * named(t, decision)});
@@ -2843,7 +2921,7 @@ scenes["07"] = function (s, t) {
   const five = base * stageIn(t, hypotheses) * stageOut(t, easyCut);
   if (five > 0) {
     const ats = [...cues(s, [["找反例", "look for counterexamples"], ["跟基准比", "check the baseline"], ["也想想不做", "consider not acting"]]), experiment];
-    const separates = cue(s, "分开最可能", "separates the plausible");
+    const separates = cue(s, "分清最可能", "separates the plausible");
     // The tree stands centred on its finished extent: the Chinese tests and qualifier are short, so its tree stands 110
     // px right of the hypothesis's first place, and the English 70 px, easing to 20 px as its qualifier arrives, whole
     // under its term.
@@ -2867,7 +2945,7 @@ scenes["07"] = function (s, t) {
       } else if (i === 2) {
         // Two courses from one point: acting, and the course the case takes with no action, drawn dashed.
         link(gx, y, gx + 120, y - 20, {route: "hvh", mid: gx + 40, alpha: q * .8, upto: soon(t, at, .5)});
-        link(gx, y, gx + 120, y + 20, {route: "hvh", mid: gx + 40, color: P.muted, alpha: q, dash: [5, 6], upto: soon(t, at + .2, .5)});
+        link(gx, y, gx + 120, y + 20, {route: "hvh", mid: gx + 40, color: P.muted, alpha: q, dash: [5, 6], upto: drawShare(t, at + .2, Math.abs(gx + 120 - (gx)) + Math.abs(y + 20 - (y)), .5)});
       } else {
         const sq = five * ramp(t, separates - .1, .45), fork = soon(t, separates - .05, .6);
         ring(gx + 14, y, 13, {color: P.evidence, alpha: q, width: 2.5});
@@ -2883,7 +2961,7 @@ scenes["07"] = function (s, t) {
     // The qualifier keeps the key words of what the experiment separates, short of the whole clause its caption shows:
     // the Chinese takes the verb and its object, each part on its own words. The English qualifier stands under its term
     // on one line, and the tree stands further left to take it.
-    const qual = en ? ["that separates", " the plausible explanations"] : ["分开", "几种解释"];
+    const qual = en ? ["that separates", " the plausible explanations"] : ["分清", "几种解释"];
     const qualAts = en ? [separates] : [separates, cue(s, "几种解释", "")];
     termRow(t, [L("最小的实验", "The smallest experiment")], [experiment], qual, qualAts, nx, ys[3] - labelSize(LABEL) / 2,
       {width: en ? 620 : 1780 - nx, inline: en ? false : null, alpha: five * listLevel(t, ats, 3), set: "tests"});
@@ -2891,16 +2969,17 @@ scenes["07"] = function (s, t) {
   // 6. Being easy to test does not make an explanation more likely: the easy test's way runs toward the explanation and
   // stops at a bar before it, and "more likely" is refused above the stopped way. The English names the easy test first
   // and the stage cuts on it; the Chinese names the explanation first, so the stage cuts on the explanation and the easy
-  // test arrives on its own words, its way drawing on from there.
+  // test arrives on its own words, its way drawing on from there. The stage is one row, so its two ends stand 980 px
+  // apart and its marks at the size of a stage's only structure, so the row covers the band while it reads.
   const six = base * stageIn(t, easyCut) * stageOut(t, delay);
   if (six > 0) {
     const [easyAt, notMake, weak, more] = cues(s, [["容易检验", "easy to test"], ["就觉得", "does not make"], ["一个解释", "an explanation"],
       ["更可能对", "more likely"]]);
-    // The two ends' names share one baseline, a name's gap under the taller mark, the magnifier, whose handle reaches 42 px
+    // The two ends' names share one baseline, a name's gap under the taller mark, the magnifier, whose handle reaches 54 px
     // below the line.
-    const y = 500, px = 520, bar = 1120, wx = 1340, r = 26, tq = six * (en ? 1 : ramp(t, easyAt - .1, .45)), nameY = y + 44 + NAME_GAP;
-    ring(px, y, 30, {color: P.muted, alpha: tq, width: 3});
-    line(px + 21, y + 21, px + 40, y + 40, {color: P.muted, alpha: tq, width: 4});
+    const y = 500, px = 460, bar = 1150, wx = 1440, r = 32, tq = six * (en ? 1 : ramp(t, easyAt - .1, .45)), nameY = y + 54 + NAME_GAP;
+    ring(px, y, 40, {color: P.muted, alpha: tq, width: 3});
+    line(px + 28, y + 28, px + 54, y + 54, {color: P.muted, alpha: tq, width: 4});
     nameText(L("容易检验", "Easy to test"), px, nameY, {valign: "top", alpha: six * named(t, easyAt)});
     ring(wx, y, r, {color: P.muted, alpha: six * ramp(t, weak - .1, .45), width: 2, dash: [5, 5]});
     dot(wx, y, r * .5, {color: P.muted, alpha: six * ramp(t, weak - .1, .45), hollow: true, width: 2.5});
@@ -2908,26 +2987,27 @@ scenes["07"] = function (s, t) {
     // The way's point runs toward the explanation until the bar stands: no pass begins after it, and the pass under way
     // runs on to the bar.
     const drawnAt = (en ? easyCut : easyAt) + .7;
-    link(px + 44, y, bar - 10, y, {alpha: tq, upto: soon(t, (en ? easyCut : easyAt) + .1, .6), end: false, flowing: since(t, drawnAt),
+    link(px + 54, y, bar - 10, y, {alpha: tq, upto: soon(t, (en ? easyCut : easyAt) + .1, .6), end: false, flowing: since(t, drawnAt),
       last: since(notMake, drawnAt)});
     line(bar, y - 22, bar, y + 22, {color: P.unknown, alpha: six * ramp(t, notMake + .05, .3), width: 4});
-    rejectedName(L("更可能对", "More likely"), (px + 44 + bar) / 2, y - NAME_GAP, {valign: "bottom", alpha: six * named(t, more),
+    rejectedName(L("更可能对", "More likely"), (px + 54 + bar) / 2, y - NAME_GAP, {valign: "bottom", alpha: six * named(t, more),
       mark: ramp(t, more + .05, .3)});
   }
   // 7. Last night's delay, worked through as the smallest experiment: the delay and the one check that settles it stand
   // side by side, the delay leading to the vendor's publication time, which forks below to the two explanations it
   // separates. Each explanation is a small timeline: the vendor's publication (a document) above our job's start (a
   // point), against the time they were due (the dashed tick); what came late is marked. Each timeline stands on its own
-  // words as the fork reaches it, and is named below.
+  // words as the fork reaches it, and is named below. The delay and the check stand 360 px either side of the centre, so
+  // the two cover the band while they stand above the explanations still to come.
   const seven = base * stageIn(t, delay) * stageOut(t, reason);
   if (seven > 0) {
     const [checkAt, ...why] = cues(s, [["查供应商", "checking"], ["是发布晚了", "did the vendor publish late"],
       ["我们的任务启动晚了", "did our job start late"]]);
     // The delay's and the check's names share one baseline, a name's gap over the taller mark.
-    const cy = 430, dx = 720, px = 1200, CR = 60, MR = 56, y = 680, w = 380, x0s = [360, 1180], nameY = cy - Math.max(CR, MR) - NAME_GAP;
+    const cy = 430, dx = 600, px = 1320, CR = 60, MR = 56, y = 680, w = 380, x0s = [360, 1180], nameY = cy - Math.max(CR, MR) - NAME_GAP;
     clock(dx, cy, CR, {hand: .62, color: P.unknown, alpha: seven});
-    // The English caption says the delay alone, so its name stays the two-hour delay of the case it is.
-    nameText(L("昨晚那次延迟", "The two-hour delay"), dx, nameY, {valign: "bottom", alpha: seven * named(t, delay)});
+    // The delay is named as the words name it.
+    nameText(L("昨晚那次延迟", "Last night's delay"), dx, nameY, {valign: "bottom", alpha: seven * named(t, delay)});
     const cq = seven * ramp(t, checkAt - .1, .45), tip = MR * .72;
     link(dx + CR + 10, cy, px - MR - 8, cy, {alpha: cq, upto: soon(t, checkAt - .1, .5)});
     ring(px, cy, MR, {color: P.evidence, alpha: cq, width: 3});
@@ -2952,33 +3032,37 @@ scenes["07"] = function (s, t) {
   }
   // 8. Check the reasoning before trusting a conclusion: the conclusion stands at the centre as a stamped page, and the
   // reasoning that supports it rises to it from the evidence below when the reasoning is named. The reasoning traps the
-  // words name, six in Chinese and five in English, build around the page in two mirrored columns, each mark beside the
+  // words name, six in each edition, build around the page in two mirrored columns, each mark beside the
   // page and its name beyond it, in the order they are spoken, left then right. Each trap is a mechanism at reading size
   // that commits its error while its words are spoken and is then refused beside its name: two series rise and fall
   // together and are then joined as cause and effect; one case's ink floods the whole; a necessary part, with the other
   // condition still missing, is taken to produce the outcome; an outcome is traced back to one of its possible causes; a
-  // lens takes in only the agreeing points (Chinese only); and a practice reaches a case beyond its bounds, which stand
+  // lens takes in only the agreeing points; and a practice reaches a case beyond its bounds, which stand
   // dashed once the words name them.
   const eight = base * stageIn(t, reason) * stageOut(t, bounded);
   if (eight > 0) {
     const [checkAt, ...ats] = cues(s, [["查查推理", "check the reasoning"], ["相关看成因果", "correlation presented"], ["个案看成全部", "one case taken"],
-      ["必要条件看成", "necessary condition"], ["认定只有一个原因", "one outcome blamed"], ...(en ? [] : [["只找对自己有利", ""]]),
+      ["必要条件看成", "necessary condition"], ["认定只有一个原因", "one outcome blamed"], ["只找对自己有利", "selective evidence"],
       ["搬出最佳实践", "best practice"]]);
-    // The mechanism each spoken trap takes, in spoken order: the lens of a one-sided search is said only in Chinese.
-    const kinds = en ? [0, 1, 2, 3, 5] : [0, 1, 2, 3, 4, 5];
+    // The mechanism each spoken trap takes, in spoken order.
+    const kinds = [0, 1, 2, 3, 4, 5];
     const limitsAt = cue(s, "在这里适不适用", "its limits");
-    const PW = 240, PH = 230, py = 480, cols = [740, 1180], ys = [360, 460, 560, 660], NW = 450, BY = 710, EY = 760;
-    // The English first trap stands whole on one authored line, as no break keeps it a phrase in an even block; its second
-    // trap stands in two authored lines in both renderers, so its cross stands after its longer line,
-    // and its third trap, the widest name to stand while its row's right-hand trap is still to come, stands on two
-    // authored lines too, so the stage stays balanced as it builds. Each Chinese trap stands on one line, as said.
-    const names = en ? [["A correlation presented as a cause"], ["One case taken", "for the whole"], ["Necessary taken", "as sufficient"],
-      "Blamed on a single cause", "Best practice without its limits"]
-      : ["把相关看成因果", "把个案看成全部", "把必要条件看成充分条件", "认定只有一个原因", "只找对自己有利的证据", "搬出“最佳实践”"];
+    // The page stands a little above the rows' middle, so its top stands under 90 px below the heading that names it and
+    // the two read as one.
+    const PW = 240, PH = 230, py = 465, cols = [740, 1180], ys = [360, 460, 560, 660], NW = 450, BY = 710, EY = 760;
+    // The English first trap is named by its key words on one line, so while it stands alone beside the page the stage
+    // stays within the build balance; its second trap is named by its key words on one line, short of the clause its
+    // caption shows, and its third trap, the widest name to stand while its row's right-hand trap is still to come,
+    // stands on two authored lines, so the stage stays balanced as it builds. Each Chinese trap stands on one line, as said; the one-sided search by its key words, short
+    // of the clause its caption shows.
+    const names = en ? [["Correlation as cause"], "One case for the whole", ["A necessary condition", "treated as sufficient"],
+      "Blamed on a single cause", "Selective evidence", "Best practice without its limits"]
+      : ["把相关看成因果", "把个案看成全部", "把必要条件看成充分条件", "认定只有一个原因", "只找有利的证据", "搬出“最佳实践”"];
     // The names reach further than the marks, the left-hand ones furthest, so the stage stands centred on its widest
     // names rather than on the page: from the widest left-hand name to the cross after the widest right-hand one.
     const reach = side => Math.max(...names.filter((_, i) => i % 2 === side).map(v => Math.max(...wrapName(v, NW).map(line => measure(line)))));
-    ctx.save(); ctx.translate(960 - (cols[0] - 128 - reach(0) + cols[1] + 86 + reach(1) + 16 + 26) / 2, 0);
+    const left = cols[0] - 128 - reach(0), right = cols[1] + 86 + reach(1) + 16 + 26;
+    ctx.save(); ctx.translate(960 - (left + right) / 2, 0);
     documentIcon(960 - PW / 2, py - PH / 2, PW, PH, {alpha: eight, rows: 0});
     seal(960, py - 6, 50, {alpha: eight});
     // The heading stands clear above the traps' first row, its taller name or its marks, so it heads the page and the
@@ -2987,16 +3071,19 @@ scenes["07"] = function (s, t) {
     nameText(L("相信结论之前", "A conclusion"), 960, ys[0] - rowHalf - HEAD_CLEAR, {valign: "bottom", width: 300, alpha: eight * named(t, reason)});
     // The reasoning: one way below the page for each trap, the ways meeting and rising to the conclusion as the reasoning
     // is named. The ways end in no marks of their own, since each trap is refused beside its name. The ways' row spans
-    // both columns of traps, 520 px either side of the page, so the stage keeps its centre while the first trap stands
-    // alone on its side.
-    const rq = eight * ramp(t, checkAt - .1, .4), rise = soon(t, checkAt, .6), RW = 520;
+    // the whole stage, from its widest left-hand name to the cross after its widest right-hand one, so the stage keeps
+    // its centre while the first trap stands alone on its side, however wide that trap's name. The reasoning is drawn at
+    // 2.5 px, so it reads, and covers the band with the page, while the page waits for its first trap.
+    const rq = eight * ramp(t, checkAt - .1, .4), rise = soon(t, checkAt, .6), RX = [left + 40, right - 40];
     ats.forEach((_, k) => {
-      const x = 960 - RW + k * 2 * RW / (ats.length - 1);
-      link(x, EY, x, BY, {alpha: rq, upto: soon(t, checkAt - .1, .3), end: false});
+      const x = mix(RX[0], RX[1], k / (ats.length - 1));
+      link(x, EY, x, BY, {alpha: rq, upto: soon(t, checkAt - .1, .3), end: false, width: 2.5});
     });
-    line(960 - RW, BY, 960 + RW, BY, {color: P.line, alpha: rq, width: 2});
-    link(960, BY, 960, py + PH / 2 + 8, {alpha: rq, upto: rise});
+    line(RX[0], BY, RX[1], BY, {color: P.line, alpha: rq, width: 2.5});
+    link(960, BY, 960, py + PH / 2 + 8, {alpha: rq, upto: rise, width: 2.5});
     nameText(L("查查推理", "Check the reasoning"), 978, (py + PH / 2 + BY) / 2, {align: "left", alpha: eight * named(t, checkAt)});
+    // Each trap's glyph keeps sizes unlike every other trap's parts, so the parts of different traps never read as one
+    // row of repeated stations, each waiting for a name of its own: a small part is a detail under 16 px.
     ats.forEach((at, i) => {
       // Each mechanism runs once from its words and then rests in the state that shows its error.
       const gx = cols[i % 2], y = ys[Math.floor(i / 2)], q = eight * ramp(t, at - .1, .45), kind = kinds[i];
@@ -3008,25 +3095,26 @@ scenes["07"] = function (s, t) {
         path(along(b, go).kept, {color: P.evidence, alpha: q, width: 3});
         link(gx + 72, a[5][1], gx + 72, b[5][1], {color: P.unknown, alpha: q, upto: err, width: 2.5});
       } else if (kind === 1) {
-        // The one case's ink spreads through every member of the whole, column by column.
+        // The one case's ink spreads through every member of the whole, column by column, each member inking in on the
+        // smoothstep so it never appears at once.
         dot(gx - 48, y, 10, {color: P.ink, alpha: q});
         link(gx - 34, y, gx - 22, y, {color: P.ink, alpha: q, upto: go, end: false});
         for (let k = 0; k < 8; k++) {
-          const x = gx - 6 + (k % 4) * 21, yy = y - 11 + Math.floor(k / 4) * 22, flood = soon(t, at + .2 + (k % 4) * .12, .3);
+          const x = gx - 6 + (k % 4) * 21, yy = y - 11 + Math.floor(k / 4) * 22, flood = ramp(t, at + .2 + (k % 4) * .12, .4);
           dot(x, yy, 7, {color: P.muted, alpha: q * (1 - flood), hollow: true});
           dot(x, yy, 7, {color: P.ink, alpha: q * flood});
         }
       } else if (kind === 2) {
         // One condition stands and the other is missing, yet the way from the one alone reaches the outcome, which fills.
-        box(gx - 62, y - 26, 22, 22, {fill: P.evidence, alpha: q * .9, radius: 4});
-        box(gx - 62, y + 4, 22, 22, {stroke: P.muted, alpha: q, radius: 4, dash: [4, 4]});
-        link(gx - 34, y - 15, gx + 30, y, {route: "hvh", mid: gx - 4, color: P.ink, alpha: q, upto: go, end: false});
+        box(gx - 55, y - 19, 15, 15, {fill: P.evidence, alpha: q * .9, radius: 4});
+        box(gx - 55, y + 4, 15, 15, {stroke: P.muted, alpha: q, radius: 4, dash: [4, 4]});
+        link(gx - 34, y - 11.5, gx + 30, y, {route: "hvh", mid: gx - 4, color: P.ink, alpha: q, upto: go, end: false});
         ring(gx + 44, y, 13, {color: P.ink, alpha: q, width: 2.5});
         dot(gx + 44, y, 13, {color: P.ink, alpha: q * err});
       } else if (kind === 3) {
         // An outcome is traced back to a single cause, while the other possible causes stay open.
         [-20, 0, 20].forEach(d => dot(gx - 48, y + d, 7, {color: P.muted, alpha: q, hollow: true}));
-        dot(gx + 46, y, 11, {color: P.ink, alpha: q});
+        dot(gx + 46, y, 7, {color: P.ink, alpha: q});
         link(gx + 32, y, gx - 36, y, {color: P.unknown, alpha: q, upto: go, width: 2.5, end: false});
         dot(gx - 48, y, 7, {color: P.unknown, alpha: q * err});
       } else if (kind === 4) {
@@ -3040,11 +3128,11 @@ scenes["07"] = function (s, t) {
         line(lx + 11, y + 7, lx + 20, y + 16, {color: P.ink, alpha: q, width: 3});
       } else {
         // A practice reaches a case outside where it applies; its bounds stand dashed once the words name them.
-        diamond(gx - 40, y, 13, {color: P.authority, alpha: q, solid: true});
+        diamond(gx - 40, y, 16, {color: P.authority, alpha: q, solid: true});
         link(gx - 22, y, gx + 34, y, {color: P.unknown, alpha: q, upto: go, width: 2.5, end: false, flowing: since(t, at + .85),
           last: since(limitsAt, at + .85)});
-        ring(gx + 46, y, 10, {color: P.ink, alpha: q, width: 2.5});
-        dot(gx + 46, y, 10, {color: P.ink, alpha: q * err});
+        ring(gx + 46, y, 7, {color: P.ink, alpha: q, width: 2.5});
+        dot(gx + 46, y, 7, {color: P.ink, alpha: q * err});
         ring(gx - 40, y, 30, {color: P.muted, alpha: q * ramp(t, limitsAt - .1, .4), width: 2, dash: [4, 5]});
       }
     });
@@ -3109,7 +3197,7 @@ scenes["07"] = function (s, t) {
 scenes["08"] = function (s, t) {
   const [two, choose, options, statusQuo, notProve, recommend, premise, objection, first, revisit, authorized, overturn] = cues(s, [
     ["只做前两件", "only the first two"], ["要做选择时", "when choosing"], ["可行的方案", "feasible options"], ["维持现状", "status quo"],
-    ["证明不了合适", "do not prove"], ["推荐方案时", "a recommendation"], ["前提", "premises"],
+    ["证明不了它合适", "does not prove"], ["推荐方案时", "a recommendation"], ["前提", "premises"],
     ["最有力的反对意见", "strongest objection"], ["第一步", "first step"], ["什么情况下重新考虑", "trigger a revisit"],
     ["决定，由决策负责人来做", "decision owner decides"], ["新的事实推翻了结论", "new facts overturn"]]);
   const layers = cues(s, [["控制影响", "containment"], ["修复", "repair"], ["防止再发生", "prevention"]]);
@@ -3195,8 +3283,10 @@ scenes["08"] = function (s, t) {
     // The table stands 20 px right of its place while it builds alone, and eases left to make room for the refused
     // qualities beside it, so the table alone and the table with them each stand about the centre and inside the safe
     // area: 115 px in Chinese, on the words that bring them, and 185 px in English, whose qualities stand on one line
-    // over their verdict, on its last criterion's words, so the table stands in its place before they arrive.
-    ctx.save(); ctx.translate(20 - L(115, 185) * glide(t, L(badgeAts[0], criteria.at(-1)) + .05, L(115, 185)), 0);
+    // over their verdict, on its last criterion's last word, so the table reaches its place as they arrive and the table
+    // alone stands about the centre until then.
+    const easeAt = en ? cueFrom(s, "", "cost", criteria.at(-1)) : badgeAts[0];
+    ctx.save(); ctx.translate(20 - L(115, 185) * glide(t, easeAt + .05, L(115, 185)), 0);
     // The options' headers hang from one line near the cards' top, so a header of two lines shares its first line with
     // the one-line headers; the Chinese status quo's header takes two lines, which keeps clear card on either side of it,
     // and the English headers stand at the note size, all three alike, so the status quo stands whole on one line within
@@ -3240,7 +3330,7 @@ scenes["08"] = function (s, t) {
     const QX = xs[2] + CW / 2 + 30, QY = rowY(2), refuse = ramp(t, notProve - .1, .4);
     const qualities = rejectedName(L("新颖、完整、流行", "Novelty, completeness or popularity"), QX, QY, {align: "left", width: L(340, Infinity),
       alpha: cmp * named(t, badgeAts[0]), mark: refuse});
-    nameText(L("证明不了合适", "do not prove a fit"), QX, qualities.bottom + 12, {align: "left", valign: "top", alpha: cmp * named(t, notProve)});
+    nameText(L("证明不了它合适", "does not prove a fit"), QX, qualities.bottom + 12, {align: "left", valign: "top", alpha: cmp * named(t, notProve)});
     ctx.restore();
   }
   // 4. A recommendation states four things: a document whose spine reaches each of its parts, one row each, built in
@@ -3273,7 +3363,7 @@ scenes["08"] = function (s, t) {
     ctx.restore();
   }
   // 5. The decision owner decides: the owner's way runs straight to the decision and seals it. The phrases that are
-  // not decisions ("agreed in principle", "let's see" in Chinese, "keep going") leave the same way on branches toward the
+  // not decisions ("agreed in principle", "keep looking", "keep going") leave the same way on branches toward the
   // decision and stop at bars short of it: none decides. Instead, a matter not yet decided says which state it is in,
   // each on its own words beneath them: ready for the decision, its page prepared beside a seal not yet set; blocked, its
   // way stopped at a bar; or deferred, set aside beside a clock. The decision is named on its own spoken word: "决定"
@@ -3281,17 +3371,22 @@ scenes["08"] = function (s, t) {
   const [holder, notDecision, decisionName] = cues(s, [["决策负责人", "decision owner"], ["都不是决定", "are not decisions"],
     ["决定，由", "decides"]]);
   const decides = cueFrom(s, "做", "decides", holder);
-  const said = en ? cues(s, [["", "agreed in principle"], ["", "keep going"]]) : cues(s, [["原则上同意", ""], ["再看看", ""], ["继续推进", ""]]);
-  const phrases = en ? ["“Agreed in principle”", "“Keep going”"] : ["“原则上同意”", "“再看看”", "“继续推进”"];
+  const said = en ? cues(s, [["", "agreed in principle"], ["", "keep looking"], ["", "keep going"]]) : cues(s, [["原则上同意", ""], ["再看看", ""], ["继续推进", ""]]);
+  const phrases = en ? ["“Agreed in principle”", "“Keep looking”", "“Keep going”"] : ["“原则上同意”", "“再看看”", "“继续推进”"];
+  // The English first phrase is its whole caption line, the quotation and its comma, so it waits for that line to pass
+  // and arrives with the second phrase; shown while its own line stands, it would only repeat it.
+  const shown = en ? [said[1] + .1, said[1] + .1, said[2]] : said;
   const dec = base * stageIn(t, authorized) * stageOut(t, overturn);
   if (dec > 0) {
-    const Y = CONTENT_CY - 50, px = 600, sx = 1360, jx = 820, stop = 1250, ys = en ? [Y - 130, Y + 130] : [Y - 170, Y - 90, Y + 130];
+    // The owner and the decision stand 840 px apart and the seal is 58 px in radius, so the two cover the band while
+    // they stand alone, before the phrases arrive.
+    const Y = CONTENT_CY - 50, px = 560, sx = 1400, SR = 58, jx = 820, stop = 1250, ys = [Y - 170, Y - 90, Y + 130];
     person(px, Y - 6, {alpha: dec, color: P.authority, size: 1.3});
     nameText(L("决策负责人", "The decision owner"), px, Y + 50 + NAME_GAP, {valign: "top", color: P.authority, alpha: dec * named(t, holder)});
     // The person's way runs to the decision and seals it on "decides".
-    link(px + 44, Y, sx - 66, Y, {color: P.authority, alpha: dec, upto: soon(t, holder - .1, decides - holder + .3), width: 2.5});
-    seal(sx, Y, 52, {alpha: ramp(t, decides - .1, .4) * dec});
-    nameText(L("决定", "Decides"), sx, Y + 52 + NAME_GAP, {valign: "top", alpha: dec * named(t, decisionName)});
+    link(px + 44, Y, sx - SR - 14, Y, {color: P.authority, alpha: dec, upto: soon(t, holder - .1, decides - holder + .3), width: 2.5});
+    seal(sx, Y, SR, {alpha: ramp(t, decides - .1, .4) * dec});
+    nameText(L("决定", "Decides"), sx, Y + SR + NAME_GAP, {valign: "top", alpha: dec * named(t, decisionName)});
     // The refused phrases stand over or under their branches, centred on the branches' axis with their crosses as one
     // unit, as a lone refusal is centred. Where two of them stand stacked on one side they read as a list, and all its
     // crosses stand in one column after the longest phrase; where each stands alone on its side, its cross follows it.
@@ -3299,12 +3394,12 @@ scenes["08"] = function (s, t) {
     const refuse = ramp(t, notDecision + .05, .4), cs = Math.min(26, labelSize(LABEL) * .9), px0 = (jx + stop) / 2 - (16 + cs) / 2;
     const stacked = ys.some((y, i) => ys.some((v, k) => k !== i && (v > Y) === (y > Y)));
     const widths = phrases.map(v => measure(v)), markAt = i => px0 + (stacked ? Math.max(...widths) : widths[i]) / 2 + 16;
-    said.forEach((at, i) => {
+    shown.forEach((at, i) => {
       const y = ys[i], below = y > Y;
       link(jx, Y, stop, y, {route: "vh", alpha: dec * ramp(t, at - .15, .3), upto: soon(t, at - .1, .7), end: false});
       line(stop, y - 18, stop, y + 18, {color: P.unknown, alpha: refuse * dec, width: 4});
       rejectedName(phrases[i], mix((jx + stop) / 2, px0, refuse), y + (below ? NAME_GAP : -NAME_GAP),
-        {valign: below ? "top" : "bottom", alpha: dec * mix(listIn(t, said, i), named(t, at), refuse), mark: refuse, set: "phrases", markLeft: markAt(i)});
+        {valign: below ? "top" : "bottom", alpha: dec * mix(listIn(t, shown, i), named(t, at), refuse), mark: refuse, set: "phrases", markLeft: markAt(i)});
     });
     const states = [["待决定", "ready for decision"], ["受阻", "blocked"], ["暂缓", "deferred"]].map(([zh, english]) => cueFrom(s, zh, english, notDecision));
     const SY = Y + 280, sxs = [680, 960, 1240];
@@ -3328,10 +3423,10 @@ scenes["08"] = function (s, t) {
   }
   // 6. New facts overturn a conclusion: along one way in time the conclusion stands first, a stamped page, the new facts
   // arrive after it as a page of their own and cross it out, and the way runs on to the prompt correction, a newly
-  // stamped page. The sunk costs lie below the old conclusion and reach up to defend it and are stopped at a bar: they
-  // are not a reason to keep it.
+  // stamped page. The sunk costs lie below the old conclusion and reach up to hold on to it and are stopped at a bar:
+  // they are not a reason to keep it.
   const [conclusion, overturned, correct, defend, sunkCue] = cues(s, [["结论", "conclusion"], ["推翻了", "overturn"], ["就改", "correct it"],
-    ["别为沉没成本辩护", "defending sunk costs"], ["沉没成本", "sunk costs"]]);
+    ["别被沉没成本绑住", "defending sunk costs"], ["沉没成本", "sunk costs"]]);
   const fix = base * stageIn(t, overturn);
   if (fix > 0) {
     // The way's three pages stand with the new facts 30 px left of the centre, so the stage, the cross beside the old
@@ -3359,16 +3454,26 @@ scenes["08"] = function (s, t) {
     [0, 1, 2].forEach(k => box(xs[0] - 60, my + k * 34, 120, 26, {fill: P.row, stroke: P.muted, alpha: fix * named(t, defend), radius: 4}));
     link(xs[0], my - 14, xs[0], my - 72, {alpha: fix * named(t, defend), upto: soon(t, defend - .05, .6), end: false});
     line(xs[0] - 22, my - 72, xs[0] + 22, my - 72, {color: P.unknown, alpha: ramp(t, sunkCue + .05, .3) * fix, width: 4});
-    rejectedName(L("为沉没成本辩护", "Defending sunk costs"), xs[0] + 60 + NAME_GAP, my + 47, {align: "left",
+    rejectedName(L("被沉没成本绑住", "Defending sunk costs"), xs[0] + 60 + NAME_GAP, my + 47, {align: "left",
       alpha: fix * named(t, defend), mark: ramp(t, sunkCue + .05, .4)});
     ctx.restore();
   }
 };
 
 /* ---------------- 09 data: qualify data for a specific use ---------------- */
-function tableIcon(x, y, w, h, {alpha = 1, stroke: s = P.ink, rows = 4, cols = 3} = {}) {
+/* A table: its panel, its outline and its ruled rows and columns. With `joined` the rules are drawn in one stroke, so
+ * they read as the table's own lines rather than as separate members waiting for names, as 06's collection and 09's
+ * price data are drawn. */
+function tableIcon(x, y, w, h, {alpha = 1, stroke: s = P.ink, rows = 4, cols = 3, joined = false} = {}) {
   if (alpha < .01) return;
   box(x, y, w, h, {fill: P.row, stroke: s, alpha, radius: 8});
+  if (joined) {
+    stroke(() => {
+      for (let r = 1; r < rows; r++) { ctx.moveTo(x, y + h * r / rows); ctx.lineTo(x + w, y + h * r / rows); }
+      for (let c = 1; c < cols; c++) { ctx.moveTo(x + w * c / cols, y); ctx.lineTo(x + w * c / cols, y + h); }
+    }, {alpha, width: 1.5});
+    return;
+  }
   for (let r = 1; r < rows; r++) line(x, y + h * r / rows, x + w, y + h * r / rows, {color: P.line, alpha, width: 1.5});
   for (let c = 1; c < cols; c++) line(x + w * c / cols, y, x + w * c / cols, y + h, {color: P.line, alpha, width: 1.5});
 }
@@ -3377,8 +3482,8 @@ scenes["09"] = function (s, t) {
   const [specific, file, chart, signal, six, unclear, , , truth] = cues(s, [
     ["证明适合某个具体用途", "shown fit for a specific use"], ["能打开的文件", "a file that opens"], ["好看的图", "a chart that looks right"],
     ["看起来有效的模型信号", "a promising model signal"], ["先问六个问题", "ask six questions"], ["说不清这些的数据", "data that cannot answer"],
-    ["探索", "explored"], ["共享", "shared, production and decision"], ["权威来源", "source of truth"]]);
-  const asks = cues(s, [["从哪里来", "where did it come from"], ["最早什么时候能拿到", "when did it become available"], ["是什么意思", "what does it mean"],
+    ["探索", "explored"], ["共享", "sharing, production and decisions"], ["权威来源", "source of truth"]]);
+  const asks = cues(s, [["从哪里来", "where did it come from"], ["最早什么时候能拿到", "when did it become available"], ["含义是什么", "what does it mean"],
     ["被什么改过", "what changed it"], ["质量怎么样", "how good is it"], ["能用在哪里", "how may it be used"]]);
   const views = cues(s, [["报告", "reports"], ["数据目录", "catalogs"], ["缓存", "caches"], ["智能体的摘要", "agent summaries"]]);
   const unknowns = cues(s, [["含义", "meaning"], ["质量", "quality"], ["使用权限", "permission"], ["复现", "reproducibility"]]);
@@ -3393,11 +3498,12 @@ scenes["09"] = function (s, t) {
   const back = glide(t, asks[4] + .05, 55);
   ctx.save(); ctx.translate(en ? -55 * (glide(t, unknowns[0] + .05, 55) - back) : 0, 0);
   // 1-3. The price data stands at the centre while it is questioned: its name above its left edge, the specific use it
-  // must be shown fit for above its right edge on the same line, and its trust an open seal on its corner.
+  // must be shown fit for above its right edge on the same line, and its trust an open seal on its corner. Its rules are
+  // one stroke with it, so the table reads as one mark under its name.
   const center = base * stageOut(t, unclear) * clearOfTitle(s, t, top - 60);
   if (center > 0) {
     const core = ramp(t, Math.min(specific - .4, opening(s) + .2), .7) * center;
-    tableIcon(cx - W / 2, top, W, H, {alpha: core});
+    tableIcon(cx - W / 2, top, W, H, {alpha: core, joined: true});
     [["101.18", "101.25", "100.97"], ["100.94", "101.02", "100.88"], ["101.37", "101.41", "101.12"], ["101.06", "101.10", "100.95"]]
       .forEach((row, r) => row.forEach((v, c) => text(v, cx - W / 3 + c * W / 3, top + H * (r + .5) / 4, 26,
         {align: "center", color: c ? P.muted : P.ink, alpha: core, role: "mark"})));
@@ -3437,12 +3543,14 @@ scenes["09"] = function (s, t) {
   // 3. Six questions ring the data from the words that count them, replacing the three non-proofs in one cut: the ring
   // is counted in at the structure tier and named as six questions under the data, and each question's station arrives
   // on the ring, filled, when its question is asked; the names build into the whole set and leave with the ring when
-  // unexplained data is named. Each question is named by its key words, short of the whole question its caption shows;
-  // in English, whose questions lose their sense without their question words, by the noun of what it asks.
+  // unexplained data is named. Each question is named by the noun of what it asks, as its caption shows the whole
+  // question: in English, whose questions lose their sense without their question words, and in Chinese alike. The
+  // Chinese sixth, where the data may be used, is named 使用范围: the scene says 用途 a few seconds later of the one use
+  // the data must be shown fit for, which 用途 here would seem to anticipate.
   const three = base * stageIn(t, six) * stageOut(t, unclear);
   if (three > 0) {
     const rx = 460, ry = 320, names = en ? ["Source", "Availability", "Meaning", "Changes", "Quality", "Permitted use"]
-      : ["从哪里来", "能拿到", "意思", "改过", "质量", "用在哪"];
+      : ["来源", "可用时间", "含义", "改动", "质量", "使用范围"];
     path(Array.from({length: 97}, (_, k) => [cx + Math.cos(k * Math.PI / 48) * rx, cy + Math.sin(k * Math.PI / 48) * ry]),
       {color: P.line, alpha: three, width: 3.5});
     nameText(L("六个问题", "Six questions"), cx, top + H + 28 + NAME_GAP, {valign: "top", alpha: three * named(t, six)});
@@ -3457,8 +3565,8 @@ scenes["09"] = function (s, t) {
     });
   }
   ctx.restore();
-  // 4. Data that cannot answer them may be explored inside its authorized scope but stays out of shared, production and
-  // decision work until it is shown fit. The data that cannot answer stands from the cut; its exploration scope, a frame
+  // 4. Data that cannot answer them may be explored within an authorized scope but stays out of sharing, production
+  // and decisions until it is shown fit. The data that cannot answer stands from the cut; its exploration scope, a frame
   // sized to it, stands round it on the words that allow exploring ("可以…", "may be explored"), and the work it stays
   // out of stands beside it as a small frame whose three uses arrive on their words. The way from the data toward that
   // work stops at a boundary halfway. Chinese says what the data must first be shown, fit for this use, as the clause
@@ -3466,7 +3574,7 @@ scenes["09"] = function (s, t) {
   // stage gives way.
   const four = base * stageIn(t, unclear) * stageOut(t, views[0]);
   if (four > 0) {
-    const scope = cue(s, "可以在授权范围里探索", "may be explored"), uses = cues(s, [["共享", "shared"], ["投产", "production"], ["做决策", "decision work"]]);
+    const scope = cue(s, "可以在授权范围里探索", "may be explored"), uses = cues(s, [["共享", "sharing"], ["投产", "production"], ["做决策", "decisions"]]);
     // The exploration side stands right of its place while it builds alone, and the stage eases to 135 px left of it as
     // the work it stays out of is named, so the pair of frames stands centred once that work stands beside it. The
     // English stands 90 px right, so its table opens over the ring of questions it replaces.
@@ -3482,14 +3590,14 @@ scenes["09"] = function (s, t) {
     const lx = 650, fy = 340, fw = 400, fh = 320, ax = 1250, ay = fy, aw = 290, ah = 200, mid = ay + ah / 2, unclearW = L(260, 320);
     const unclearName = L("说不清这些的数据", "Data that cannot answer"), ct = fy + (fh - 150 - NAME_GAP - blockHeight(wrapName(unclearName, unclearW).length)) / 2;
     box(lx, fy, fw, fh, {stroke: P.muted, alpha: four * named(t, scope), radius: 10});
-    nameText(L("在授权范围里探索", "Explored within its authorized scope"), lx, fy - NAME_GAP, {align: "left", valign: "bottom", alpha: four * named(t, scope)});
+    nameText(L("在授权范围里探索", "Explored within an authorized scope"), lx, fy - NAME_GAP, {align: "left", valign: "bottom", alpha: four * named(t, scope)});
     tableIcon(lx + 50, ct, 220, 150, {alpha: four, stroke: P.muted, rows: 2, cols: 2});
     text("?", lx + 330, ct + 75, 56, {align: "center", color: P.unknown, alpha: four, role: "mark"});
     nameText(unclearName, lx + L(160, fw / 2), ct + 150 + NAME_GAP, {valign: "top", width: unclearW, color: P.muted, alpha: four * named(t, unclear)});
     // The work it stays out of: shared use (two people), production (a running table) and decisions (a diamond).
     const wq = four * named(t, uses[0]);
     box(ax, ay, aw, ah, {fill: P.row, stroke: P.ink, alpha: wq, radius: 10});
-    nameText(L("共享、投产或做决策", "Shared, production and decision work"), ax, ay - NAME_GAP, {align: "left", valign: "bottom", width: L(420, 600), alpha: wq});
+    nameText(L("共享、投产或做决策", "Sharing, production and decisions"), ax, ay - NAME_GAP, {align: "left", valign: "bottom", width: L(420, 600), alpha: wq});
     const uq = i => four * ramp(t, uses[i] - .1, .4), ux = i => ax + aw * (i + .5) / 3, uy = ay + ah / 2;
     person(ux(0) - 12, uy + 4, {alpha: uq(0), size: .7}); person(ux(0) + 14, uy + 4, {alpha: uq(0), size: .7, color: P.muted});
     tableIcon(ux(1) - 30, uy - 22, 60, 44, {alpha: uq(1), rows: 3, cols: 2});
@@ -3594,7 +3702,9 @@ scenes["10"] = function (s, t) {
       tableIcon(tx - 120 * k, ty - 75 * k, 240 * k, 150 * k, {alpha: tableOut});
     }
     // The rail draws on as the card flies to it, from its right end toward the first station, and its left end reaches
-    // that station as the card lands, so the card's name, flying under the card, never meets the drawn rail.
+    // that station as the card lands, so the card's name, flying under the card, never meets the drawn rail. It sets off
+    // once the card has flown over a third of its way, so the rail stands only a moment before the card's name comes
+    // near enough to name it.
     const [cx0, cy0, k0] = across(s, t, 960, 303.75), flightWay = Math.hypot(xs[0] - cx0, RAIL - cy0);
     const flightTime = Math.min(glideTime(flightWay), voiceTime(at[0] - .3) - voiceTime(priceAt - .05));
     // The way is long for the time the words leave it, so the card gathers pace over the flight's first fifth, flies on
@@ -3602,10 +3712,11 @@ scenes["10"] = function (s, t) {
     const cruise = q => { q = clamp(q); return q < .2 ? q * q / .32 : q > .8 ? 1 - (1 - q) * (1 - q) / .32 : (q - .1) / .8; };
     const flight = cruise((voiceTime(t) - voiceTime(priceAt - .05)) / flightTime);
     // The rail sets off from rest over the first quarter of its way and then draws on at one pace, so its first frames
-    // grow from a point; its left end only ever trails the even draw, so it never comes nearer the flying card's name.
+    // grow from a point, inking in over its first 96 px; its left end only ever trails the even draw, so it never comes
+    // nearer the flying card's name.
     const railQ = q => q < .25 ? q * q / .4375 : (q - .125) / .875;
-    const railFrom = mix(xs[4] + 70, xs[0] - 70, railQ(clamp((flight - .2) / .8))), grouped = ramp(t, five + .1, .4), BY = ICON - R - 40;
-    if (flight > .2) line(railFrom, RAIL, xs[4] + 70, RAIL, {color: P.line, width: 2.5, alpha: clamp((xs[4] + 70 - railFrom) / 24)});
+    const railFrom = mix(xs[4] + 70, xs[0] - 70, railQ(clamp((flight - .35) / .65))), grouped = ramp(t, five + .1, .4), BY = ICON - R - 40;
+    if (flight > .35) line(railFrom, RAIL, xs[4] + 70, RAIL, {color: P.line, width: 2.5, alpha: clamp((xs[4] + 70 - railFrom) / 96)});
     // The bracket spans the five moments' names as well as their marks, 16 px past the widest end name, symmetric about
     // the bracket's name.
     const endW = [names[0], names[4]].map(v => Math.max(...wrapName(v, RAIL_WRAP).map(line => measure(line))));
@@ -3664,7 +3775,7 @@ scenes["10"] = function (s, t) {
     s10Card(xs[2], SLOT, {alpha: two * ramp(t, foundAt + .2, .4)});
     // Then: the same lookup finds an empty slot.
     dot(xs[0], RAIL, 10, {color: P.unknown, alpha: two * named(t, thenAt)});
-    link(xs[0], RAIL - 10, xs[0], SLOT + 28, {color: P.unknown, alpha: two, upto: soon(t, thenAt - .15, .45), end: false, dash: [6, 6]});
+    link(xs[0], RAIL - 10, xs[0], SLOT + 28, {color: P.unknown, alpha: two, upto: drawShare(t, thenAt - .15, Math.abs(SLOT + 28 - (RAIL - 10)), .45), end: false, dash: [6, 6]});
     text("?", xs[0], SLOT + 1, 26, {role: "mark", align: "center", color: P.unknown, alpha: two * ramp(t, thenAt, .3)});
     const y = RAIL + 28 + NAME_GAP;
     nameText(L("当时", "Then"), xs[0], y, {valign: "top", alpha: two * named(t, thenAt)});
@@ -3770,9 +3881,14 @@ scenes["11"] = function (s, t) {
     path(points, {color: P.ink, width: 2.5, alpha: q, upto: draw});
     nameText(L("历史价格", "Historical prices"), X0 - NAME_GAP, py(X0), {align: "right", width: L(180, 300), alpha: q * level * ramp(t, seriesAt, .4)});
     if (decisions) {
+      // The three decisions' lines are one stroke, each rising from the axis to the value it could see on its own beat,
+      // so the decisions read as one set under their name rather than as separate members each waiting for a name.
+      stroke(() => DEC.forEach((x, i) => {
+        const up = soon(t, decAt - .1 + i * .25, .6);
+        if (up > 0) { ctx.moveTo(x, AY + 14); ctx.lineTo(x, mix(AY + 14, py(x) + 12, up)); }
+      }), {color: P.authority, width: 2, alpha: ramp(t, decAt - .1, .5) * q});
       DEC.forEach((x, i) => {
         const a = ramp(t, decAt - .1 + i * .25, .5) * q, p = clamp((t - eachAt - i * .3) / .7);
-        line(x, AY + 14, x, py(x) + 12, {color: P.authority, width: 2, alpha: a});
         dot(x, AY, 6, {color: P.authority, alpha: a});
         if (p > 0 && p < 1) ring(x, AY, 8 + 16 * p, {color: P.authority, alpha: a * (1 - p) * clamp(p / .2), width: 2});
       });
@@ -3780,9 +3896,11 @@ scenes["11"] = function (s, t) {
       nameText(L("决策", "Decisions"), DEC[0] - 40, AY - 16, {align: "right", valign: "bottom", color: P.authority, alpha: nq(decAt)});
     }
     if (values) {
+      // The values each decision could see are points of the stretch they stand on, 14 px across, details of the chart
+      // under their name rather than separate members each waiting for a name.
       const thenQ = ramp(t, thenV - .1, .6);
       if (thenQ > 0) path(lift(priceAt, X0, DEC[2]), {color: P.evidence, width: 3.5, alpha: q * thenQ});
-      DEC.forEach((x, i) => dot(x, py(x), 8, {color: P.evidence, alpha: q * ramp(t, thenV - .1 + i * .2, .35)}));
+      DEC.forEach((x, i) => dot(x, py(x), 7, {color: P.evidence, alpha: q * ramp(t, thenV - .1 + i * .2, .35)}));
       nameText(L("每次决策时拿得到的值", "Values available at each decision time"), DEC[2] + 26, py(DEC[2]) - 30,
         {align: "left", valign: "bottom", width: 500, color: P.evidence, alpha: nq(thenV)});
     }
@@ -3836,7 +3954,7 @@ scenes["11"] = function (s, t) {
     const FY = L(140, 176), FW = 180, FH = 96;
     const [whenAt, claimAt, snapNameAt, snapAt, recordAt, limitAt, exploreAt] = cues(s, [["最早什么时候能拿到", "when each value first"],
       ["回测只用了", "used only what"], ["当时存下的快照", "earlier snapshots"], ["快照", "snapshots"], ["修正记录", "correction history"],
-      ["讲明这一点", "timing is unproven"], ["授权内的探索", "authorized exploration"]]);
+      ["讲明可用时间", "timing is unproven"], ["授权内的探索", "authorized exploration"]]);
     DEC.forEach((c, i) => {
       // The "?" stands above its decision until that snapshot is found; then the snapshot is drawn there, as far as its
       // decision: what was known then. The mark gives way in the snapshot's first moment, fading as the drawing begins.
@@ -3867,7 +3985,7 @@ scenes["11"] = function (s, t) {
     const low = AY + 14 + NAME_GAP;
     const refusal = rejectedName(L("回测只用了当时的信息", "Used only what was available then"), DEC[0], low,
       {align: "left", valign: "top", alpha: two * named(t, claimAt), mark: ramp(t, claimAt + .4, .4)});
-    const term = [L("授权内的探索可以继续", "Authorized exploration may continue")], qual = [L("讲明这一点还没证实", "timing is unproven")];
+    const term = [L("授权内的探索可以继续", "Authorized exploration may continue")], qual = [L("讲明可用时间还没证实", "timing is unproven")];
     const beside = refusal.right + 64 + 42, fits = beside + measure(term[0]) + TERM_GAP + measure(qual[0], NOTE) <= X1;
     const ex = fits ? beside : DEC[0], ey = fits ? low : low + 48;
     check(ex - 30, ey + labelSize(LABEL) / 2, 24, {alpha: ramp(t, exploreAt - .15, .4) * two, upto: soon(t, exploreAt - .1, .4)});
@@ -3895,7 +4013,7 @@ scenes["11"] = function (s, t) {
     dashed(vx, top + 18, vx, AY - 6, {color: P.unknown, alpha: late * restMark(P.unknown, .6) * (1 - gone)});
     line(CORR_DATE, AY - 18, CORR_DATE, AY + 18, {color: P.unknown, width: 4, alpha: late});
     nameText(L("决策之后才拿得到", "Available only after the decision"), CORR_DATE, low, {valign: "top", width: 300, alpha: three * named(t, lateAt)});
-    link(vx + 6, AY - 4, CORR_DATE - 8, AY - 4, {color: P.unknown, alpha: late * restMark(P.unknown, .8) * (1 - gone), upto: soon(t, lateAt - .05, .5), dash: [6, 8], end: false});
+    link(vx + 6, AY - 4, CORR_DATE - 8, AY - 4, {color: P.unknown, alpha: late * restMark(P.unknown, .8) * (1 - gone), upto: drawShare(t, lateAt - .05, Math.abs(CORR_DATE - 8 - (vx + 6)), .5), dash: [6, 8], end: false});
     // The way from the late value to the decision it would serve, refused halfway.
     const barY = top + 80;
     link(vx + 16, top, dx, barY, {route: "hv", color: P.unknown, alpha: ramp(t, neverAt - .05, .3) * three * (1 - gone), upto: soon(t, neverAt - .05, .6), end: false});
@@ -3950,11 +4068,12 @@ scenes["11"] = function (s, t) {
     // The lens stands at 405, above the places' middle, so across this stage's two cuts its handle and the chart's axis,
     // which stands near it before and after, are never read as one mark jumping. The English name stands on one line, as
     // no break keeps its phrase and its block, so its lens stands 20 px further left and the name keeps 40 px from the
-    // bracket.
+    // bracket. The Chinese name says the clause by its key words on one line, short of the whole clause its caption
+    // shows, as the English does.
     const LY = 405, LX = RX - L(220, 240);
     ring(LX, LY, 44, {color: P.ink, alpha: lens, width: 4});
     line(LX + 31, LY + 31, LX + 62, LY + 62, {color: P.ink, alpha: lens, width: 6});
-    nameText(L("偏差还可能藏在别的地方", "Bias may hide elsewhere"), LX, LY + 62 + NAME_GAP, {valign: "top", width: L(280, 340), alpha: lens});
+    nameText(L("偏差可能藏在别处", "Bias may hide elsewhere"), LX, LY + 62 + NAME_GAP, {valign: "top", width: L(280, 340), alpha: lens});
     // The sample: a frame picks two securities, and they take the ink.
     box(RX - 24, SA[0] - 34, GX - RX + 48, SA[1] - SA[0] + 68, {stroke: P.evidence, width: 2 + lit(0), alpha: on(0), radius: 12});
     SA.forEach(y => line(RX, y, GX, y, {color: P.ink, width: 3, alpha: on(0)}));
@@ -3971,11 +4090,12 @@ scenes["11"] = function (s, t) {
       if (k === 10) { box(x, CAL - 24, 36, 48, {stroke: P.unknown, width: 2 + lit(2), alpha: on(2), radius: 4}); cross(x + 18, CAL, 22, {alpha: on(2), width: 3}); }
     }
     // Survivors: the security that lasts to today takes the ink; the one that ended before today stands to its end with
-    // it and is dropped, dashed and crossed, on "today".
+    // it and is dropped, dashed and crossed, on "today". While the survivors are said their cross lights by its stroke,
+    // as the sample's frame and the calendar's wrong day light by theirs, so it keeps one size, unlike the lens's handle.
     line(RX, SV[0], GX, SV[0], {color: P.ink, width: 3, alpha: on(3)});
     line(RX, SV[1], END, SV[1], {color: P.line, width: 3.5, alpha: on(3), dash: dropped ? [10, 10] : null});
     line(END, SV[1] - 18, END, SV[1] + 18, {color: P.line, width: 4, alpha: on(3)});
-    cross(END + 30, SV[1], 24 + 4 * lit(3), {alpha: four * ramp(t, dropAt - .1, .3), width: 3});
+    cross(END + 30, SV[1], 24, {alpha: four * ramp(t, dropAt - .1, .3), width: 3 + 1.5 * lit(3)});
     const names = en ? ["Sample selection", "Changed tickers or issuers", "The trading calendar", "Only today's survivors"]
       : ["样本选择", "证券代码和公司的变更", "交易日历", "幸存者偏差"];
     [(SA[0] + SA[1]) / 2, TK, CAL, (SV[0] + SV[1]) / 2].forEach((y, i) =>
@@ -4002,13 +4122,18 @@ scenes["11"] = function (s, t) {
     dashed(xs[2], py(xs[2]) - 46, xs[2], py(xs[2]) - 10, {color: P.unknown, alpha: mark(2)});
     xs.forEach((x, i) => { if (speaking(t, ats, i) > 0) ring(x, py(x), 16, {color: P.unknown, alpha: five * speaking(t, ats, i) * restMark(P.unknown, .6), width: 2}); });
     railNames(en ? ["Missing", "Late", "Conflicting"] : ["缺失", "延迟", "冲突"], xs, AY, {alpha: i => five * listIn(t, ats, i), set: "gaps"});
-    // The conclusion spans the series, then keeps only the stretch before the first gap.
+    // The conclusion spans the series, then keeps only the stretch before the first gap. Its bar is a filled band 6 px
+    // deep, a mark of its own, never one more line like the time axis below it.
     const claim = ramp(t, concAt - .15, .4) * five, back = glide(t, supportsAt + .05, X1 - xs[0] + 60), a1 = mix(X1, xs[0] - 60, back);
-    line(X0, BAR, a1, BAR, {color: P.ink, width: 6, alpha: claim, cap: "butt"});
+    box(X0, BAR - 3, a1 - X0, 6, {fill: P.ink, alpha: claim, radius: 0});
     line(X0, BAR - 14, X0, BAR + 14, {color: P.ink, width: 3, alpha: claim});
     line(a1, BAR - 14, a1, BAR + 14, {color: P.ink, width: 3, alpha: claim});
-    termRow(t, [L("结论", "Conclusion")], [concAt], [L("只说到证据撑得住处", "claim no more than the evidence supports")], [supportsAt],
-      X0, BAR - 30 - NAME_GAP - labelSize(LABEL), {alpha: five});
+    // The conclusion is named on its first mention, and what it may claim joins it, smaller and muted, on the clause that
+    // says it: two names, each on its own words, set as a term and its qualifier on one line.
+    const concName = L("结论", "Conclusion"), concY = BAR - 30 - NAME_GAP - labelSize(LABEL);
+    growName(t, [concName], [concAt], X0, concY, {alpha: five});
+    growName(t, [L("只说到证据撑得住的地方", "claim no more than the evidence supports")], [supportsAt], X0 + measure(concName) + TERM_GAP,
+      concY + (labelSize(LABEL) - labelSize(NOTE)) / 2, {size: NOTE, color: P.muted, alpha: five});
     xs.forEach((x, i) => link(x, py(x) - (i === 0 ? 66 : 76), x, BAR + 18, {alpha: five * (1 - ramp(t, supportsAt + .05, .4)),
       upto: soon(t, changesAt - .05 + i * .15, .6)}));
     ctx.restore();
@@ -4021,7 +4146,7 @@ scenes["11"] = function (s, t) {
     ctx.save(); ctx.translate(chartDx, 0);
     const proveAt = cue(s, "说明不了", "cannot prove");
     // The open questions' row stands 54 px under the axis, so the refusal's first line keeps clear of the axis's ticks.
-    const whenAt = cueFrom(s, "什么时候能拿到", "available then", feedCut), fy = py(X1), WY = AY + 54, stop = 1222, FX = 1800 - chartDx;
+    const whenAt = cueFrom(s, "当时能不能拿到", "available then", feedCut), fy = py(X1), WY = AY + 54, stop = 1222, FX = 1800 - chartDx;
     link(FX, fy, X1 + 14, fy, {color: P.evidence, width: 3, alpha: ramp(t, feedCut - .1, .5) * six, flowing: since(t, feedCut - .1)});
     nameText(L("今天的数据再准", "Today's accurate feed"), FX, fy - 28, {align: "right", valign: "bottom", width: 300,
       color: P.evidence, alpha: six * named(t, feedCut)});
@@ -4111,7 +4236,7 @@ scenes["11"] = function (s, t) {
     nameText(L("能不能用", "Admission"), gx, mid - 150 - NAME_GAP, {valign: "bottom", color: P.authority, alpha: seven * named(t, no)});
     // The way runs on just past the bar that stops it, whatever the frame's width.
     const wayFrom = F.x + F.w + 12, stopX = 1470 - hold;
-    link(wayFrom, mid, gx - 24, mid, {color: P.unknown, alpha: ramp(t, refused - .15, .4) * seven, upto: (stopX + 11 - wayFrom) / (gx - 24 - wayFrom) * soon(t, refused - .05, .6), dash: [8, 8], end: false});
+    link(wayFrom, mid, gx - 24, mid, {color: P.unknown, alpha: ramp(t, refused - .15, .4) * seven, upto: (stopX + 11 - wayFrom) / (gx - 24 - wayFrom) * drawShare(t, refused - .05, stopX + 11 - wayFrom, .6), dash: [8, 8], end: false});
     line(stopX, mid - 30, stopX, mid + 30, {color: P.unknown, width: 4, alpha: ramp(t, refused + .45, .3) * seven});
     rejectedName(L("它定不了", "Grant admission"), stopX, mid + 30 + NAME_GAP, {valign: "top", alpha: seven * named(t, refused), mark: ramp(t, refused + .45, .3)});
     ctx.restore();
@@ -4205,6 +4330,13 @@ scenes["11"] = function (s, t) {
 };
 
 /* ---------------- 12 data: from a signal to controlled use ---------------- */
+/* An arc of 12.1's ring drawn through its own points, so each condition's arc and each group's run is a mark of its own
+ * extent: as a canvas arc it would report its whole circle, the place of every other arc of the ring, and one arc
+ * lighting while the next arrives would read as one arc taking another's place. */
+function s12Arc(cx, cy, r, a0, a1) {
+  const n = Math.max(2, Math.ceil(Math.abs(a1 - a0) / .04));
+  for (let k = 0; k <= n; k++) { const a = a0 + (a1 - a0) * k / n; (k ? ctx.lineTo : ctx.moveTo).call(ctx, cx + r * Math.cos(a), cy + r * Math.sin(a)); }
+}
 scenes["12"] = function (s, t) {
   const together = cue(s, "同时满足", "all hold");
   const conds = cues(s, [["含义", "meaning is explainable"], ["来源", "source traceable"], ["时间", "time identifiable"],
@@ -4220,12 +4352,13 @@ scenes["12"] = function (s, t) {
   const arc = i => { const a0 = -Math.PI / 2 + i * Math.PI / 4 + .06, a1 = a0 + Math.PI / 4 - .12; return [a0, a1, (a0 + a1) / 2]; };
   // 1. Before data enters a lasting work system, eight conditions must all hold. The data stands from the first words,
   // and the system stands as a ring on its own words, open at its left where the data's way reaches it, the way in
-  // drawing on as "enters" is said. A thin ring closes around the system on "all hold", and each condition draws its arc
-  // of the ring and is named outside it on its own words, so the eight build into one set around the system. The names
-  // are the conditions' key words. The Chinese says the eight in three groups, each opened by its own words (说得清,
-  // 对得上, 管得住): each group thickens the thin ring over the conditions it gathers on the words that open it, and is
-  // named inside the ring at its middle on those words. The stage hands over in one cut when a missing condition is
-  // named.
+  // drawing on as "enters" is said; the ring stands at the structure tier, firm enough to read, so the stage stands as
+  // wide and tall as the system from its words. A thin ring closes around the system on "all hold", and each condition
+  // draws its arc of the ring and is named outside it on its own words, so the eight build into one set around the
+  // system. The names are the conditions' key words. The Chinese says the eight in three groups, each opened by its own
+  // words (说得清, 对得上, 管得住): each group thickens the thin ring over the conditions it gathers on the words that
+  // open it, and is named inside the ring at its middle on those words. The stage hands over in one cut when a missing
+  // condition is named.
   const one = base * stageOut(t, missing);
   if (one > 0) {
     const cy = CONTENT_CY, R = 230, [dataAt, enterAt, systemAt] = cues(s, [["数据要", "before data enters"],
@@ -4240,7 +4373,7 @@ scenes["12"] = function (s, t) {
     // The English names its eight conditions three seconds after the data and its system stand, so until the first is
     // named the two stand 80 px right, about the centre without the names, and ease to their place on its words.
     ctx.save(); ctx.translate(en ? 80 * (1 - glide(t, conds[0] + .05, 80)) : 0, 0);
-    ring(cx, cy, R, {color: P.line, alpha: one * named(t, systemAt), width: 2, start: Math.PI + .1, upto: 1 - .2 / (2 * Math.PI)});
+    ring(cx, cy, R, {color: P.line, alpha: one * named(t, systemAt), width: 3.5, start: Math.PI + .1, upto: 1 - .2 / (2 * Math.PI)});
     tableIcon(dx - 90, cy - 60, 180, 120, {alpha: one});
     // Chinese says the data and the system it enters in one phrase, which names the system from its first words, so with
     // the eight conditions and their three groups the stage carries twelve names; its table is the data it speaks of.
@@ -4252,23 +4385,24 @@ scenes["12"] = function (s, t) {
     // The Chinese system name stands in two lines, so the two groups named above it on either side keep clear of its ends.
     nameText(L(["数据要长期", "用在工作里"], "Lasting work system"), cx, cy, {width: 2 * R - 80, color: P.evidence,
       alpha: one * named(t, L(dataAt, systemAt))});
-    if (en) ring(cx, cy, R + 18, {color: P.evidence, alpha: one * ramp(t, together + .05, .3), width: 2, upto: soon(t, together + .05, .8)});
-    else {
-      // The eight close around the system as one thin ring on "同时满足", as in English; each of the three groups then
-      // thickens the run of the ring over the conditions it gathers and is named inside it on the words that open it.
-      // The three names stand inside the ring 120° apart, each within the run it gathers, the upper two 30° above the
-      // centre line, so they balance about the system's two-line name rather than crowding over it.
+    // The eight close around the system as one thin ring on "all hold" (in Chinese "同时满足"), drawn on as one stroke.
+    ring(cx, cy, R + 18, {color: P.evidence, alpha: one * ramp(t, together + .05, .3), width: 2, upto: soon(t, together + .05, .8)});
+    if (!en) {
+      // Each of the three groups then thickens the run of the ring over the conditions it gathers, its run fading in
+      // over the thin ring on the words that open it, and is named inside it on those words. The three names stand
+      // inside the ring 120° apart, each within the run it gathers, the upper two 30° above the centre line, so they
+      // balance about the system's two-line name rather than crowding over it.
       const titles = ["说得清", "对得上", "管得住"], opens = cues(s, titles.map(v => [v, ""])), at = [-Math.PI / 6, Math.PI / 2, Math.PI * 7 / 6];
-      const edge = [0, 3, 5, 8].map(i => -Math.PI / 2 + i * Math.PI / 4), closed = -Math.PI / 2 + 2 * Math.PI * soon(t, together + .05, .8);
+      const edge = [0, 3, 5, 8].map(i => -Math.PI / 2 + i * Math.PI / 4);
       titles.forEach((title, g) => {
-        const a0 = edge[g], a1 = Math.min(edge[g + 1], closed), am = at[g], lit = ramp(t, opens[g] - .1, .4);
-        if (a1 > a0) stroke(() => ctx.arc(cx, cy, R + 18, a0, a1), {color: P.evidence, alpha: one * ramp(t, together + .05, .3), width: 2 + 2 * lit});
+        const am = at[g], lit = ramp(t, opens[g] - .1, .4);
+        if (lit > 0) stroke(() => s12Arc(cx, cy, R + 18, edge[g], edge[g + 1]), {color: P.evidence, alpha: one * lit, width: 4});
         nameText(title, cx + Math.cos(am) * (R - 72), cy + Math.sin(am) * (R - 72), {color: P.evidence, alpha: one * named(t, opens[g]), set: "groups"});
       });
     }
     conds.forEach((at, i) => {
       const [a0, a1, am] = arc(i), q = ramp(t, at - .1, .4), lit = speaking(t, conds, i);
-      stroke(() => ctx.arc(cx, cy, R, a0, a1), {color: P.evidence, alpha: q * one, width: 10 + 4 * lit, cap: "butt"});
+      stroke(() => s12Arc(cx, cy, R, a0, a1), {color: P.evidence, alpha: q * one, width: 10 + 4 * lit, cap: "butt"});
       radialName(names[i], cx, cy, R + 18, am, {width: 420, alpha: one * listIn(t, conds, i), set: "conditions"});
     });
     ctx.restore();
@@ -4342,9 +4476,11 @@ scenes["12"] = function (s, t) {
     check(ux, cy, 34, {color: P.authority, alpha: three * ramp(t, ctrlAt - .1, .4)});
     nameText(L("受控使用", "Controlled use"), ux, endY, {valign: endAlign, color: P.authority, alpha: three * named(t, ctrlAt)});
     link(cx + R + 2, cy, ux - 72, cy, {alpha: three, upto: soon(t, ctrlAt + .05, .6)});
-    // The ring's two arcs are one stroke: one ring, open where the way passes.
+    // The ring's two arcs are one stroke: one ring, open where the way passes. It stands at the structure tier as 09.3's
+    // ring of questions does, firm enough to read, so the stage stands balanced on the whole ring while the questions on
+    // its upper half are asked.
     stroke(() => { ctx.arc(cx, cy, R, gap, Math.PI - gap); ctx.moveTo(cx + R * Math.cos(Math.PI + gap), cy + R * Math.sin(Math.PI + gap));
-      ctx.arc(cx, cy, R, Math.PI + gap, 2 * Math.PI - gap); }, {alpha: three * ramp(t, applyAt - .15, .4), width: 2});
+      ctx.arc(cx, cy, R, Math.PI + gap, 2 * Math.PI - gap); }, {alpha: three * ramp(t, applyAt - .15, .4), width: 3.5});
     const use = ramp(t, forUse - .1, .4) * three;
     ring(cx, cy - 64, 22, {color: P.evidence, alpha: use, width: 2.5});
     dot(cx, cy - 64, 8, {color: P.evidence, alpha: use});
@@ -4365,18 +4501,20 @@ scenes["12"] = function (s, t) {
     });
   }
   // 4. Technically possible does not mean worth doing; a signal does not mean production-ready; deployed does not mean
-  // admitted, still less that another use may follow (in English, admitted for every use). Four rows, each a way from
-  // what holds toward what is said not to follow: the way draws on on "does not mean" and stops at a gate's bar, and
-  // what lies beyond stays an open mark, named on its own words. The fourth row says what deployment brings still less,
-  // so its way branches from deployment's mark on the words that deny it, and it has no name of its own on the left.
-  // The marks and the bar are set at reading size, so the first row alone already spans the frame. The rows build into
+  // admitted, still less that another use may follow (in English, admitted, let alone for every use). Four rows, each a
+  // way from what holds toward what is said not to follow: the way draws on on "does not mean" and stops at a gate's
+  // bar, and what lies beyond stays an open mark, named on its own words. The fourth row says what deployment brings
+  // still less, so its way branches from deployment's mark on the words that deny it, and it has no name of its own on
+  // the left.
+  // The marks and the gate are set at reading size, so the first row alone already spans the frame. The rows build into
   // one set until admission is named. The set stays centred as it grows: the first row stands on the centre line, and
-  // the rows already shown step up by half a row as the words that bring the next one begin. A row's gate stands from
-  // its words at the structure tier, so the row spans the frame before its way is said; the bar takes its colour when
-  // the way reaches it.
+  // the rows already shown step up by half a row as the words that bring the next one begin. The rows share one gate, a
+  // bar through their whole extent at the structure tier, which stands where the first way meets it, so the table
+  // stands as tall as it will be from its first refusal; each row's stretch of it takes its colour when its way reaches
+  // it.
   const rights = cues(s, [["值得做", "worth doing"], ["能投产", "production ready"], ["准入了", "admitted"], ["别的用途", "for every use"]]);
   const lefts = [possible, signalNot, deployed];
-  const nots = [...lefts.map(at => cueFrom(s, "不等于", "does not mean", at)), en ? rights[3] : cueFrom(s, "更不等于", "", deployed)];
+  const nots = [...lefts.map(at => cueFrom(s, "不等于", "does not mean", at)), cueFrom(s, "更不等于", "let alone", deployed)];
   const rowAts = [...lefts, nots[3]];
   const four = base * stageIn(t, possible) * stageOut(t, admission);
   if (four > 0) {
@@ -4384,6 +4522,7 @@ scenes["12"] = function (s, t) {
     const dx = L(0, 20), lx = 540 + dx, rx = 1380 + dx, bar = 960 + dx, MR = 24, PITCH = 96, pairs = en ? [["Technically possible", "Worth doing"], ["A signal", "Production-ready"],
       ["Deployed", "Admitted"], [null, "For every use"]] : [["技术上可行", "值得做"], ["有信号", "能投产"], ["已经部署", "准入了"], [null, "别的用途"]];
     const grown = [1, 2, 3].reduce((sum, k) => sum + soon(t, rowAts[k] - .3, .35), 0), ys = rowAts.map((_, i) => 510 + PITCH * (i - grown / 2));
+    line(bar, 510 - 1.5 * PITCH - 36, bar, 510 + 1.5 * PITCH + 36, {color: P.line, alpha: ramp(t, nots[0] + .45, .3) * four, width: 4});
     rowAts.forEach((at, i) => {
       const y = ys[i], go = soon(t, nots[i] + .05, .45), row = ramp(t, at - .1, .4) * four, barred = ramp(t, nots[i] + .45, .3);
       if (i < 3) {
@@ -4394,7 +4533,6 @@ scenes["12"] = function (s, t) {
         link(lx + MR + 12, y, bar - 12, y, {alpha: four, upto: go, end: false});
         nameText(pairs[i][0], lx - MR - NAME_GAP, y, {align: "right", alpha: four * listIn(t, lefts, i), set: "holds"});
       } else link(lx, ys[2] + MR + 12, bar - 12, y, {route: "vh", alpha: four, upto: go, end: false});
-      line(bar, y - 36, bar, y + 36, {color: P.line, alpha: row * (1 - barred), width: 4});
       line(bar, y - 36, bar, y + 36, {color: P.unknown, alpha: barred * four, width: 4});
       // What does not follow stands as an unreached outcome, in the dashed outline 17.3 gives one.
       ring(rx, y, MR, {color: P.muted, alpha: ramp(t, rights[i] - .1, .4) * four, width: 2.5, dash: [6, 6]});
@@ -4403,7 +4541,7 @@ scenes["12"] = function (s, t) {
     });
   }
   // 5. Admission permits a specified use, like that backtest, under stated conditions before it begins; adoption is that
-  // use actually observed within them. The admission gate stands at the centre, shut by its bar; a use comes to wait
+  // use, actually observed under those conditions. The admission gate stands at the centre, shut by its bar; a use comes to wait
   // before it on the words that let it through and is named on its own words, the backtest it stands for joining its
   // name on its words, and on "permits" the bar lifts into the gate and the use's way draws on through it. The
   // conditions close round the space beyond the gate as one frame, the gate as its left wall, and are named, on their own
@@ -4415,7 +4553,7 @@ scenes["12"] = function (s, t) {
     // right wall (at most at 1590), the inset the observer keeps under its top, so the frame holds its content evenly
     // whatever the words' length.
     const x0 = 880, y0 = 330, y1 = 670, ly = 500, ux = 600, ex = 1035, ey = 405, INSET = 48;
-    const adoptTerm = [L("采用", "Adoption")], adoptQual = en ? ["use actually observed", " within them"] : ["事后真看到有人"];
+    const adoptTerm = [L("采用", "Adoption")], adoptQual = en ? ["use actually observed", " under those conditions"] : ["事后真看到有人用上了它"];
     const room = 1590 - INSET - ex - 64, inline = termRowLayout(adoptTerm, adoptQual, room).one, termW = measure(adoptTerm[0]), qualW = measure(adoptQual.join(""), NOTE);
     const x1 = ex + 64 + Math.min(room, inline ? termW + TERM_GAP + qualW : Math.max(termW, qualW)) + INSET;
     const [permits, useAt, exampleAt, condAt, observedAt] = cues(s, [["放行一项用途", "permits a specified use"], ["一项用途", "a specified use"],
@@ -4445,7 +4583,7 @@ scenes["12"] = function (s, t) {
     dot(ex, ey, 9, {color: P.ink, alpha: adopted});
     line(ex, ey + 30, ex, ly - 14, {color: P.ink, alpha: five * ramp(t, observedAt + .05, .4), width: 2});
     // The qualifier wraps by its parts, so a long English one takes a second line inside the frame.
-    termRow(t, adoptTerm, [adoption], adoptQual, en ? [observedAt, cue(s, "", "within them")] : [observedAt], ex + 64, ey - labelSize(LABEL) / 2,
+    termRow(t, adoptTerm, [adoption], adoptQual, en ? [observedAt, cue(s, "", "under those conditions")] : [observedAt], ex + 64, ey - labelSize(LABEL) / 2,
       {width: room, alpha: five});
     ctx.restore();
   }
@@ -4453,14 +4591,21 @@ scenes["12"] = function (s, t) {
 
 /* ---------------- 13 data: changing a shared identifier ---------------- */
 /* A table drawn as one mark: its panel, its outline and its ruled rows and columns in one stroke, so its rules read as
- * the table's own lines rather than as separate members waiting for names. */
-function s13Table(x, y, w, h, {alpha = 1, stroke: s = P.ink, rows = 4, cols = 3} = {}) {
+ * the table's own lines rather than as separate members waiting for names. A table that shows its data holds a value
+ * in each cell, ruled as one stroke as its lines are, so the values read, and count, as the table's content. */
+function s13Table(x, y, w, h, {alpha = 1, stroke: s = P.ink, rows = 4, cols = 3, values = false} = {}) {
   if (alpha < .01) return;
   box(x, y, w, h, {fill: P.row, stroke: s, alpha, radius: 8});
   stroke(() => {
     for (let r = 1; r < rows; r++) { ctx.moveTo(x, y + h * r / rows); ctx.lineTo(x + w, y + h * r / rows); }
     for (let c = 1; c < cols; c++) { ctx.moveTo(x + w * c / cols, y); ctx.lineTo(x + w * c / cols, y + h); }
   }, {alpha, width: 1.5});
+  if (values) stroke(() => {
+    for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) {
+      const vx = x + w * (c + .2) / cols, vy = y + h * (r + .5) / rows;
+      ctx.moveTo(vx, vy); ctx.lineTo(vx + w / cols * ((r + c) % 2 ? .45 : .6), vy);
+    }
+  }, {color: P.muted, alpha: alpha * .8, width: 2});
 }
 
 scenes["13"] = function (s, t) {
@@ -4473,7 +4618,7 @@ scenes["13"] = function (s, t) {
   const [seats, onePerson, coordinate, retire, migrated, ended, notice] = cues(s, [["这些是责任", "responsibilities not seats"], ["同一个人", "one person"],
     ["任务负责人", "task lead"], ["旧公司代码要停用", "old identifier is retired"], ["都已迁移", "has migrated"], ["终止了那项使用", "ended its use"], ["弃用通知", "deprecation notice"]]);
   // Each decision's owner is named on its own noun; the items it settles fill on their own words in stage 2.
-  const owners = [cue(s, "领域负责人", "authorized domain owners"), cue(s, "数据模型负责人", "data-model owner")];
+  const owners = [cue(s, "有授权的领域负责人", "authorized domain owners"), cue(s, "数据模型负责人", "data-model owner")];
   // The decisions' stage cuts in on its thought's first words, which in Chinese lead to the decisions by a clause.
   const opensDecisions = cue(s, "这时要定", "several decisions");
   const base = ramp(t, opening(s), .7);
@@ -4489,9 +4634,12 @@ scenes["13"] = function (s, t) {
   // the data moves right to its place across from the calculation and the case's name moves over the pair.
   if (p1 > 0) {
     // The data and the calculation are blocks of one height on one row, so their headings share a baseline. The finished
-    // pair, out to the end of the tests' name beside the data, is centred in each edition.
-    const testsName = L("本地测试通过", "Local tests passed"), issuerName = L("一套公司代码", "Issuer identifier");
-    const Y = 520, H = 220, W = 250, RW = 260, CH = H, reach = W + 26 + NAME_GAP + measure(testsName), rl = 960 - (720 + reach) / 2, top = Y - H / 2, ctop = Y - CH / 2, low = top + H + 50;
+    // pair, out to the end of the tests' name beside the data, is centred in each edition. The data's table shows its
+    // values and is wide enough that the data, with the case named over it, stands substantial while it is told alone.
+    // The English names the tests by their words without "pass", which its caption says whole; the check beside the
+    // name says they pass.
+    const testsName = L("本地测试通过", "Local tests"), issuerName = L("一套公司代码", "Issuer identifier");
+    const Y = 520, H = 220, W = 380, RW = 260, CH = H, reach = W + 26 + NAME_GAP + measure(testsName), rl = 960 - (720 + reach) / 2, top = Y - H / 2, ctop = Y - CH / 2, low = top + H + 50;
     const caseAt = cue(s, "一个虚构的例子", "an illustrative change"), dataAt = cueFrom(s, "一份共享数据", "a shared dataset", example);
     const idAt = cue(s, "一套公司代码", "issuer identifier"), factorAt = cue(s, "下游的因子计算", "factor calculation"), lost = cue(s, "漏掉一些", "lose some");
     const outs = [wrong, lost];
@@ -4504,12 +4652,12 @@ scenes["13"] = function (s, t) {
     const solo = 960 - (lo + Math.max(W, measure(L("共享数据", "Shared dataset")), W - lo)) / 2, alone = 960 - (lo + reach) / 2;
     const apart = glide(t, moveAt + .05, Math.abs(rl + 720 - alone)), dl = mix(mix(solo, alone, told), rl + 720, apart), dx = dl + W / 2;
     // The case's file stands from the first word and its name beside it on its words, centred on the frame and then
-    // over the pair.
-    const caseName = L("一个虚构的例子", "An illustrative case"), hx = mix(960, rl + 500, apart) - (48 + measure(caseName)) / 2, hy = top - 120;
+    // over the pair. The file's lines are ruled as one stroke, so the file reads, and counts, as one mark its name names.
+    const caseName = L("一个虚构的例子", "An illustrative change"), hx = mix(960, rl + (720 + W) / 2, apart) - (48 + measure(caseName)) / 2, hy = top - 120;
     const file = ramp(t, s.voice_start - .3, .4) * p1, data = ramp(t, dataAt - .15, .4) * p1;
-    documentIcon(hx, hy - labelSize(LABEL) / 2 - 20, 32, 40, {alpha: file, rows: 3});
+    s17Page(hx, hy - labelSize(LABEL) / 2 - 20, 32, 40, {alpha: file, rows: 3});
     nameText(caseName, hx + 48, hy, {align: "left", valign: "bottom", alpha: p1 * named(t, caseAt)});
-    s13Table(dl, top, W, H, {alpha: data});
+    s13Table(dl, top, W, H, {alpha: data, values: true});
     nameText(L("共享数据", "Shared dataset"), dl, top - NAME_GAP, {align: "left", valign: "bottom", alpha: p1 * named(t, dataAt)});
     // Local tests pass: a check on the data's corner, named beside it.
     const ok = ramp(t, tests - .1, .4) * p1;
@@ -4562,7 +4710,7 @@ scenes["13"] = function (s, t) {
   if (p2 > 0) {
     // The two owners stand symmetric about the decisions' name, and each list hangs centred under its owner.
     const Y = 480, xs = [520, 1400];
-    const ownerNames = [L("领域负责人", "Authorized domain owners"), L("数据模型负责人", "Data-model owner")];
+    const ownerNames = [L("有授权的领域负责人", "Authorized domain owners"), L("数据模型负责人", "Data-model owner")];
     const items = en ? [["Entities", "Relationships", "Rules", "Metric meanings"], ["Grain", "IDs and keys", "Constraints", "Time and version rules"]]
       : [["公司是谁", "有什么关系", "业务规则是什么", "指标什么含义"], ["数据的粒度", "用什么代码和键关联", "有哪些约束", "时间和版本按什么规则"]];
     const itemAts = (en ? [["entities", "relationships", "rules", "metric meanings"], ["grain", "IDs and keys", "constraints", "time and version"]]
@@ -4592,7 +4740,7 @@ scenes["13"] = function (s, t) {
     const stop = named(t, resolveAt - .2) * p2, barX = (960 - 80 - 12 + way) / 2;
     s13Table(880, ty, 160, 70, {alpha: sc, stroke: P.muted, rows: 3});
     nameText(L("表结构选得再方便", "A convenient schema"), 960, ty - NAME_GAP, {valign: "bottom", alpha: p2 * named(t, schema)});
-    link(880 - 12, ty + 35, way, ty + 35, {color: P.unknown, alpha: sc, upto: .5 * soon(t, schema + .1, .6), end: false, dash: [6, 6]});
+    link(880 - 12, ty + 35, way, ty + 35, {color: P.unknown, alpha: sc, upto: .5 * drawShare(t, schema + .1, .5 * Math.abs(way - (880 - 12)), .6), end: false, dash: [6, 6]});
     line(barX, ty + 5, barX, ty + 65, {color: P.unknown, alpha: stop, width: 4});
     // The English refusal stands whole on one line between the two columns, as no break keeps its phrase in an even block.
     nameText(L("解决不了含义上的分歧", "Cannot resolve a conflict of meaning"), 960, ty + 70 + NAME_GAP, {valign: "top", width: 480, alpha: stop});
@@ -4618,15 +4766,18 @@ scenes["13"] = function (s, t) {
     const [coordAt, takeAt] = [cueFrom(s, "统筹", "coordinates", coordinate), cueFrom(s, "替各方做决定", "taking over", coordinate)];
     // Where each token stands, left to right in the order the roles are named; the person holds the two on the left and
     // the team the three on the right.
-    // The Chinese roles are named in two characters each, so its row stands closer and the trays under the tokens stay
-    // filled by the tokens they hold.
+    // The Chinese row stands as wide as the duties under its tokens need, so the product owner's duty stands whole on
+    // one line, 40 px or more from its neighbours. Once the duties have given way, as the roles are said to be
+    // responsibilities, it closes up to 220 px, a glide, so the trays the holders raise later stand about as wide as the
+    // tokens they hold; its short names keep wide gaps at that pitch.
     // Both rows stand at one pitch about the centre; the person holds the first two and the team stands under the last
     // three.
-    const TR = 50, Y = 440, FY = 680, trayY = Y + TR + 12, PITCH = L(220, 275), PX = 960 - 1.5 * PITCH, TX = 960 + PITCH, LX = L(900, 891);
+    const closeUp = en ? 0 : glide(t, seats + .05, 2 * 70), PITCH = mix(L(290, 275), 220, closeUp);
+    const TR = 50, Y = 440, FY = 680, trayY = Y + TR + 12, PX = 960 - 1.5 * PITCH, TX = 960 + PITCH, LX = L(900, 891);
     // The row stands toward its open end while it builds, two steps until the fourth role and one until the fifth, so
     // each partial row stands balanced with the joins under the centre while Development's way down to them stays
     // 50 px clear of their left end (at 740).
-    const shift = building(t, roles.slice(2), L(85, 140), .45), xs = [-2, -1, 0, 1, 2].map(k => 960 + k * PITCH + shift);
+    const shift = building(t, roles.slice(2), L(145, 140), .45), xs = [-2, -1, 0, 1, 2].map(k => 960 + k * PITCH + shift);
     const these = ramp(t, seats + .05, .3) * (1 - ramp(t, notSeats + .05, .3));
     // The joins Development checks stand under the row's centre while the roles are named, reached by one way down and
     // across from Development's token: the shared data and the calculation joined, checked on the words that say so.
@@ -4666,7 +4817,7 @@ scenes["13"] = function (s, t) {
         dot(x + u(15), y, u(4), {color: P.evidence, alpha: q * ramp(t, pathsAt + .35, .3)});
       } else if (i === 3) {
         path(along([[x - u(17), y + u(6)], [x - u(3), y + u(6)], [x - u(3), y - u(9)], [x + u(17), y - u(9)]], go).kept, {color: P.ink, alpha: q, width: 3});
-        link(x + u(17), y - u(4), x - u(17), y + u(15), {route: "vh", r: 5, color: P.muted, alpha: q, upto: soon(t, recoverAt + .05, .5), end: false, dash: [4, 5]});
+        link(x + u(17), y - u(4), x - u(17), y + u(15), {route: "vh", r: 5, color: P.muted, alpha: q, upto: drawShare(t, recoverAt + .05, Math.abs(x - u(17) - (x + u(17))) + Math.abs(y + u(15) - (y - u(4))), .5), end: false, dash: [4, 5]});
       } else {
         ring(x - u(8), y, u(9), {color: P.authority, alpha: q, width: 2.5});
         check(x - u(8), y + u(1), u(10), {color: P.authority, alpha: q, upto: go, width: 3});
@@ -4686,7 +4837,7 @@ scenes["13"] = function (s, t) {
     // words, so every holder is read by what it does; the duties give way with 核对关联 as the roles are said to be
     // responsibilities.
     if (!en) {
-      const duties = [[["检查兼容性"], [acts[1]]], [["找出下游使用方", "安排迁移"], [acts[2], pathsAt]],
+      const duties = [[["检查兼容性"], [acts[1]]], [["找出下游使用方、安排迁移"], [acts[2]]],
         [["规划发布", "和恢复"], [acts[3], recoverAt]], [["确认使用权限", "和停用条件"], [acts[4], exitAt]]];
       const em = labelSize(LABEL), top = Y + TR + 9 + NAME_GAP + em / 2, kept = p3 * (1 - ramp(t, seats + .05, .3));
       duties.forEach(([lines, ats], k) => lines.forEach((v, j) => text(v, xs[k + 1], top + j * em * LEADING, LABEL,
@@ -4709,10 +4860,11 @@ scenes["13"] = function (s, t) {
     nameText(L("任务负责人", "Task lead"), LX, FY + 30 + NAME_GAP, {valign: "top", color: P.evidence, alpha: lead});
     link(LX - 36, FY - 8, PX + 36, FY - 8, {color: P.evidence, alpha: lead, upto: co, flowing});
     link(LX + 36, FY - 8, TX - 54, FY - 8, {color: P.evidence, alpha: lead, upto: co, flowing});
-    // The refusal is spoken with its phrase ("without taking over"), so the cross arrives with the words and the unit
-    // never stands without it, off the lead's axis.
-    rejectedName(L("替各方做决定", "Taking over authority"), LX, FY + 30 + NAME_GAP + labelSize(LABEL) + 14,
-      {valign: "top", alpha: p3 * named(t, takeAt), mark: named(t, takeAt)});
+    // The refusal is spoken with its phrase ("without taking over"), so the cross arrives with the words. Its words stand
+    // centred on the lead's axis, under the lead's name, and the cross hangs after them.
+    const takeName = L("替各方做决定", "Taking over authority");
+    rejectedName(takeName, LX, FY + 30 + NAME_GAP + labelSize(LABEL) + 14,
+      {valign: "top", alpha: p3 * named(t, takeAt), mark: named(t, takeAt), markLeft: LX + measure(takeName) / 2 + 16});
   }
   // 4. Retiring the old identifier: a tree from the identifier to its affected consumers, which stands with them on the
   // words that ask to show every affected consumer. Three consumers have migrated, under one bracket; the decision owner
@@ -4757,7 +4909,7 @@ scenes["13"] = function (s, t) {
     // The notice under the identifier: its way up stops at a bar halfway, on the words that deny it.
     const nt = ramp(t, notice - .15, .4) * p4, nx = RX + 45, ny = RY + RH + 120, wayTop = RY + RH + 12;
     documentIcon(nx - 45, ny, 90, 116, {alpha: nt, rows: 3, stroke: P.muted});
-    link(nx, ny - 12, nx, wayTop, {color: P.unknown, alpha: nt, upto: .5 * soon(t, notProof - .1, .5), end: false, dash: [6, 6]});
+    link(nx, ny - 12, nx, wayTop, {color: P.unknown, alpha: nt, upto: .5 * drawShare(t, notProof - .1, .5 * Math.abs(wayTop - (ny - 12)), .5), end: false, dash: [6, 6]});
     line(nx - 30, (ny - 12 + wayTop) / 2, nx + 30, (ny - 12 + wayTop) / 2, {color: P.unknown, alpha: ramp(t, notProof + .3, .3) * p4, width: 4});
     termRow(t, noticeTerm, [notice], noticeQual, [notProof], nx + 45 + NAME_GAP, ny + 58 - labelSize(LABEL) / 2, {alpha: p4});
   }
@@ -4884,7 +5036,7 @@ scenes["14"] = function (s, t) {
   // The report's reach either side of the result: its left edge at the left names, and its right edge at the result's
   // ring, then in English the inputs' name, and then the failures' and the risk's names.
   const reportLeft = -OUT - NAME_GAP - Math.max(measure(modelName.join("")), en ? 0 : widest(inputsName, 480));
-  const firstRight = Math.max(reportLeft + measure(L("交出结果之前，讲清三件事", "Before hand-over")), RR + 8);
+  const firstRight = Math.max(reportLeft + measure(L("交出结果之前，讲清三件事", "Before handing over")), RR + 8);
   const inputsRight = Math.max(firstRight, en ? TW + NAME_GAP + widest(inputsName, 380) : 0);
   const wholeRight = Math.max(inputsRight, 220 + 50 + NAME_GAP + Math.max(widest(failName, 480), measure(riskName.join(""))));
   const centreOn = right => 960 - (reportLeft + right) / 2, third = cue(s, "每个失败或差异", "each failure");
@@ -4897,7 +5049,7 @@ scenes["14"] = function (s, t) {
   if (pB > 0) {
     // The heading starts where the diagram starts, at the left names, and stands well clear above the inputs' tiles.
     const modelLeft = RCX + reportLeft;
-    nameText(L("交出结果之前，讲清三件事", "Before hand-over"), modelLeft, 338 - 22 - 40, {align: "left", valign: "bottom", alpha: pB * named(t, handing)});
+    nameText(L("交出结果之前，讲清三件事", "Before handing over"), modelLeft, 338 - 22 - 40, {align: "left", valign: "bottom", alpha: pB * named(t, handing)});
     const starts = rows.filter((_, i) => groups[i] !== groups[i - 1]).map(v => v[0]), level = i => pB * listLevel(t, starts, groups[i]);
     const on = at => ramp(t, at - .15, .35) * pB, att = at => soon(t, at + .05, .5);
     // The results: the stretch the tests covered draws round the result, and the stretch at its foot they did not reach
@@ -4916,8 +5068,10 @@ scenes["14"] = function (s, t) {
     const parts = [[mx - 32, my - 13], [mx - 8, my - 13], [mx - 20, my + 13]];
     path([...parts, parts[0]], {color: P.ink, alpha: mq, width: 2});
     parts.forEach(([x, y]) => dot(x, y, 5, {color: P.ink, alpha: mq}));
-    line(mx + 6, my + 14, mx + 40, my + 14, {color: P.ink, alpha: cq, width: 2});
-    [0, 1, 2, 3].forEach(k => line(mx + 6 + k * 11, my + 14, mx + 6 + k * 11, my + 7, {color: P.ink, alpha: cq, width: 2}));
+    // The scale, its rule and its four ticks, is one stroke, so it moves whole with the card; ticks drawn one by one, 11
+    // px apart, would read at the card's pace as each tick taking its neighbour's place.
+    stroke(() => { ctx.moveTo(mx + 6, my + 14); ctx.lineTo(mx + 40, my + 14);
+      [0, 1, 2, 3].forEach(k => { ctx.moveTo(mx + 6 + k * 11, my + 14); ctx.lineTo(mx + 6 + k * 11, my + 7); }); }, {color: P.ink, alpha: cq, width: 2});
     line(mx + 28, my - 18, mx + 28, my + 14, {color: P.authority, alpha: cq, width: 3});
     link(mx + 58, my, RCX - RR - 8, RCY, {route: en ? null : "hvh", mid: RCX - MEET, color: P.evidence, alpha: mq, upto: att(rows[0][0])});
     growName(t, modelName, rows[0], mx - 50 - NAME_GAP - measure(modelName.join("")), my, {valign: "middle", alpha: level(0), set: "report"});
@@ -4964,48 +5118,57 @@ scenes["14"] = function (s, t) {
   // The result stands at its dock from the cut that brings the report, rather than gliding there across the frame.
   token(docked ? RCX : tx, docked ? RCY : trackY, {alpha: tokQ * handOff, r: docked ? 24 : 10});
   // 3. Changing production, shared assets or critical management chains needs more. The change waits at the start
-  // of a way to the vault that holds them, and the way crosses seven gates, one per required control: each gate arrives
-  // shut on the words that name its control and opens one step per requirement as each is said, named by its key
-  // words, above and below the way in turn. The vault grows as each object it holds is named, and the objects are named together over it. When the last
-  // gate has opened, the change's way draws on through all of them into the vault. With the vault's name and, in English,
+  // of a way to the vault that holds them, named from the cut by the voice's first word, the change itself, and the way
+  // crosses seven gates, one per required control: each gate arrives shut on the words that name its control and opens
+  // one step per requirement as each is said, named by its key words, above and below the way in turn. The vault grows
+  // as each object it holds is named, and the objects are named together over it. When the last gate has opened, the
+  // change's way draws on through all of them into the vault. With the change's and the vault's names and, in English,
   // its examples the stage carries eleven names at most.
   const p3 = stageIn(t, vaultAts[0]) * base * stageOut(t, highCut);
   if (p3 > 0) {
-    const keys = en ? [["Subject, impact", "Task lead, authority"], "Rerun exactly", "Tests, acceptance", "Rollback or degradation", "Security, permission", "Escalate, hand control", "Evidence bound"]
-      : [["改什么、影响谁", "谁负责、谁授权"], "原样重跑", "测试、验收", "回滚或降级预案", "查安全、权限", "上报、交给人接管", "证据要对得上\n当前的版本"];
+    // The English evidence, too long to stand whole on one line beside its neighbour, stands as its key words over the
+    // rest of its words, smaller and muted.
+    const keys = en ? [["Subject, impact", "Task lead, authority"], "Rerun exactly", "Tests, acceptance", "Rollback or degradation", "Security, permission",
+      "Escalate, hand over, stop", {term: "Evidence bound", note: "to the current version"}]
+      : [["改什么、影响谁", "谁负责、谁授权"], "原样重跑", "测试、验收", "回滚或降级预案", "查安全、权限", "上报、交人接管或停下", "证据要对得上\n当前的版本"];
     // The vault's name heads the vault, its lines centred on it, and the stage, from the change's ring to the name's
     // far edge, stands centred on the frame in each edition.
     const vaultName = L("生产环境、共享资产，或者风控、监管报送这类关键管理链条", "Production, shared assets or critical management chains");
-    // The English gates stand 180 px apart, further than the Chinese, so each control's name stands whole on one line.
-    const vaultNote = "Such as risk control or regulatory reporting", GP = L(128, 180), VX0 = 470 + 6 * GP + L(162, 130), VW = 140;
+    // The gates stand 144 px apart in Chinese and 180 px in English, so each control's name stands whole on one line, 40
+    // px or more from the next name on its side of the way.
+    const vaultNote = "Such as risk control or regulatory reporting", GP = L(144, 180), VX0 = 470 + 6 * GP + L(162, 130), VW = 140;
     const half = Math.max(...wrapName(vaultName, 480).map(v => measure(v)), ...(en ? wrapName(vaultNote, 480, NOTE).map(v => measure(v, NOTE)) : [])) / 2, ox = 960 - (330 - 23 + VX0 + VW / 2 + half) / 2;
     const LY = 510, CX0 = 330 + ox, gx = k => 470 + ox + k * GP, VX = VX0 + ox, starts = lockAts.map(ats => ats[0]);
     // The vault opens around its first object and grows on the words that bring each next one; its name moves with its
     // top edge, so the two always stand together.
     const shown = vaultAts.slice(1).reduce((n, at) => n + soon(t, at - .3, .35), 1), VH = 40 + 80 * shown, vy = LY - VH / 2;
     box(VX, vy, VW, VH, {fill: P.row, stroke: P.ink, alpha: p3, radius: 6, width: 2.5});
-    // English names two of the chains as examples after them: a link of the chain lights on each.
+    // English names two of the chains as examples after them: a link of the chain beats on each. The table and the
+    // chain are each drawn as one mark, the table's rules and the chain's three links in one stroke, so each object
+    // reads as one thing the vault holds rather than as parts waiting for their own names.
     const examples = en ? cues(s, [["", "risk control"], ["", "regulatory reporting"]]) : [];
     vaultAts.forEach((at, i) => {
       const y = LY + 80 * (i - (shown - 1) / 2), mx = VX + VW / 2, q = ramp(t, at - .15, .4) * p3;
-      if (i === 0) tableIcon(mx - 32, y - 24, 64, 48, {alpha: q, rows: 3, cols: 3});
+      if (i === 0) s13Table(mx - 32, y - 24, 64, 48, {alpha: q, rows: 3, cols: 3});
       if (i === 1) { box(mx - 30, y - 22, 38, 32, {stroke: P.ink, alpha: q, radius: 5}); box(mx - 8, y - 10, 38, 32, {fill: P.row, stroke: P.ink, alpha: q, radius: 5}); }
-      if (i === 2) [-22, 0, 22].forEach((d, k) => {
-        const lit = k < examples.length ? ramp(t, examples[k] - .1, .3) : 0;
-        ring(mx + d, y, 12, {color: blend(P.ink, P.evidence, lit), alpha: q, width: 2.5});
-        if (lit > 0) ring(mx + d, y, 18, {color: P.evidence, alpha: q * lit, width: 2});
-      });
+      if (i === 2) {
+        stroke(() => [-22, 0, 22].forEach(d => { ctx.moveTo(mx + d + 12, y); ctx.arc(mx + d, y, 12, 0, Math.PI * 2); }), {color: P.ink, alpha: q, width: 2.5});
+        examples.forEach((at, k) => beats(t, mx - 22 + 22 * k, y, 18, [at], {color: P.evidence, alpha: q}));
+      }
     });
     // The vault's name stands over its top edge, and never nearer the last control's name than a wide gap, so the two
-    // are read apart.
-    const lastKey = wrapName(keys[6], 230), clear = LY - 46 - NAME_GAP - blockHeight(lastKey.length) - 64;
-    nameText(vaultName, VX + VW / 2, Math.min(vy - NAME_GAP, clear), {valign: "bottom", width: 480, alpha: p3 * named(t, vaultAts[0])});
+    // are read apart: it rises clear of that name, a glide, on the words that bring it.
+    const keyHeight = v => v.note ? termRowLayout([v.term], [v.note], Infinity, false).height : blockHeight(wrapName(v, 230).length);
+    const clear = LY - 46 - NAME_GAP - keyHeight(keys[6]) - 64, over = vy - NAME_GAP;
+    nameText(vaultName, VX + VW / 2, mix(over, Math.min(over, clear), glide(t, starts[6] - .4, 40)), {valign: "bottom", width: 480, alpha: p3 * named(t, vaultAts[0])});
     // English names the chains' examples after the chains, so they join under the vault on their own words, smaller and
     // muted, following its bottom edge and centred on it as its name is; the Chinese name says them before the chains.
     if (en) nameText("Such as risk control or regulatory reporting", VX + VW / 2, vy + VH + NAME_GAP, {valign: "top", width: 480,
       size: NOTE, color: P.muted, alpha: p3 * named(t, cue(s, "", "such as risk control"))});
-    // The change and its way to the vault stand from the cut.
+    // The change and its way to the vault stand from the cut, the change named under it from the way's start edge, as a
+    // way's first name stands.
     token(CX0, LY, {alpha: p3, r: 16});
+    nameText(L("改动", "Changes"), CX0 - 23, LY + 23 + NAME_GAP, {align: "left", valign: "top", alpha: p3 * named(t, cue(s, "改动", "changes"))});
     link(CX0 + 30, LY, VX - 12, LY, {alpha: p3, end: false});
     lockAts.forEach((ats, k) => {
       const x = gx(k), at = ats[0], q = ramp(t, at - .3, .3) * p3, open = saidShare(t, ats), up = k % 2 === 0;
@@ -5015,11 +5178,19 @@ scenes["14"] = function (s, t) {
       ring(x, LY, 58, {color: P.evidence, alpha: speaking(t, starts, k) * restMark(P.evidence, .45) * p3, width: 2});
       // The first control names its subject and impact first; the second pair, the task lead with the authority, joins
       // its name on the task lead's words, a line nearer the way, so the station changes while its four requirements are
-      // spoken and its two lines stand at one width. The Chinese escalation stands on one line, 37 px from its neighbour
-      // below the way, as no break at its list mark keeps an even block.
-      const key = Array.isArray(keys[k]) ? keys[k] : [keys[k]], ky = up ? LY - 46 - NAME_GAP : LY + 46 + NAME_GAP;
+      // spoken and its two lines stand at one width. The Chinese escalation stands on one line, 40 px from its neighbour
+      // below the way, as no break at its list mark keeps an even block. The English evidence's key words stand over the
+      // rest of its words, which join them on their own words, at the note size.
+      const ky = up ? LY - 46 - NAME_GAP : LY + 46 + NAME_GAP;
+      if (keys[k].note) {
+        const {term, note} = keys[k];
+        termRow(t, [term], [ats[0]], [note], [ats[1]], x, up ? ky - keyHeight(keys[k]) : ky, {align: "center", inline: false,
+          alpha: p3 * listLevel(t, starts, k), set: "controls"});
+        return;
+      }
+      const key = Array.isArray(keys[k]) ? keys[k] : [keys[k]];
       key.forEach((part, j) => nameText(part, x, ky + (up ? j - key.length + 1 : j) * labelSize(LABEL) * LEADING,
-        {valign: up ? "bottom" : "top", width: Array.isArray(keys[k]) ? Infinity : L(240, Infinity), alpha: p3 * listIn(t, starts, k) * (j ? named(t, ats[j + 1]) : 1), set: "controls"}));
+        {valign: up ? "bottom" : "top", width: Array.isArray(keys[k]) ? Infinity : L(300, Infinity), alpha: p3 * listIn(t, starts, k) * (j ? named(t, ats[j + 1]) : 1), set: "controls"}));
     });
     // Once every gate is open the change's way runs through them all into the vault.
     const passAt = lockAts[6].at(-1);
@@ -5100,10 +5271,10 @@ scenes["10"].carries = true;
 scenes["15"] = function (s, t) {
   const [commitment, owner, condition, chain] = cues(s, [["承诺", "the commitment"], ["负责人", "owner"],
     ["完成条件摆到明面上", "completion condition visible"], ["是一条信任链", "follows a chain of trust"]]);
-  // The six links of the chain, each on the clause that describes it. The English tells the chain on last night's delay.
-  const links = cues(s, [["先明确决策负责人是谁", "the decision owner approves"], ["答应交什么", "an earlier start"],
-    ["只在这个范围里动手", "the job is changed within them"], ["拿出当前的证据", "current runs give evidence"], ["只说证据撑得住的话", "the claim stays within"],
-    ["最后验收", "then come acceptance and learning"]]);
+  // The six links of the chain, each on the clause that describes it.
+  const links = cues(s, [["先明确决策负责人是谁", "name the decision owner"], ["答应交什么", "agree what will be delivered"],
+    ["只在这个范围里动手", "act only within it"], ["拿出当前的证据", "produce current evidence"], ["只说证据撑得住的话", "claim only what it supports"],
+    ["最后验收", "then accept and learn"]]);
   // The Chinese says the chain cannot lose a link: the skip starts on the chain's words and stops on that rule.
   const [lighter, skip, before] = cues(s, [["手续可以随风险变轻", "lower risk means less process"], ["这条链", "cannot skip a link"], ["改动之前", "before changing anything"]]);
   const checks = cues(s, [["改的是哪个对象", "target"], ["哪个版本", "version"], ["在哪个环境", "environment"], ["现状如何", "current state"],
@@ -5164,36 +5335,36 @@ scenes["15"] = function (s, t) {
       {gap: 17 + NAME_GAP, wrap: 320, alpha: i => seats * listIn(t, at, i), set: "visible"});
   }
   // 2. The chain of trust: six links on one rail, each overlapping the next, so the order and the joining are carried
-  // by the layout. The rail's two ends stand on the words that name the chain and the rail draws on between them, the
-  // six links standing on it as faint slots from those words, so the chain's shape carries the stage until its first
-  // link is described (in English after the case is introduced); each link closes round it in its colour on its own clause,
-  // the link being described lit, and the names build into the whole set on one baseline below. The English walks the chain through last night's delay, so its links are named by what happens to the job:
-  // the owner's approval of an earlier start and its limits, the change within them, the current runs, the claim within
-  // their evidence, then acceptance and learning.
+  // by the layout. The rail's start stands on the words that name the chain and the rail draws on from it, its far end
+  // arriving with it, so the chain's span, under its name, carries the stage until its first link is described; each
+  // link closes round the rail in its colour on its own clause, named under it on those words, the link being described
+  // lit, and the names build into the whole set below.
   // 3. Lower risk means less process: the links slim down but all six stay. The chain cannot skip a link (in Chinese,
   // cannot lose one): a way leaves the action within the scope over the evidence toward the claim and stops at a bar
   // above the evidence, with the refused words beside it. The chain holds until the checks before a change are named
   // and leaves in one cut.
   const ch = base * stageIn(t, chain) * stageOut(t, before);
   if (ch > 0) {
-    // Each link is named by the key phrase of its clause, which its caption shows whole; the English names stand whole,
-    // each on one line, on two baselines at the links' one pitch.
-    const names = en ? [["Decision owner approves"], ["An earlier start and its limits"], ["Job is changed"], ["Current runs"], ["The claim"],
-      ["Acceptance and learning"]] : ["决策负责人、针对什么", "答应交什么", "范围里动手", "当前的证据", "撑得住的话", "验收、总结"];
+    // Each link is named by the key phrase of its clause; a clause that is its own key phrase is named without its
+    // caption's whole words: the English action by the scope its pronoun stands for, as the Chinese names it, and the
+    // English claim as the claims the evidence beside it supports;
+    // the Chinese claim without its last 话, still read as what is said, not as "if". The English names stand whole, each
+    // on one line, on two baselines at the links' one pitch, and the Chinese on one baseline, the claim whole on one
+    // line, which its pitch takes.
+    const names = en ? [["Decision owner and subject"], ["What will be delivered"], ["Act only within scope"], ["Current evidence"],
+      ["Only supported claims"], ["Accept and learn"]] : ["决策负责人、针对什么", "答应交什么", "只在范围里动手", "当前的证据", ["只说证据撑得住的"], "验收、总结"];
     const pitch = L(272, 254), Y = 500, H = 92, xs = names.map((_, i) => L(280, 325) + i * pitch), W = pitch + 26;
     const thin = soon(t, lighter + .05, 1.1), h = mix(H, 62, thin), sw = mix(4, 2.5, thin);
     const railQ = ch * named(t, chain);
-    line(xs[0] - W / 2, Y, mix(xs[0] - W / 2, xs[5] + W / 2, soon(t, chain - .1, .9)), Y, {color: P.muted, alpha: railQ, width: 3});
-    [xs[0] - W / 2, xs[5] + W / 2].forEach(x => dot(x, Y, 6, {color: P.muted, alpha: railQ}));
+    dot(xs[0] - W / 2, Y, 6, {color: P.muted, alpha: railQ});
+    link(xs[0] - W / 2, Y, xs[5] + W / 2, Y, {color: P.muted, alpha: railQ, width: 3, upto: soon(t, chain - .1, .9)});
+    // A link whose English name stands a row lower carries a stem down to it, one stroke with the link, one mark.
     names.forEach((_, i) => {
       const x = xs[i], q = ramp(t, links[i] - .1, .45) * ch, lit = speaking(t, links, i), color = i === 5 ? P.authority : P.evidence;
-      stroke(() => ctx.roundRect(x - W / 2, Y - h / 2, W, h, h / 2), {color: P.line, alpha: railQ * (1 - q / ch), width: 2});
-      stroke(() => ctx.roundRect(x - W / 2, Y - h / 2, W, h, h / 2), {color, alpha: q, width: sw + 1.5 * lit});
+      stroke(() => { ctx.roundRect(x - W / 2, Y - h / 2, W, h, h / 2);
+        if (en && i % 2) { ctx.moveTo(x, Y + h / 2); ctx.lineTo(x, Y + H / 2 + NAME_GAP + RAIL_ROW - 6); } }, {color, alpha: q, width: sw + 1.5 * lit});
     });
-    if (en) xs.forEach((x, i) => { if (i % 2) line(x, Y + h / 2 + 6, x, Y + H / 2 + NAME_GAP + RAIL_ROW - 6, {alpha: ramp(t, links[i] - .1, .45) * ch, width: 2}); });
     railNames(names, xs, Y + H / 2, {gap: i => NAME_GAP + (en && i % 2 ? RAIL_ROW : 0), alpha: i => ch * listIn(t, links, i), set: "chain"});
-    // The English tells the chain on last night's delay, so the chain is marked as illustrative while the case is told.
-    if (en) illustrative(ch * span(t, cue(s, "", "take last night's delay") - .2, lighter, .4));
     // The chain is named at its start edge; how light its process may be joins the name as its qualifier.
     termRow(t, [L("信任链", "Chain of trust")], [chain], [L("手续可以随风险变轻", "Lower risk means less process")], [lighter],
       xs[0] - W / 2, Y - H / 2 - NAME_GAP - labelSize(LABEL), {width: 900, alpha: ch, color: P.evidence});
@@ -5234,9 +5405,10 @@ scenes["15"] = function (s, t) {
     });
   }
   // 4b. A blocked critical path is exposed at once: the path runs as one rail, whole from the cut, its work done up to
-  // the block, where a bar stops it on the word that blocks it and the way beyond turns dashed; the exposure rises from the block on its
-  // words, and the dependent work stands beyond the bar from its own words, where waiting for it to fail is refused.
-  // The rail holds until scope or risk changes and leaves in one cut.
+  // the block arriving on the words that name the critical path, where a bar stops it on the word that blocks it and
+  // the way beyond turns dashed; the exposure rises from the block on its words, and the dependent work stands beyond
+  // the bar from its own words, where waiting for it to fail is refused. The rail holds until scope or risk changes and
+  // leaves in one cut.
   const fourB = base * stageIn(t, blockedAt) * stageOut(t, scope);
   if (fourB > 0) {
     const Y = 540, bx = 880, top = 320, ds = [1180, 1400, 1620], halt = cue(s, "受阻", "blocked"), refuse = cue(s, "别等下游出错", "Don't wait");
@@ -5245,8 +5417,10 @@ scenes["15"] = function (s, t) {
     // The whole path stands from the cut; on the word that blocks it, the way beyond the block turns dashed.
     link(bx - 14, Y, 1620, Y, {alpha: fourB * (1 - ramp(t, halt - .05, .3)), width: 3, end: false});
     link(bx + 14, Y, 1620, Y, {alpha: fourB * .8 * ramp(t, halt - .05, .3), width: 3, end: false, dash: [8, 8]});
-    [420, 640].forEach(x => dot(x, Y, 14, {color: P.evidence, alpha: fourB}));
-    dot(mix(640, bx - 30, glide(t, blockedAt + .05, bx - 30 - 640)), Y, 13, {color: P.ink, alpha: fourB});
+    // The work done stands on the path from its name's words, and the work under way glides on to the block.
+    const work = ramp(t, crit - .15, .4) * fourB;
+    [420, 640].forEach(x => dot(x, Y, 14, {color: P.evidence, alpha: work}));
+    dot(mix(640, bx - 30, glide(t, crit + .05, bx - 30 - 640)), Y, 13, {color: P.ink, alpha: work});
     line(bx, Y - 50, bx, Y + 50, {color: P.unknown, alpha: fourB * ramp(t, halt - .05, .3), width: 4});
     ds.forEach(x => ring(x, Y, 22, {color: P.muted, alpha: fourB * ramp(t, downstream - .15, .4), width: 3}));
     nameText(L("关键的一步", "Critical path"), 300, Y - 14 - NAME_GAP, {align: "left", valign: "bottom", alpha: fourB * named(t, crit)});
@@ -5254,26 +5428,28 @@ scenes["15"] = function (s, t) {
     // The exposure rises from the block at once, a point travelling up it.
     link(bx, Y - 48, bx, top, {color: P.authority, alpha: fourB, width: 2.5, upto: soon(t, sayIt + .05, .6), flowing: since(t, sayIt + .65)});
     nameText(L("马上说", "Expose it at once"), bx, top - NAME_GAP, {valign: "bottom", color: P.authority, alpha: fourB * named(t, sayIt)});
-    rejectedName(L("等下游出错", "Waiting for dependents to fail"), ds[1], Y + 50 + NAME_GAP, {valign: "top", alpha: fourB * named(t, refuse),
+    rejectedName(L("等下游出错", "Waiting for dependent work to fail"), ds[1], Y + 50 + NAME_GAP, {valign: "top", alpha: fourB * named(t, refuse),
       mark: ramp(t, wait + .05, .3)});
   }
   // 5. A material change of scope or risk goes back to the decision owner. The change stands inside the
   // frame of its scope from the first words, at the centre, and the frame visibly widens on the words that say the
   // change is material.
-  // A link rises from the change to its owner, who first stands over it, a point travelling it. The change and the decision
-  // are then written into the work record that already exists: the record stands on the words that begin the writing,
-  // the change runs straight across to it and the decision comes down from the owner, each writing its own row, and the
-  // record is named on its words.
+  // A link rises from the change to its owner, who stands over it, high enough that the two stand as one tall stage, from
+  // the first words of the clause that returns to it, a point travelling the link. The change and the decision are then
+  // written into the work record that already exists: the record stands with its earlier entries on the words that
+  // begin the writing, the change runs straight across to it and the decision comes down from the owner, each writing
+  // its own row, and the record is named on its words.
   const five = base * stageIn(t, scope);
   if (five > 0) {
     const back = cue(s, "回头找", "return to"), changed = cueFrom(s, "变化", "the change", decider), decided = cueFrom(s, "决定", "decision", changed);
+    const ownerAt = cue(s, "就回头找", "return to");
     // The change and then its owner stand centred while the record is still to come. The record stands close enough to
     // the change that the stage, from the change's widened frame to the rows' names beside the record, ends centred in
     // each edition, and the owner stands midway between the change and the record, at the middle of the bracket its two
     // links make: on the words that begin the writing the change glides left into that stage, the record entering beside
     // it, and the owner takes its place over the bracket.
     const writing = cue(s, "把变化", "record the change");
-    const DX = 740, dy = 590, oy = 340, ry = 515, rw = 120, rh = 150, under = dy + 110 + NAME_GAP;
+    const DX = 740, dy = 590, oy = 300, ry = 515, rw = 120, rh = 150, under = dy + 110 + NAME_GAP;
     const RX = 1920 - (DX - 130) - rw - NAME_GAP - Math.max(...(en ? ["Change", "Decision"] : ["变化", "决定"]).map(v => measure(v)));
     const apart = glide(t, writing + .05, 960 - DX), dx = mix(960, DX, apart), rx = RX + dx - DX, ox = mix(960, (DX + RX + rw / 2) / 2, apart);
     // The scope's frame stands firm around the change and widens on "materially"; it stays a card-sized frame.
@@ -5281,16 +5457,17 @@ scenes["15"] = function (s, t) {
     box(dx - fw / 2, dy - fh / 2, fw, fh, {stroke: P.muted, alpha: five, radius: 14, width: 3});
     path([[dx, dy - 50], [dx + 50, dy + 36], [dx - 50, dy + 36], [dx, dy - 50], [dx + 50, dy + 36]], {color: P.unknown, alpha: five, width: 3});
     nameText(en ? "Material change of scope or risk" : ["范围或风险", "有了实质变化"], dx, under, {valign: "top", width: 360, alpha: five * named(t, scope)});
-    const own = ramp(t, decider - .1, .45) * five;
+    const own = ramp(t, ownerAt - .1, .45) * five;
     person(ox, oy, {alpha: own, color: P.authority, size: 1.5});
-    nameText(L("决策负责人", "Decision owner"), ox, oy - 52 - NAME_GAP, {valign: "bottom", color: P.authority, alpha: five * named(t, decider)});
+    nameText(L("决策负责人", "Decision owner"), ox, oy - 52 - NAME_GAP, {valign: "bottom", color: P.authority, alpha: five * named(t, ownerAt)});
     // Over the change the link rises straight to the owner's feet; as the two part it turns to the owner's side.
     link(dx, dy - fh / 2 - 12, ox - 44 * apart, mix(oy + 46, oy, apart), {route: "vh", color: P.authority, alpha: five, width: 2.5, upto: soon(t, back - .05, .9),
       flowing: since(t, back + .85), span: Math.abs((DX + RX + rw / 2) / 2 - 44 - DX) + (dy - 216 / 2 - 12 - oy)});
-    // The existing record: a document at full ink from the words that begin the writing, named on its own words; its
-    // two rows are written on their words.
-    const kept = named(t, record);
-    documentIcon(rx, ry, rw, rh, {alpha: five * named(t, writing), rows: 0});
+    // The existing record: a document at full ink from the words that begin the writing, its earlier entries ruled as
+    // one stroke over the rows to be written, named on its own words; its two rows are written on their words.
+    const kept = named(t, record), held = five * named(t, writing);
+    documentIcon(rx, ry, rw, rh, {alpha: held, rows: 0});
+    stroke(() => [[30, .62], [50, .42]].forEach(([d, w]) => { ctx.moveTo(rx + 18, ry + d); ctx.lineTo(rx + 18 + rw * w, ry + d); }), {color: P.muted, alpha: held * .8, width: 2});
     // The record is named on the change's line, whole on one line centred under the record, clear below the rows' names.
     nameText(L("现有的工作记录", "Existing work record"), rx + rw / 2, under, {valign: "top", alpha: five * kept});
     const c = soon(t, changed - .05, .8), d = soon(t, decided - .05, .8), rows = [[dy, P.ink, changed], [dy + 48, P.authority, decided]];
@@ -5350,7 +5527,7 @@ scenes["16"] = function (s, t) {
     const parts = cues(s, [["问题", "the problem"], ["范围", "scope"], ["怎样算完成", "completion condition"]]);
     const [routeAt, ownerAt, underWay, unchecked, made, passed, acceptor, confirmed] = cues(s, [["有了做法", "a route"], ["负责人", "an owner"],
       ["正在做", "under way"], ["核验还没通过", "checks have not passed"], ["交付物有了", "the deliverable"], ["核验通过了", "checks passed"],
-      ["验收人", "an authorized acceptor"], ["确认了", "confirmed by"]]);
+      ["有授权的验收人", "an authorized acceptor"], ["确认了", "confirmed by"]]);
     // What the verification holds for: the subject (in Chinese, the subject agreed on), version, environment and scope
     // or limit.
     const versionAt = cue(s, "版本", "version"), holdsFor = [cue(s, "说好的对象", "subject"), versionAt, cue(s, "环境", "environment"), cueFrom(s, "限度", "limit", versionAt)];
@@ -5397,19 +5574,19 @@ scenes["16"] = function (s, t) {
     // The parts that frame the work: empty dashed slots while they are missing, written in as the work gains its route.
     // Their name stands over the card from their words; once the card moves on, it names what the unframed state lacks,
     // so it stays over the first station while the states it heads stand, risen 64 px on the route's words so the card's
-    // turning and its deliverable pass under it.
+    // turning and its deliverable pass under it. The slots stand close under it, so the name reaches all three.
     const framed = soon(t, routeAt + .05, .5), lx = x - CW / 2 + 20;
     parts.forEach((at, k) => {
-      const y = CT + 30 + k * 26, w = [100, 74, 90][k];
+      const y = CT + 22 + k * 24, w = [100, 74, 90][k];
       box(lx, y - 8, w, 16, {stroke: P.unknown, alpha: named(t, at) * (1 - framed) * two, radius: 4, width: 2, dash: [5, 5]});
       if (framed > 0) line(lx, y, lx + w * framed, y, {color: P.ink, alpha: two, width: 4});
     });
     growName(t, L(["问题", "、范围", "或怎样算完成"], ["The problem", ", scope", " or completion condition"]), parts, xs[0] - CW / 2,
       CT - NAME_GAP - 64 * soon(t, routeAt + .05, .6), {valign: "bottom", color: P.unknown, alpha: two});
-    // The owner walks beside the card from its words; the deliverable stands on the card from its words, and the
-    // acceptor's seal is stamped on it once the acceptor has confirmed.
+    // The owner walks beside the card from its words; the deliverable stands on the card from its words, its lines ruled
+    // as one stroke, one page, and the acceptor's seal is stamped on it once the acceptor has confirmed.
     person(x - CW / 2 - 38, RY - 27, {alpha: named(t, ownerAt) * two});
-    documentIcon(x - 32, CT - 76, 64, 84, {alpha: named(t, made) * two, rows: 3});
+    s17Page(x - 32, CT - 76, 64, 84, {alpha: named(t, made) * two, rows: 3});
     const stamp = ramp(t, Math.max(acceptor, confirmed) + .05, .3) * two;
     if (stamp > 0) { dot(x, CT - 32, 23, {color: P.row, alpha: stamp}); seal(x, CT - 32, mix(30, 22, stamp), {alpha: stamp}); }
     person(xs[5] + CW / 2 + 44, RY - 27, {color: P.authority, alpha: named(t, acceptor) * two, size: 1.1});
@@ -5482,10 +5659,11 @@ scenes["16"] = function (s, t) {
     const escEnd = TX + 40 + measure(report[2], LABEL) + 24, PX = 1400;
     link(escEnd, ys[2], PX - 40, ys[2], {color: P.authority, alpha: four * ramp(t, escAt - .05, .3), upto: soon(t, escAt - .05, .6)});
     person(PX, ys[2] + 4, {color: P.authority, alpha: four * ramp(t, escAt + .3, .4), size: 1.1});
-    // Independent authorized work keeps moving along its lane to the scene's end.
+    // Independent authorized work keeps moving along its lane to the scene's end, its dots small as a flow's dots are,
+    // so they read as the work moving rather than as more items of the report.
     for (let k = 0; k < 3; k++) {
       const q = loopPhase(since(t, Math.min(independent, moving) - .15), 1288, k / 3);
-      if (q !== null) flowDot(mix(316, 1604, q), BY, 10, q, {color: P.evidence, alpha: lane});
+      if (q !== null) flowDot(mix(316, 1604, q), BY, 7, q, {color: P.evidence, alpha: lane});
     }
     // The Chinese lane is named by the work it carries; its moving dots say that the work keeps moving.
     const parts = L(["不受影响", "、已授权的工作"], ["Independent, authorized work", " keeps moving"]), pAts = en ? [moving, independent] : [independent, cue(s, "已授权的工作", "")];
@@ -5504,13 +5682,20 @@ function s17Page(x, y, w, h, {alpha = 1, stroke: edge = P.ink, rows = 4, fillCol
   }, {color: P.muted, alpha: alpha * .8, width: 2});
 }
 /* The completion stamp of 17.1: one quiet ring standing from the claim's first words, open by a hair at its top, with
- * its check waiting in it, quiet, and its name. Each condition lights one arc of the ring where its row meets it, so
- * completion reads as the sum of its conditions; the arcs tile the ring, and the check is struck when all six have
- * lit. `arcs` are the arcs' extents in degrees, clockwise from the right. */
-function s17Stamp(x, y, r, arcs, lights, colors, {alpha = 1, struck = 0} = {}) {
+ * its check waiting in it, quiet, and its name. Each condition lights one arc of the ring where its row meets it, the
+ * arc spreading from that point to its ends, so completion reads as the sum of its conditions; the arcs tile the ring,
+ * and the check is struck when all six have lit. The lit arcs of one colour are one stroke, so the lit ring reads, and
+ * counts, as one part of the stamp rather than as arcs each waiting for a name. `arcs` are the arcs' extents in
+ * degrees, clockwise from the right, and `meets` the angles where their rows meet the ring. */
+function s17Stamp(x, y, r, arcs, meets, lights, colors, {alpha = 1, struck = 0} = {}) {
   ring(x, y, r, {color: P.line, alpha: alpha * .9, width: 4, start: -Math.PI / 2 + .04, upto: 1 - .08 / (2 * Math.PI)});
-  arcs.forEach(([a, b], k) => {
-    if (lights[k] > 0) ring(x, y, r, {color: colors[k], alpha: alpha * lights[k], width: 8, start: (a + 1.5) * Math.PI / 180, upto: (b - a - 3) / 360});
+  [...new Set(colors)].forEach(color => {
+    if (!arcs.some((_, k) => colors[k] === color && lights[k] > 0)) return;
+    stroke(() => arcs.forEach(([a, b], k) => {
+      if (colors[k] !== color || lights[k] <= 0) return;
+      const m = meets[k], a0 = (m - (m - a - 1.5) * lights[k]) * Math.PI / 180, a1 = (m + (b - 1.5 - m) * lights[k]) * Math.PI / 180;
+      ctx.moveTo(x + r * Math.cos(a0), y + r * Math.sin(a0)); ctx.arc(x, y, r, a0, a1);
+    }), {color, alpha, width: 8});
   });
   check(x, y - 22, r * .5, {color: P.line, alpha: alpha * .7});
   check(x, y - 22, r * .5, {alpha, upto: struck});
@@ -5540,10 +5725,10 @@ scenes["17"] = function (s, t) {
   : [
     ["交付物", "交付物", "在约定的位置", "在约定的位置", "在约定的位置"],
     ["每条完成标准", "每条完成标准", "达到了", "达到了", "都达到了"],
-    ["核验", "核验已经通过", "现在跑过、和说法对得上", "现在跑过", "已经通过"],
+    ["核验", "核验现在跑过", "现在跑过、和说法对得上", "现在跑过", "已经通过"],
     ["风险、限度和后续由谁负责", "风险", "已记录", "都已记录", "都已记录"],
     ["约定的状态", "约定的状态", "达到了", "达到了约定的状态", "达到了约定的状态"],
-    ["验收人", "验收人", "需要人来验收的", "需要人来验收", "已经验收"]])
+    ["验收人", "验收人", "需要时已经验收", "需要人来验收", "已经验收"]])
     .map(([term, termCue, qual, qualCue, holdCue]) => [[].concat(term), cue(s, termCue, termCue), qual, cue(s, qualCue, qualCue), cue(s, holdCue, holdCue)]);
   // A row builds from the first of its words; its box stands with its key term, the name that stands beside it.
   const starts = rows.map(([, termAt, , qualAt]) => Math.min(termAt, qualAt)), marks = rows.map(([, termAt]) => termAt);
@@ -5566,10 +5751,11 @@ scenes["17"] = function (s, t) {
     // Each row meets the ring at the angle of its own height, and its arc reaches halfway to its neighbours' angles.
     const meet = Math.asin(GY / R) * 180 / Math.PI, top = 180 + meet, low = 180 - meet;
     const arcs = [[(top + 180) / 2, 270], [270, (360 - meet + 360) / 2], [(low + 180) / 2, (top + 180) / 2], [-meet / 2, meet / 2], [90, (low + 180) / 2], [meet / 2, 90]];
+    const meets = [top, 360 - meet, 180, 0, low, meet];
     // When the last condition holds, the stamp is struck and the whole list returns to full ink with it. An arc lights
     // once its link has reached it, and has lit before its thought ends, so no arc changes in the quiet that follows.
     const struck = ramp(t, done + .05, .55), place = ramp(t, opening(s) + .2, .6) * g1;
-    s17Stamp(SX, SY, R, arcs, holds.map(at => ramp(t, Math.min(at + .45, thoughtEnd(at) - .3), .3)), colors, {alpha: place, struck: struck * g1});
+    s17Stamp(SX, SY, R, arcs, meets, holds.map(at => ramp(t, Math.min(at + .45, thoughtEnd(at) - .3), .3)), colors, {alpha: place, struck: struck * g1});
     nameText(L("完成", "Complete"), SX, SY + 70, {alpha: g1 * named(t, complete)});
     // The rule is named from the scene's first words, so the scene cuts in with its claim in view.
     const allAt = cue(s, "这些条件全都满足", "every condition holds");
@@ -5657,22 +5843,27 @@ scenes["17"] = function (s, t) {
   }
   // 3. Adjacent states are not each other. Each pair stands in one row of a ledger: the state reached on the left, its
   // mark filled, and the state it does not make on the right, its ring hollow and dashed, each on its own words. The way
-  // from one toward the other draws on from the reached mark and stops at a tall bar on the words that deny it, so each
-  // table of refusals builds and stands instead of its rows replacing each other. English says all five pairs in one
-  // thought, so one table holds them all until missing evidence is named. Chinese says the passing test and the exact copy
-  // of a file in one thought and the rest in the next, so a table holds each thought's pairs: on the merged change a
-  // second, laid out with the same spacing, takes the merge, the publication and the Agent's report, and holds until missing
-  // evidence is named. Each table balances on the frame: the English table grows about the content centre, its first row
-  // on the centre line and the rows already shown stepping up by half a row as the words that bring the next one begin.
-  // The exact copy can still mean the wrong thing: in English its bar stands on "still", and the meaning it does not
-  // make is named on "the wrong thing".
-  const stopWords = en ? ["is not", "still", "is not", "is not", "does not"] : ["不等于", "也不等于", "不等于", "不等于", "也不等于"];
+  // from one toward the other draws on from the reached mark and stops at the table's gate, one tall bar through the
+  // table's whole extent, which stands at the structure tier from the words that deny the first pair, where the first
+  // way meets it; each pair's stretch of it takes its colour on the words that deny that pair, so each table of refusals
+  // builds and stands instead of its rows replacing each other, and stands as tall as it will be once its first pair
+  // has been refused. English says all five pairs in one thought, so one table holds them all until missing evidence is
+  // named. Chinese says the passing test and the exact copy of a file in one thought and the rest in the next, so a
+  // table holds each thought's pairs: on the merged change a second, laid out with the same spacing, takes the merge,
+  // the publication and the Agent's report, and holds until missing evidence is named. Each table balances on the
+  // frame: the English table grows about the content centre, its first row on the centre line and the rows already shown
+  // stepping up by half a row as the words that bring the next one begin, and every table stands centred across on the
+  // rows said so far.
+  // In English the passing test's bar stands on "proves neither", and the exact copy's on "does not", the meaning it does
+  // not make named on "the meaning is right".
+  const stopWords = en ? ["proves neither", "does not", "is not", "is not", "does not"] : ["不等于", "也不等于", "不等于", "不等于", "也不等于"];
   const stops = nots.map((at, i) => cueFrom(s, stopWords[i], stopWords[i], at));
   // A reached state given as lines would keep them, one under the other, each ending at the column's edge; every state
   // stands on one line, as said, the Chinese Agent's report among them.
   const left = en ? [[["A passing test"], []], [["An exact copy"], []], [["A merged change"], []], [["Published"], []], [["An Agent reports completion"], []]]
     : [[["测试通过"], []], [["两个文件一字不差"], []], [["改动合并了"], []], [["发布了"], []], [["智能体说完成了"], []]];
-  const right = en ? [["Acceptance", "acceptance"], ["The right meaning", "the wrong thing"], ["Published", "published"], ["Effective or adopted", "effective or adopted"], ["Work complete", "work complete"]]
+  const right = en ? [["Overall correctness or acceptance", "overall correctness"], ["The right meaning", "the meaning is right"], ["Published", "published"],
+    ["Effective or adopted", "effective or adopted"], ["Work complete", "work complete"]]
     : [["整体正确或已验收", "整体正确或已验收"], ["含义就对", "含义就对"], ["发布了", "发布了"], ["用上了", "用上了"], ["完成了", "完成了"]];
   const rightAts = right.map(([, v], i) => cueFrom(s, v, v, stops[i]));
   // A reached state's qualifier stands under its name, so the name stands beside its mark from its own words.
@@ -5686,13 +5877,17 @@ scenes["17"] = function (s, t) {
   const from = DL + DOT + 8, to = DR - RING - 8, reach = (BAR - 8 - from) / (to - from);
   // The pair being said lights its reached mark; a light that would end in the quiet between thoughts waits for words.
   const litAts = nots.map(v => pauseHold(v - .15, .3) + .15);
-  // One table: its rows, their heights, its fade, its sets' key, and the word on which its names are whole again. A
-  // table stands centred on its own names, from its widest reached state to its widest state not made, so a table of
-  // shorter names keeps the columns' spacing and still balances on the frame.
-  const ledger = (rows, ys, a, key, whole) => {
+  // One table: its rows, their heights now and once all are said, its fade, its sets' key, and the word on which its
+  // names are whole again. A table stands centred on its own names, from its widest reached state to its widest state
+  // not made, so a table of shorter names keeps the columns' spacing and still balances on the frame; it counts the
+  // reached states said so far, and glides to stay centred as a wider one arrives.
+  const ledger = (rows, ys, last, a, key, whole) => {
     const reachedAts = rows.map(i => nots[i]), notAts = rows.map(i => rightAts[i]), lights = rows.map(i => litAts[i]);
-    const spanL = Math.max(...rows.map(i => rowW(left[i]))), spanR = Math.max(...rows.map(i => measure(right[i][0], LABEL)));
-    ctx.save(); ctx.translate(960 - (DL - DOT - NAME_GAP - spanL + DR + RING + NAME_GAP + spanR) / 2, 0);
+    const spanR = Math.max(...rows.map(i => measure(right[i][0], LABEL)));
+    const centreOn = n => 960 - (DL - DOT - NAME_GAP - Math.max(...rows.slice(0, n).map(i => rowW(left[i]))) + DR + RING + NAME_GAP + spanR) / 2;
+    const shift = rows.slice(1).reduce((v, i, k) => { const d = centreOn(k + 2) - centreOn(k + 1); return v + d * glide(t, nots[i] - .1, d); }, centreOn(1));
+    ctx.save(); ctx.translate(shift, 0);
+    line(BAR, last[0] - 50, BAR, last.at(-1) + 50, {color: P.line, alpha: ramp(t, stops[rows[0]] + .05, .3) * a, width: 4});
     rows.forEach((i, k) => {
       const [term, qual] = left[i], y = ys[k], lit = speaking(t, lights, k);
       dot(DL, y, DOT + 1, {color: P.evidence, alpha: ramp(t, nots[i] + .05, .3) * a});
@@ -5713,13 +5908,14 @@ scenes["17"] = function (s, t) {
   };
   const g3 = base * stageIn(t, nots[0]) * stageOut(t, en ? missing : nots[2]);
   if (g3 > 0 && en) {
-    const grown = [1, 2, 3, 4].reduce((sum, i) => sum + soon(t, pauseHold(nots[i] - .3, .4), .4), 0);
-    ledger([0, 1, 2, 3, 4], [0, 1, 2, 3, 4].map(k => CONTENT_CY + 120 * (k - grown / 2)), g3, "all", cueFrom(s, "完成了", "complete", rightAts[4]));
+    const grown = [1, 2, 3, 4].reduce((sum, i) => sum + soon(t, pauseHold(nots[i] - .3, .4), .4), 0), row = n => [0, 1, 2, 3, 4].map(k => CONTENT_CY + 120 * (k - n / 2));
+    ledger([0, 1, 2, 3, 4], row(grown), row(4), g3, "all", cueFrom(s, "完成了", "complete", rightAts[4]));
   }
-  if (g3 > 0 && !en) ledger([0, 1], [CONTENT_CY - 80, CONTENT_CY + 80], g3, "first", cueFrom(s, "就对", "wrong thing", rightAts[1]));
+  if (g3 > 0 && !en) ledger([0, 1], [CONTENT_CY - 80, CONTENT_CY + 80], [CONTENT_CY - 80, CONTENT_CY + 80], g3, "first", cueFrom(s, "就对", "meaning is right", rightAts[1]));
   const g3b = en ? 0 : base * stageIn(t, nots[2]) * stageOut(t, missing);
   // The second table's first row stands just above the centre, so the table is balanced from its first row on.
-  if (g3b > 0) ledger([2, 3, 4], [CONTENT_CY - 70, CONTENT_CY + 50, CONTENT_CY + 170], g3b, "second", cueFrom(s, "完成了", "complete", rightAts[4]));
+  const second = [CONTENT_CY - 70, CONTENT_CY + 50, CONTENT_CY + 170];
+  if (g3b > 0) ledger([2, 3, 4], second, second, g3b, "second", cueFrom(s, "完成了", "complete", rightAts[4]));
   // 4. When evidence is missing, the claim narrows to it. A row of evidence stands on the words that say evidence is
   // missing: the evidence that exists is checked, and what is missing stays a dashed, open
   // outline with a question mark. The claim stands as one card over the row on the words that narrow it, its wording
@@ -5787,8 +5983,12 @@ scenes["18"] = function (s, t) {
   // and the arc of the judgment it affects, from analysis to decision, lights; when the subject, outcome or boundaries
   // change, the other run reaches the first step, which lights again.
   // The loop holds until the next thought names the work it asks more of, and hands the picture over in one cut.
+  // The two changes are a list said member by member, the right one first. The English right change stands further out
+  // with the shorter name, so there the loop stands 40 px toward the left change's side until that change comes, and
+  // the stage stays balanced while it builds (see building).
   const one = base * stageOut(t, two);
   if (one > 0) {
+    ctx.save(); ctx.translate(-building(t, [evidence, subject], L(0, 40)), 0);
     const cx = 960, cy = CONTENT_CY, R = 270, top = cy - R;
     // The ring draws on from Frame's station and stays open there by a hair, under the station's mark.
     const drawn = ramp(t, opening(s), 1.2);
@@ -5833,29 +6033,32 @@ scenes["18"] = function (s, t) {
     });
     // The first step lights again once the other run has reached it, and settles before the thought ends.
     ring(cx, top, 24, {color: P.ink, alpha: one * ramp(t, Math.min(reframe + .7, thoughtEnd(reframe) - .35), .3) * .7, width: 3});
+    ctx.restore();
   }
-  // 2. What the work leaves behind. High-impact or repeated work stands at the centre as a stack of its runs, named on
-  // its first words; its completion stamp stands open on its corner on the words "before calling it complete", and
-  // before it is called complete, each tool it needs
-  // drops from it on its own noun into one row below, the row reaching out to each tool just before it comes, and the
-  // one being said lights its mark. The existing owners, who will maintain the tools, are a frame drawn round them on
-  // their name, and the work's stamp is struck once the tools are left with them; the monitor pulses as the next
-  // occurrence is found earlier. The stage holds until the example is named.
+  // 2. What the work leaves behind. High-impact or repeated work stands as a stack of its runs, named beside it on its
+  // first words, the name and the stack centred as one group so the work fills the picture from those words; its
+  // completion stamp stands open on its corner on the words "before calling it complete", and before it is called
+  // complete, each tool it needs drops from it on its own noun into one row below, the row reaching out to each tool
+  // just before it comes, and the one being said lights its mark. The existing owners, who will maintain the tools, are
+  // a frame drawn round them on their name, and the work's stamp is struck once the tools are left with them; the
+  // monitor pulses as the next occurrence is found earlier. The stage holds until the example is named.
   const [repeated, nextAt, earlier, easier] = cues(s, [["反复出现", "repeated"], ["下一次问题", "the next occurrence"],
     ["更早被发现", "found earlier"], ["更容易判断", "judged more easily"]]);
   const g2 = base * stageIn(t, two) * out;
   if (g2 > 0) {
-    const WW = 150, WH = 190, WX = 960 - (WW + 44) / 2, WY = 342, BUS = 582, IY = 656, FY = 606, FH = 175;
-    // The row of tools stands centred under the trunk as it grows: the first tool drops straight under it, and the row
-    // steps left by half its pitch as the row reaches out to each further tool, in 0.5 s, so no name travels 40 px in a
-    // frame.
-    const lean = kept.slice(1).reduce((v, at) => v + 120 * (1 - glide(t, at - .3, 120)), 0), xs = [600, 840, 1080, 1320].map(x => x + lean);
     const work = en ? ["High-impact", " or repeated work"] : ["影响大的", "或者反复出现的工作"];
+    // The work's name stands at its left, centred on its page, and the page stands as far right of the centre as centres
+    // the name and the stack together; the trunk drops from the middle of the stack.
+    const WW = 150, WH = 220, WX = 960 + (measure(work.join(""), LABEL) + NAME_GAP - WW - 44) / 2, WY = 312, TX = WX + (WW + 44) / 2;
+    const BUS = 582, IY = 656, FY = 606, FH = 175;
+    // The row of tools stands centred on the frame as it grows: the first tool drops at its middle, and the row steps
+    // left by half its pitch as the row reaches out to each further tool, in 0.5 s, so no name travels 40 px in a frame.
+    const lean = kept.slice(1).reduce((v, at) => v + 120 * (1 - glide(t, at - .3, 120)), 0), xs = [600, 840, 1080, 1320].map(x => x + lean);
     // Its runs: the pages behind show only the edges that stand clear of the front page.
     for (let k = 2; k >= 1; k--) path([[WX + k * 22, WY - (k - 1) * 22], [WX + k * 22, WY - k * 22], [WX + WW + k * 22, WY - k * 22], [WX + WW + k * 22, WY + WH - k * 22],
       [WX + WW + (k - 1) * 22, WY + WH - k * 22]], {color: P.ink, alpha: g2, width: 2});
     s17Page(WX, WY, WW, WH, {alpha: g2, rows: 5});
-    growName(t, work, [high, repeated], 960 - measure(work.join(""), LABEL) / 2, WY - 44 - NAME_GAP, {valign: "bottom", alpha: g2});
+    growName(t, work, [high, repeated], WX - NAME_GAP, WY + WH / 2, {valign: "middle", align: "right", alpha: g2});
     // The stamp on the work's corner stands open on the words before calling it complete, and is struck once the tools
     // are left with the owners.
     const SX = WX + WW, SY = WY + WH, stamp = g2 * ramp(t, before - .15, .4);
@@ -5865,8 +6068,8 @@ scenes["18"] = function (s, t) {
     // The row reaches out from the work to each tool just before the tool is named, and each drops on its noun.
     // The trunk reaches the row before the row starts to grow, so the row grows out of it from nothing.
     const reach = kept.map(at => soon(t, at - .3, .35)), first = soon(t, kept[0] - .65, .3);
-    link(960, SY, 960, BUS, {alpha: g2, upto: first, end: false});
-    const left = Math.min(960, ...xs.map((x, i) => mix(960, x, reach[i]))), right = Math.max(960, ...xs.map((x, i) => mix(960, x, reach[i])));
+    link(TX, SY, TX, BUS, {alpha: g2, upto: first, end: false});
+    const left = Math.min(TX, ...xs.map((x, i) => mix(TX, x, reach[i]))), right = Math.max(TX, ...xs.map((x, i) => mix(TX, x, reach[i])));
     if (right - left > 1) line(left, BUS, right, BUS, {color: P.line, alpha: g2, width: 2});
     box(440, FY, 1040, FH, {fill: P.row, stroke: P.ink, alpha: g2 * named(t, leave), radius: 14, width: 2.5});
     kept.forEach((at, i) => {
@@ -5972,7 +6175,7 @@ scenes["18"] = function (s, t) {
       } else s17Page(x - W / 2 + 20, TOP + 10, W - 40, H - 14, {alpha: q, rows: 5, stroke: P.muted});
       // The user nobody is: an empty seat that stands on the item's words, when a dashed way runs out to it.
       person(seats[i], MY + 8, {alpha: q, color: P.line, size: .9, solid: false});
-      link(x + side * (W / 2 + 12), MY, seats[i] - side * 34, MY, {color: P.line, alpha: q, upto: soon(t, ats[i] + .05, .6), dash: [8, 8]});
+      link(x + side * (W / 2 + 12), MY, seats[i] - side * 34, MY, {color: P.line, alpha: q, upto: drawShare(t, ats[i] + .05, Math.abs(seats[i] - side * 34 - (x + side * (W / 2 + 12))), .6), dash: [8, 8]});
       rejectedName(names[i], x, TOP - 12 - NAME_GAP, {valign: "bottom", width: 460, alpha: no * named(t, ats[i]),
         mark: ramp(t, ats[i] + .45, .3), set: "unused"});
     });
@@ -6054,20 +6257,21 @@ scenes["19"] = function (s, t) {
   // Until the handover the member and the column stand alone, centred as one group, and on the handover's words they
   // move left to their places beside the Agent, the member to the place it keeps through the next stages. Before the
   // first kind is named the member stands alone at the centre, and it moves to its place in the group on that kind's
-  // words.
+  // words. The column stands nearer the Agent than the member, its rows a wide pitch apart and its last row on the
+  // actors' line, so the member and the kinds fill the picture from the first kind on while the Agent is still to come.
   const kinds = cues(s, [["查资料", "search"], ["分析", "analysis"], ["起草", "drafting"], ...(en ? [["", "changes"]] : [])]);
   const toAgent = cue(s, "委托给智能体", "to agents"), agentAt = cue(s, "智能体", "agents");
   const g1 = base * clearOfTitle(s, t, 350) * stageOut(t, Math.min(within, extend));
   if (g1 > 0) {
     const names = en ? ["Search", "Analysis", "Drafting", "Changes"] : ["查资料", "分析", "起草"];
-    const wide = Math.max(...names.map(v => measure(v, LABEL))), group = (memberLeft + 900 + wide) / 2;
+    const CX = 1080, wide = Math.max(...names.map(v => measure(v, LABEL))), group = (memberLeft + CX + wide) / 2;
     const lead = (960 - group) * (1 - glide(t, toAgent + .05, 960 - group)), solo = (group - MX) * (1 - glide(t, kinds[0] + .05, group - MX));
-    const ax = 1380, ay = 500, cx = 900 + lead, mx = MX + lead;
+    const ax = 1400, ay = 500, cx = CX + lead, mx = MX + lead;
     ctx.save(); ctx.translate(solo, 0);
     person(mx, MY, {alpha: g1, color: P.authority, size: 1.7});
     nameText(L("成员", "Member"), mx, MY + 38 + NAME_GAP, {valign: "top", color: P.authority, alpha: g1 * named(t, cue(s, "成员", "members"))});
     ctx.restore();
-    const tops0 = stackTops(names.map(() => blockHeight(1)), CONTENT_CY, 60), lift = snap(tops0.map(v => v + em / 2));
+    const tops0 = stackTops(names.map(() => blockHeight(1)), CONTENT_CY, 80), lift = snap(tops0.map(v => v + em / 2));
     const tops = tops0.map(v => v + lift), mid = i => tops[i] + labelSize(LABEL) / 2;
     names.forEach((v, i) => {
       const y = mid(i), on = ramp(t, kinds[i] - .15, .4), lit = speaking(t, kinds, i);
@@ -6085,16 +6289,16 @@ scenes["19"] = function (s, t) {
   }
   // 2. Within the delegated boundary the Agent extends what people can investigate, reason about and do: the boundary
   // stands round the Agent as a frame, and the three abilities build into one column inside it, each with its mark.
-  // The frame opens on its words about the Agent alone and widens to the column as its first ability arrives; until
-  // then it stands round the Agent at the middle of where the boundary will stand, so the member and the boundary are
-  // balanced, and the Agent steps to its side as the frame widens (in English the abilities are named first, so the
-  // frame opens at its full width).
+  // The frame opens on the stage's first words about the Agent alone and widens to the column as its first ability
+  // arrives; until then it stands round the Agent at the middle of where the boundary will stand, so the member and the
+  // boundary are balanced, and the Agent steps to its side as the frame widens. The frame is named on its own words,
+  // which open the stage in Chinese and close it in English, where it holds the Agent and its abilities before then.
   const abilities = cues(s, [["调查", "investigate"], ["推理", "reason about"], ["动手", "and do"]]);
   // The next stage cuts in on its first words: the Agent's own column in Chinese, the refusal in English.
   const sourceCut = cue(s, "智能体能执行", "but an agent");
   // Each column's frame is as wide as its own widest name, so the boundary is filled by what it holds.
-  // The refused authority stands whole on one line, the frame widening to take it.
-  const kx = FX + 210, refused = L("组织的授权", "Organizational authority"), RW = 400, lean19 = L(0, 100);
+  // The refused authorization stands whole on one line, the frame widening to take it.
+  const kx = FX + 210, refused = L("组织的授权", "Organizational authorization"), RW = 400, lean19 = L(0, 100);
   const widthFor = names => 210 + 20 + NAME_GAP + Math.max(...names) + 40;
   const g2 = base * stageIn(t, Math.min(within, extend)) * stageOut(t, sourceCut);
   if (g2 > 0) {
@@ -6105,7 +6309,7 @@ scenes["19"] = function (s, t) {
     // The waiting frame is 240 px square, as wide as its stage's balance needs and small enough to read as a card, and
     // stands at its full height, so its name keeps its line as the frame widens.
     const f = s19Frame(t, FX, small, widthFor(names.map(v => measure(v, LABEL))), ys, abilities, [380, 620], [380, 620],
-      {middle: within < abilities[0] ? 240 : null}), on = ramp(t, within - .15, .4) * g2;
+      {middle: 240}), on = ramp(t, Math.min(within, extend) - .15, .4) * g2;
     box(f.x, f.y, f.w, f.h, {stroke: P.evidence, alpha: on, radius: 22, width: 2.5});
     nameText(L("委托范围", "A delegated boundary"), f.x, f.y - NAME_GAP, {align: "left", valign: "bottom", color: P.evidence, alpha: g2 * named(t, within)});
     // The member's link to the boundary carries one flow through stages 2 to 4, timed by its length once the frame
@@ -6122,23 +6326,24 @@ scenes["19"] = function (s, t) {
       nameText(v, kx + 20 + NAME_GAP, y, {align: "left", color: P.evidence, alpha: g2 * listIn(t, abilities, i), set: "abilities"});
     });
   }
-  // 3. The Agent executes and reasons, but it cannot grant organizational authority: inside the boundary the Agent's
-  // own column builds on its words, and organizational authority, the source the Agent is not, is refused in it, so the
-  // frame shows what stays with the Agent and what does not. The English names only the refusal, so its column holds
-  // that row.
+  // 3. The Agent executes and reasons, but it cannot grant organizational authorization or make commitments for people:
+  // inside the boundary the Agent's own column builds on its words, and the authorization and the commitments it cannot
+  // give are refused in it, so the frame shows what stays with the Agent and what does not. The English names only the
+  // two refusals, so its column holds those rows.
   const boundary = cue(s, "要划清边界", "delegate with a clear boundary");
   const g3 = base * stageIn(t, sourceCut) * stageOut(t, boundary);
   if (g3 > 0) {
     person(MX, MY, {alpha: g3, color: P.authority, size: 1.7});
     nameText(L("成员", "Member"), MX, MY + 38 + NAME_GAP, {valign: "top", color: P.authority, alpha: g3});
-    // The rows each edition says: executes, reasons, the refused authority and the refused commitment in Chinese; the
-    // refused source in English. The frame opens about the Agent and widens to each row as it arrives.
-    const said = en ? [2] : [0, 1, 2, 3], promise = "替人作出承诺";
-    const does = en ? [cue(s, "", "source of organizational authority")]
+    // The rows each edition says: executes, reasons, the refused authorization and the refused commitment in Chinese;
+    // the two refusals in English. The frame opens about the Agent and widens to each row as it arrives.
+    const said = en ? [2, 3] : [0, 1, 2, 3], promise = L("替人作出承诺", "Commitments for people");
+    const does = en ? cues(s, [["", "organizational authorization"], ["", "make commitments for people"]])
       : cues(s, [["智能体能执行", ""], ["能推理", ""], ["给不了组织的授权", ""], ["替人作出承诺", ""]]);
     const ys0 = stackTops(said.map(() => blockHeight(1)), CONTENT_CY, 34).map(top => top + em / 2), ys = ys0.map(y => y + snap(ys0));
-    const widths = [...(en ? [] : ["执行", "推理"].map(v => measure(v, LABEL))), Math.max(...wrapName(refused, RW).map(v => measure(v, LABEL))) + 16 + 26,
-      ...(en ? [] : [measure(promise, LABEL) + 16 + 26])];
+    // The two refusals' crosses stand in one column after the longer of their names, so each refusal's row reaches it.
+    const refusals = Math.max(...wrapName(refused, RW).map(v => measure(v, LABEL)), measure(promise, LABEL));
+    const widths = [...(en ? [] : ["执行", "推理"].map(v => measure(v, LABEL))), refusals + 16 + 26, refusals + 16 + 26];
     const grown = tt => widths.reduce((w, v, k) => mix(w, Math.max(w, widthFor(widths.slice(0, k + 1))), soon(tt, does[k] - .3, .4)), small);
     // As the English frame widens to take the refused name whole, it and the Agent ease left, so the stage stays centred.
     const fx3 = FX - lean19 * glide(t, does[0] - .3, lean19), ax3 = fx3 + small / 2, kx3 = fx3 + 210;
@@ -6155,7 +6360,8 @@ scenes["19"] = function (s, t) {
       if (i >= 2) seal(kx3, y, 16, {alpha: q * .8, hollow: true});
       const at = ramp(t, does[k] - .15, .4) * listLevel(t, does, k);
       if (i < 2) nameText(["执行", "推理"][i], kx3 + 20 + NAME_GAP, y, {align: "left", color: P.evidence, alpha: g3 * at, set: "agent"});
-      else rejectedName(i === 2 ? refused : promise, kx3 + 20 + NAME_GAP, y, {align: "left", width: RW, alpha: g3 * ramp(t, does[k] - .15, .4), mark: ramp(t, does[k] + .4, .4)});
+      else rejectedName(i === 2 ? refused : promise, kx3 + 20 + NAME_GAP, y, {align: "left", width: RW, alpha: g3 * ramp(t, does[k] - .15, .4), mark: ramp(t, does[k] + .4, .4),
+        markLeft: kx3 + 20 + NAME_GAP + refusals + 16});
     });
   }
   // 4. Delegate with a clear boundary, not a pile of context: the pile under the member is refused, and the boundary
@@ -6172,8 +6378,10 @@ scenes["19"] = function (s, t) {
   const parts = cues(s, [["目的和范围", "purpose and scope"], ["交什么", "the deliverable"], ["限制和权限", "limits and permissions"], ["怎么验收", "how the result will be accepted"], ["什么时候必须停", "when to stop"]]);
   const g4 = base * stageIn(t, boundary) * stageOut(t, example);
   if (g4 > 0) {
+    // The last part's Chinese name keeps its key words in a shorter form, 何时必须停, so it does not repeat the caption
+    // that shows that part alone.
     const names = en ? ["Purpose and scope", "The deliverable", "Limits and permissions", "How the result will be accepted", "When to stop"]
-      : ["目的和范围", "交什么", "限制和权限", "怎么验收", "什么时候必须停"];
+      : ["目的和范围", "交什么", "限制和权限", "怎么验收", "何时必须停"];
     // A part wider than the column wraps onto a second line, and each part stands centred on its own row.
     const PW = 360, blocks = names.map(v => wrapName(v, PW)), heights = blocks.map(v => blockHeight(v.length));
     const tops = stackTops(heights, CONTENT_CY, 40), lift = snap(tops.flatMap((top, i) => blocks[i].map((_, k) => top + em / 2 + k * em * LEADING)));
@@ -6244,7 +6452,7 @@ scenes["19"] = function (s, t) {
   // 6. The report carries each value's source and observation time, the differences, and what cannot be verified: the
   // report stands at the left, and its three contents are written out of it into one column, each a way, a mark and a
   // name on its own words.
-  const noSnap = cue(s, "没有当时的快照", "stop if");
+  const noSnap = cue(s, "没有修正前的快照", "stop if");
   const items = cues(s, [["每个值的来源", "each value's source"], ["哪些有差异", "the differences"], ["哪些核实不了", "what cannot be verified"]]);
   const g6 = base * stageIn(t, report) * stageOut(t, noSnap);
   if (g6 > 0) {
@@ -6297,7 +6505,7 @@ scenes["19"] = function (s, t) {
     seal(xs[2], ys[2], 36, {alpha: on[2], hollow: true});
     // The two stop conditions are the list, so the pair returns to full ink once both are said; the release is a
     // separate prohibition, refused on its own words.
-    const stops = en ? ["Earlier snapshot is missing", "A write to production"] : ["没有当时的快照", "要改生产环境里的数据"];
+    const stops = en ? ["Earlier snapshot is missing", "A write to production"] : ["没有修正前的快照", "要改生产环境里的数据"];
     stops.forEach((v, i) => nameText(v, xs[i], ys[i] + 44 + NAME_GAP, {valign: "top", width: 380, alpha: g7 * listIn(t, at.slice(0, 2), i), set: "stops"}));
     rejectedName(L("放行这份数据", "Grant admission"), xs[2], ys[2] + 44 + NAME_GAP, {valign: "top", width: 420,
       alpha: g7 * named(t, noApprove), mark: ramp(t, noApprove + .45, .4)});
@@ -6354,7 +6562,7 @@ scenes["19"] = function (s, t) {
   // while the Chinese never names missing context as such, so there it stays a mark of what the Agent does not know.
   const g9 = base * stageIn(t, gap);
   if (g9 > 0) {
-    const ask = cue(s, "停下来问", "stops and asks"), assume = cue(s, "写明假定", "proceeds on reasonable"), onward = cue(s, "接着做", "proceeds on reasonable");
+    const ask = cue(s, "停下来问", "stops and asks"), assume = cue(s, "写明合理的假定", "proceeds on reasonable"), onward = cue(s, "接着做", "proceeds on reasonable");
     const fine = cue(s, "不影响", "does not materially"), first = cue(s, "要处理的对象", "target");
     // Each condition: its words (a term, or the members of a list) and the words that bring each, its qualifier and the
     // words that bring it, whether it stops the Agent, and the words its ring beats on. The English says authority
@@ -6370,10 +6578,13 @@ scenes["19"] = function (s, t) {
     const rows = en ? [proceeds, stops] : [stops, proceeds];
     const outB = L("停下来问", "Stops and asks");
     // The member stays where the last stage left them. While the first condition builds, the fork stands S1 px right of
-    // its place beside the member, and on the first outcome it moves to S2 px right of that place. The English S1 is
-    // taken from the full-size draft, whose Latin lines run narrower than the headless estimate.
-    const [S1, S2] = en ? [300, 0] : [280, 90], fork = mix(S1, S2, glide(t, (en ? assume : ask) + .05, S1 - S2));
-    const CW = en ? 520 : 480, mx = 450, rx = mx + 150 + fork, cx0 = rx + 130;
+    // its place beside the member, and on the first outcome it moves to S2 px from that place. The English S1 is taken
+    // from the full-size draft, whose Latin lines run narrower than the headless estimate. The English column takes what
+    // may be unclear on two even lines, each ending on a whole member, so there the fork ends 20 px left of its place,
+    // its branches turn nearer the Agent and its outcomes stand nearer their conditions, and the finished tree stays
+    // about the centre.
+    const [S1, S2] = en ? [300, -20] : [280, 90], fork = mix(S1, S2, glide(t, (en ? assume : ask) + .05, S1 - S2));
+    const CW = en ? 560 : 480, mx = 450, rx = mx + 150 + fork, cx0 = rx + L(130, 116);
     // Each condition's block: the list's lines, the block's height and width, and the width of its first line, where its
     // outcome's run leaves.
     const lineW = line => line.reduce((w, [, v]) => w + measure(v), 0);
@@ -6386,7 +6597,7 @@ scenes["19"] = function (s, t) {
       const {one, height} = termRowLayout(term, qual, CW, false), head = measure(term.join(""), LABEL), note = measure(qual.join(""), NOTE);
       return {height, width: one ? head + TERM_GAP + note : Math.max(head, note), head: one ? head + TERM_GAP + note : head};
     });
-    const colW = Math.max(...blocks.map(v => v.width)), ox = cx0 + colW + 70;
+    const colW = Math.max(...blocks.map(v => v.width)), ox = cx0 + colW + L(70, 60);
     // The Chinese opens on its list building alone at the top of the fork, so there the branches stand further apart
     // and the opening fills the frame; the English opens on proceeding, which a wider fork would raise level with the
     // open question's name, so it keeps the usual gap.
@@ -6406,21 +6617,24 @@ scenes["19"] = function (s, t) {
     if (en) nameText("Missing context", rx, QY - NAME_GAP, {valign: "bottom", alpha: g9 * named(t, gap)});
     rows.forEach(([term, termAts, qual, qualAt, stop, partAts], r) => {
       const y = ys[r], begin = Math.min(termAts[0], qualAt), q = ramp(t, begin - .15, .4) * g9, mark = cx0 - 14 - NAME_GAP;
-      link(rx + 40, 500, mark - 18, y, {route: "hvh", mid: rx + 80, alpha: q * .8, end: false});
+      link(rx + 40, 500, mark - 18, y, {route: "hvh", mid: cx0 - 50, alpha: q * .8, end: false});
       ring(mark, y, 14, {color: stop ? P.unknown : P.evidence, alpha: q, width: 2.5});
       beats(t, mark, y, 22, partAts, {color: stop ? P.unknown : P.evidence, alpha: g9});
       if (stop) {
         // Each member at its place in the block, a separator it hangs at the end of the line before with it, on its own
-        // words and at its level in the list; the qualifier on the line below, on its own words.
+        // words and at its level in the list; the qualifier on the line below, on its own words. The list and its
+        // qualifier are one name, as a term row's term and qualifier are, so its members are read as the parts of one
+        // name, not as names of their own.
+        const whole = [...term, ...qual].join(" ");
         blocks[r].lines.forEach((line, k) => {
           let left = cx0;
           line.forEach(([i, v]) => {
             growName(t, [v], [termAts[i]], left, tops[r] + k * labelSize(LABEL) * LEADING,
-              {alpha: g9 * listLevel(t, termAts, i), whole: term[i].replace(/^[、，,\s]+/u, ""), set: "context"});
+              {alpha: g9 * listLevel(t, termAts, i), whole, set: "context"});
             left += measure(v);
           });
         });
-        growName(t, qual, [qualAt], cx0, tops[r] + blockHeight(blocks[r].lines.length) + TERM_STACK, {size: NOTE, color: P.muted, alpha: g9, set: "context"});
+        growName(t, qual, [qualAt], cx0, tops[r] + blockHeight(blocks[r].lines.length) + TERM_STACK, {size: NOTE, color: P.muted, alpha: g9, whole, set: "context"});
       } else termRow(t, term, term.map(() => termAts[0]), qual, qual.map(() => qualAt), cx0, tops[r], {width: CW, inline: false, alpha: g9, set: "context"});
       // The outcome: a straight run from its condition's first line to its mark, drawn on the outcome's words.
       const at = stop ? ask : assume, go = soon(t, at - .1, .5), on = ramp(t, at - .15, .4) * g9;
@@ -6430,7 +6644,7 @@ scenes["19"] = function (s, t) {
       if (stop) nameText(outB, ox + 24 + NAME_GAP, y, {align: "left", color: P.authority, alpha: g9 * named(t, ask)});
       // The English outcome stands whole on one line and on its own words, when the fork has come to its place, so the
       // finished tree stands about the centre and the name never stands past the safe area.
-      else growName(t, en ? ["Stated", " assumptions"] : ["写明假定", "，接着做"], en ? [cue(s, "", "stated assumptions"), cue(s, "", "stated assumptions")] : [assume, onward],
+      else growName(t, en ? ["Stated", " assumptions"] : ["写明合理的假定", "，接着做"], en ? [cue(s, "", "stated assumptions"), cue(s, "", "stated assumptions")] : [assume, onward],
         ox + 24 + NAME_GAP, y - labelSize(LABEL) / 2, {width: en ? 340 : 1810 - ox - 24 - NAME_GAP, color: P.evidence, alpha: g9});
     });
   }
@@ -6517,12 +6731,12 @@ scenes["20"] = function (s, t) {
     person(OX, 506, {alpha: one, color: P.authority, size: 1.4});
     nameText(L("一个人", "One person"), OX, line1, {valign: "top", color: P.authority, alpha: one});
   }
-  // 3. But a title alone grants no power to decide or accept (in Chinese, being the task lead does not mean one may
+  // 3. But a title alone grants no authority to decide or accept (in Chinese, being the task lead does not mean one may
   // decide or accept): a title stands alone on the left, and each of its two ways to the powers it names draws toward
   // that power and stops at a short bar as the power is named; the first way leaves on the words that refuse the power,
   // which open the stage in Chinese.
   const caller = cue(s, "调用智能体的人", "the person who calls");
-  const powers = [cue(s, "做决定", "grants no power to decide"), cueFrom(s, "验收", "accept", title + 1)];
+  const powers = [cue(s, "做决定", "grants no authority to decide"), cueFrom(s, "验收", "accept", title + 1)];
   const g3 = base * stageIn(t, alone) * stageOut(t, caller);
   if (g3 > 0) {
     // The two powers stand symmetric about the title, the lower one named on the line of the title's name under its card,
@@ -6621,7 +6835,7 @@ scenes["20"] = function (s, t) {
     nameText(L("工作", "The work"), wx, 340 + 124 + NAME_GAP, {valign: "top", alpha: g6 * named(t, cueFrom(s, "工作", "the work", transfers))});
     // The duty stays: a seal on the person's side whose way across stops at the gap between the two sides.
     seal(lx + 330, 600, 30, {alpha: g6 * ramp(t, dutyAt - .15, .4)});
-    link(lx + 370, 600, 954, 600, {color: P.unknown, alpha: g6 * ramp(t, dutyAt + .05, .3), upto: soon(t, dutyAt + .05, .5), end: false, dash: [8, 8]});
+    link(lx + 370, 600, 954, 600, {color: P.unknown, alpha: g6 * ramp(t, dutyAt + .05, .3), upto: drawShare(t, dutyAt + .05, Math.abs(954 - (lx + 370)), .5), end: false, dash: [8, 8]});
     line(960, 572, 960, 628, {color: P.unknown, alpha: ramp(t, cueFrom(s, "责任", "duty", dutyAt) + .05, .25) * g6, width: 4});
     nameText(L("这份责任", "That duty"), lx + 330, 600 + 30 + NAME_GAP, {valign: "top", color: P.authority, alpha: g6 * named(t, dutyAt)});
   }
@@ -6654,8 +6868,9 @@ scenes["20"] = function (s, t) {
     const agentIn = g7 * ramp(t, acceptor + STAGE_CUT, .3);
     agent(ax, ay, {alpha: agentIn, size: 1.3});
     nameText(L("智能体", "Agent"), ax, nameY, {valign: "top", color: P.evidence, alpha: agentIn});
-    // The member the unmet work goes back to, beside the Agent within the boundary.
-    person(mx, ay, {color: P.authority, size: 1.2, alpha: g7 * ramp(t, memberAt - .15, .4)});
+    // The member the unmet work goes back to, beside the Agent within the boundary. It stands at the acceptor's size, an
+    // icon's height, so its head and shoulders read as one figure under its name.
+    person(mx, ay, {color: P.authority, size: 1.1, alpha: g7 * ramp(t, memberAt - .15, .4)});
     nameText(L("成员", "Member"), mx, nameY, {valign: "top", color: P.authority, alpha: g7 * named(t, memberAt)});
     // The work stands on the words that name it, under the acceptor's look, its foot on the line where the Agent and the
     // member stand, so the three are named on one line.
@@ -6722,7 +6937,7 @@ scenes["21"] = function (s, t) {
     line(x + 39, y + 39, x + 76, y + 76, {color: P.evidence, alpha: a, width: 5});
   };
   const [output, actual, summary, first] = cues(s, [["智能体的输出", "an agent's output"], ["实际的工作", "checking the work"], ["它写的摘要", "its summary"],
-    ["行动依据和现状", "is the authority right"]]);
+    ["行动依据和现状", "is the authority to act right"]]);
   // 1. Checking an Agent's output means checking the work, not just its summary. The output stands near the centre on
   // the first words as one stack of pages under its name, with the check's lens over it; the lens settles onto the
   // pages on the words that name the work, and the summary the Agent wrote stands beside the stack on its own name,
@@ -6765,7 +6980,7 @@ scenes["21"] = function (s, t) {
       [c("", "actual changes"), c("", "agreed and reported scope")], [c("", "verification"), c("", "current version"), c("", "right environment"), c("", "really run")],
       [c("", "anything highrisk"), c("", "the decision owner"), c("", "explicitly approve")]]
       : [[c("行动依据", ""), c("现状", "")], [c("输入", "")], [c("假定", ""), c("推论", ""), c("判断", "")],
-        [c("改动", ""), c("约定", "")], [c("核验真在", ""), c("当前版本", ""), c("正确环境", ""), c("跑过吗", "")],
+        [c("实际改动", ""), c("约定", "")], [c("核验真在", ""), c("当前版本", ""), c("正确环境", ""), c("跑过吗", "")],
         [c("高风险的操作", ""), c("决策负责人", ""), c("明确批准", "")]];
     const sealAt = Math.max(marks[5][0], marks[5][2]) + .05;
     // The scope row's question ends on its scope, which the English names after "agreed and reported".
@@ -6782,13 +6997,14 @@ scenes["21"] = function (s, t) {
     const yOf = k => 500 + (k - (n - 1) / 2) * pitch, top = 500 - n * pitch / 2 - 24, bottom = 500 + n * pitch / 2 + 24;
     documentIcon(PL, top, PW, bottom - top, {alpha: two, rows: 0});
     nameText(L("实际的工作", "The work"), PL, top - NAME_GAP, {align: "left", valign: "bottom", alpha: two});
-    const names = en ? ["Authority", "Inputs", "Assumptions, inferences and judgments", "Actual changes", "Verification", "Approve anything high-risk"]
-      : ["行动依据和现状", "输入", "假定、推论和判断", "改动", "核验", "高风险的操作"];
+    const names = en ? ["Authority to act", "Inputs", "Assumptions, inferences and judgments", "Actual changes", "Verification", "Approve anything high-risk"]
+      : ["行动依据和现状", "输入", "假定、推论和判断", "实际改动", "核验", "高风险的操作"];
     names.forEach((v, k) => {
-      // The row being asked stays marked until the next row stands, so its mark never fades in the quiet before it.
+      // The row being asked stays marked until the next row stands, so its mark never fades in the quiet before it. The
+      // mark enters with its row, which may stand after the row's words begin, so it never appears at once.
       const y = yOf(k), row = ramp(t, rowAt[k], .4) * two, lit = k + 1 < starts.length ? ramp(t, starts[k] - .15, .3) * (1 - ramp(t, rowAt[k + 1], .3)) : speaking(t, starts, k);
       if (row <= 0) return;
-      if (lit > 0) line(PL + 22, y - 30, PL + 22, y + 30, {color: P.evidence, alpha: lit * two, width: 4});
+      if (lit > 0) line(PL + 22, y - 30, PL + 22, y + 30, {color: P.evidence, alpha: lit * row, width: 4});
       // The row is one mark under its name: a rule under the row runs from its marks to the box where it is ticked.
       line(IX - 80, y + 40, TX + 18, y + 40, {color: P.line, alpha: row, width: 2});
       // The reviewer reads the row: a bright run travels along its rule, under its name, from its marks to its box while
@@ -6884,7 +7100,8 @@ scenes["21"] = function (s, t) {
     line(headX + measure(head) + NAME_GAP, Y, xs[4] + 70, Y, {color: P.muted, alpha: three, width: 3});
     nameText(head, headX, Y, {align: "left", color: P.evidence, alpha: three * named(t, own)});
     [0, 2, 3, 4].forEach(i => {
-      if (speaking(t, way, i) > 0) ring(xs[i], Y, 24, {color: P.evidence, alpha: speaking(t, way, i) * restMark(P.evidence, .5) * three, width: 2});
+      // Each station's halo stands well wider than the Agent, so the Agent walking past is never read as one of them.
+      if (speaking(t, way, i) > 0) ring(xs[i], Y, 30, {color: P.evidence, alpha: speaking(t, way, i) * restMark(P.evidence, .5) * three, width: 2});
     });
     // The four things it confirms first, one box each, ticked on its own word.
     ticks.forEach((at, k) => {
@@ -6935,13 +7152,15 @@ scenes["21"] = function (s, t) {
     (en ? ["Runs checks", "Reads the complete results", "Summarizing"] : ["跑完和说法对得上的核验", "读完全部结果", "再下结论"])
       .forEach((v, k) => nameText(v, xs[k + 2], NY, {valign: "top", width: 370, alpha: three * listIn(t, way, k + 2), set: "way"}));
   }
-  // 4. Parallel Agents suit only independent questions, paths or review angles: the work flows down the frame. The Agents stand in one row at
-  // the centre from the stage's first words, which name them, and the independent questions stand over them, one each,
-  // on their own words; each Agent's role is named under it on its words, the line of changing nothing crosses every
-  // lane on its words, and the lanes join below the one person who combines their results and owns the judgment, as
-  // that person is named. The stage is centred on its extent, from its row labels' left edge to what stands at its
-  // right: the lock's line while the last role is still to come, then the last role's name, which it moves to make
-  // room for on that role's words.
+  // 4. Parallel Agents suit only independent questions, paths or review angles: the work flows down the frame. The
+  // Agents stand together on the first lane from the stage's first words, which name them, the ones still to take a
+  // lane stacked behind the first, and the independent questions stand over the lanes, one each, on their own words;
+  // each Agent takes its own lane on the words of its role, which is named beside it, and leaves the stack as it arrives
+  // there, so no Agent stands without a name. The line of changing nothing crosses every lane on its words, and the
+  // lanes join below the one person who combines their results and owns the judgment, as that person is named; each
+  // lane's way down leaves clear of its lock. The stage is centred on its extent, from its row labels' left edge to what
+  // stands at its right: the lock's line while the last role is still to come, then the last role's name, which it
+  // moves to make room for on that role's words.
   const four = base * stageIn(t, parallel) * stageOut(t, majority);
   if (four > 0) {
     const [apart, readOnly] = cues(s, [["能拆开的独立问题", "independent questions"], ["只看不改", "change nothing"]]);
@@ -6968,15 +7187,24 @@ scenes["21"] = function (s, t) {
       ctx.moveTo(xs[0], BY); ctx.lineTo(xs[2], BY);
       xs.forEach(x => [[BY, QY - 24], [QY + 24, AY - 30], [AY + 30, KY - 18]].forEach(([a, b]) => { ctx.moveTo(x, a); ctx.lineTo(x, b); }));
     }, {color: P.muted, alpha: four, width: 3});
+    // The stack: the Agents still to take their lanes stand behind the first, each 9 px further up and to the left, and
+    // the back one leaves as each lane's Agent arrives, so the stack closes up as it empties.
+    const takes = roles.map((at, i) => i ? ramp(t, at - .15, .4) : 1), AR = 22 * 1.15;
+    [2, 1].forEach(k => {
+      const q = four * (1 - takes[3 - k]), x = xs[0] - k * 9, y = AY - k * 9;
+      diamond(x, y, AR, {color: P.ground, alpha: q, solid: true});
+      diamond(x, y, AR, {color: P.evidence, alpha: q});
+    });
     xs.forEach((x, i) => {
       ring(x, QY, 20, {color: P.unknown, alpha: asked, width: 2.5});
       text("?", x, QY + 1, 22, {align: "center", color: P.unknown, alpha: asked, role: "mark"});
-      agent(x, AY, {alpha: four, size: 1.15});
+      if (!i) diamond(x, AY, AR, {color: P.ground, alpha: four, solid: true});
+      agent(x, AY, {alpha: four * takes[i], size: 1.15});
       const lit = speaking(t, roles, i);
       if (lit > 0) ring(x, AY, 38, {color: P.evidence, alpha: lit * restMark(P.evidence, .5) * four, width: 2});
       nameText(rnames[i], x + 30 + NAME_GAP, AY, {align: "left", alpha: four * listIn(t, roles, i), set: "roles"});
       lock(x, KY, {alpha: shut, color: P.evidence, closed: soon(t, readOnly, .5)});
-      link(x, KY + 20, xs[1], OY - 42, {route: "vhv", mid: (KY + OY - 22) / 2, alpha: four * ramp(t, integrate - .1, .3), upto: join, flowing: since(t, integrate + .65), lag: i / 3});
+      link(x, KY + 28, xs[1], OY - 42, {route: "vhv", mid: (KY + OY - 22) / 2, alpha: four * ramp(t, integrate - .1, .3), upto: join, flowing: since(t, integrate + .65), lag: i / 3});
     });
     person(xs[1], OY, {alpha: owner, color: P.authority, size: 1.2});
     // The English person is named only by its caption ("with one person owning the combined result."), so a name would
@@ -7006,27 +7234,34 @@ scenes["21"] = function (s, t) {
   // record. The work flows down the frame: the checked output stands at the top with its source and limits written
   // beside it on their own words, and when they are recorded a way runs down from it into the record below, which
   // appears with its earlier entries on its own words and takes a new entry; the record is stamped as a fact the team
-  // can rely on once both the record and the fact are named. The stage is centred on its extent, from the output's or
-  // the record's name at the left to the entry's rows or the fact at the right.
+  // can rely on once both the record and the fact are named. The checked output is the stack of the work's pages, as
+  // the first stage drew it, so it and its first entry fill the picture while the record is still to come. The stage
+  // is centred on its extent, from the output's or the record's name at the left to the entry's rows or the fact at
+  // the right.
   const six = base * stageIn(t, lasting);
   if (six > 0) {
     const [recorded, src, lim] = cues(s, [["记进", "recorded"], ["来源", "source"], ["限度", "limits"]]);
     const outputName = L("检查过的输出", "Checked output"), recordName = L("这项工作的权威记录", ""), factName = L("", "A lasting team fact");
     const entries = en ? ["Source", "Limits"] : ["来源", "限度"];
-    const left = Math.min(1000 - 110 - NAME_GAP - measure(outputName), 810 - (recordName ? NAME_GAP + measure(recordName) : 0));
-    const right = Math.max(1110 + 26 + NAME_GAP + Math.max(...entries.map(v => measure(v))), 1190 + 30 + (factName ? NAME_GAP + measure(factName) : 0));
+    // The pages behind the front one stand BACK px apart up and to the right; the entries stand clear of them.
+    const BACK = 26, left = Math.min(1000 - 110 - NAME_GAP - measure(outputName), 810 - (recordName ? NAME_GAP + measure(recordName) : 0));
+    const right = Math.max(1110 + 2 * BACK + 26 + NAME_GAP + Math.max(...entries.map(v => measure(v))), 1190 + 30 + (factName ? NAME_GAP + measure(factName) : 0));
     const shift = 960 - (left + right) / 2;
     const OX = 1000 + shift, OY = 300, OW = 220, OH = 260, RX = 810 + shift, RY = 640, RW = 380, RH = 150, stampAt = Math.max(teamFact, authoritative) + .05;
-    const go = soon(t, recorded + .05, .6), rec = named(t, authoritative) * six;
-    // The checked output: a page of work with its check.
-    documentIcon(OX - OW / 2, OY, OW, OH, {alpha: six, rows: 0});
+    const go = soon(t, recorded + .05, .6), rec = named(t, authoritative) * six, EX = OX + OW / 2 + 2 * BACK + 26;
+    // The checked output: the work's pages with its check. The pages behind show only the edges that stand clear of the
+    // front page.
+    const PX = OX - OW / 2;
+    for (let k = 2; k >= 1; k--) path([[PX + k * BACK, OY - (k - 1) * BACK], [PX + k * BACK, OY - k * BACK], [PX + OW + k * BACK, OY - k * BACK],
+      [PX + OW + k * BACK, OY + OH - k * BACK], [PX + OW + (k - 1) * BACK, OY + OH - k * BACK]], {color: P.ink, alpha: six, width: 2});
+    documentIcon(PX, OY, OW, OH, {alpha: six, rows: 0});
     check(OX, OY + OH / 2 + 6, 90, {alpha: six});
-    nameText(outputName, OX - OW / 2 - NAME_GAP, OY + OH / 2, {align: "right", alpha: six * named(t, lasting)});
+    nameText(outputName, PX - NAME_GAP, OY + OH / 2, {align: "right", alpha: six * named(t, lasting)});
     // Its source and limits, one row each beside it, on their own words; the stamp makes the whole entry full ink.
     [src, lim].forEach((at, k) => {
       const y = OY + 90 + k * 56, whole = named(t, at) * ramp(t, stampAt, .35);
-      dot(OX + OW / 2 + 26, y, 6, {color: P.evidence, alpha: six * named(t, at)});
-      nameText(entries[k], OX + OW / 2 + 26 + NAME_GAP, y, {align: "left", color: P.evidence, alpha: six * Math.max(listIn(t, [src, lim], k), whole), set: "entry"});
+      dot(EX, y, 6, {color: P.evidence, alpha: six * named(t, at)});
+      nameText(entries[k], EX + NAME_GAP, y, {align: "left", color: P.evidence, alpha: six * Math.max(listIn(t, [src, lim], k), whole), set: "entry"});
     });
     link(OX, OY + OH + 12, OX, RY - 12, {color: P.evidence, alpha: six * named(t, recorded), upto: go, flowing: since(t, recorded + .65)});
     box(RX, RY, RW, RH, {fill: P.row, stroke: P.ink, alpha: rec, radius: 12, width: 2.5});
@@ -7056,8 +7291,8 @@ scenes["22"] = function (s, t) {
   // number them across two thoughts, kinds one and two in the first and three to five in the next.
   const [stopAt, escalate] = cues(s, [["要停下受影响的事", "stop"], ["上报", "escalate"]]);
   const independent = cue(s, "不受影响", "independent authorized work");
-  const [handoff, ...told] = en ? cues(s, [["", "a report names"], ["", "the work"], ["", "the delivery state"], ["", "the evidence"], ["", "its limits"], ["", "any acceptance"]])
-    : cues(s, [["汇报完成或交接时", ""], ["做到了哪一步", ""], ["做了什么", ""], ["怎么核验的", ""], ["还有哪些限度", ""]]);
+  const [handoff, ...told] = en ? cues(s, [["", "a completion report names"], ["", "the work"], ["", "the delivery state"], ["", "the evidence"], ["", "its limits"], ["", "any acceptance"]])
+    : cues(s, [["汇报完成或交接时", ""], ["做到了哪一步", ""], ["做了什么", ""], ["怎么核验的", ""], ["还有哪些限度", ""], ["还要谁验收", ""]]);
   // What an interruption keeps is read from the interruption on: 22.2 also names uncommitted work.
   const interrupt = cue(s, "中途停下", "on interruption");
   const kept = [["保留现场", "preserve the state"], ["没提交的改动", "uncommitted work"], ["试过和失败", "attempts and failures"],
@@ -7066,13 +7301,14 @@ scenes["22"] = function (s, t) {
   const base = ramp(t, opening(s), .7);
   // 1. Stop and escalate, in five kinds of situation, all five on one way. The Agent stands named at the head of its
   // way, the course of action the kinds stop, and the person it escalates to stands above the way from the first
-  // escalation. Each kind is a station on the way: its stop sign stands on a post over the way, its escalation rises
-  // from the sign to the person, and what the kind holds shows beneath the way under its name, each part drawn on its
-  // own words. The first sign stands on the words that stop the Agent and is named there; its escalation rises on
-  // "escalate", and every later sign and its escalation arrive with the name of their kind. Kinds one and two each stack
-  // their two conditions in their column, the first above the second: the conflict over what cannot be identified, then
-  // too little authority (with the boundary it would cross) over an irreversible step without authorization or recovery;
-  // the one condition of each other kind stands on the middle of the two. The five build as one list
+  // escalation. Each kind is a station on the way: its stop sign stands on a short post over the way, so the sign and
+  // its post read as one station, its escalation rises from the sign to the person, and what the kind holds shows
+  // beneath the way under its name, each part drawn on its own words. The first sign stands on the words that stop the
+  // Agent and is named there; its escalation rises on "escalate", and every later sign and its escalation arrive with
+  // the name of their kind. Kinds one and two each stack their two conditions in their column, the first above the
+  // second: the conflict over what cannot be identified, then too little authority (with the boundary it would cross)
+  // over an irreversible step without authorization or recovery; the one condition of each other kind hangs just above
+  // its name, so the name reaches every part of it as it comes. The five build as one list
   // across the two thoughts that number them and stand whole together until the handoff is named, while independent
   // authorized work keeps moving on its own lane below them; they are named as a group on the words that announce them,
   // left of their names and a word space and more clear of the first. The stations stand at one pitch along the way, so
@@ -7082,13 +7318,14 @@ scenes["22"] = function (s, t) {
   // English, where each number is a clause of its own, each station stands on the words after its number, which open
   // its condition, so the English kind two is named "Authority is insufficient", as the Chinese names it 权限不够. Where
   // those words alone lose the clause that gives them their sense, the English name keeps that sense in a short phrase:
-  // kind three is "Unrecognized work" and kind five "Continuing would harm".
-  // The English first name is authored as its two lines, so it keeps two lines like its neighbours within its pitch.
-  const names = en ? [["Instructions", "materially conflict"], "Authority is insufficient", "Unrecognized work", "Contradicts expectation", "Continuing would harm"]
-    : ["说不清", "权限不够", "来历不明", "核验和预期相反", "再做下去"];
+  // kind three is "Unrecognized work" and kind five "Continuing would harm", as the Chinese kind five is 再做下去有害.
+  // The English names stand whole, each on one line, so each keeps its subject and predicate together: the rail is too
+  // dense for them on one baseline, so they stand on two at its one pitch, every other name a row lower on a short stem.
+  const names = en ? [["Instructions materially conflict"], ["Authority is insufficient"], ["Unrecognized work"], ["Contradicts expectation"], ["Continuing would harm"]]
+    : ["说不清", "权限不够", "来历不明", "核验和预期相反", "再做下去有害"];
   const nameAts = cues(s, en ? [["", "instructions materially conflict"], ["", "authority is insufficient"], ["", "you find work"], ["", "verification contradicts"], ["", "continuing would"]]
     : [["一是", ""], ["二是", ""], ["三是", ""], ["四是", ""], ["五是", ""]]);
-  const WY = 520, SY = 440, SR = 22, BUS = 360, GY = 632, PAIR = 48, NY = 744, PX = 960, OY = 280, AX = 230, LANE = 852;
+  const WY = 520, SY = 480, SR = 22, BUS = 360, GY = 632, PAIR = 48, ONE = 34, NY = 744, PX = 960, OY = 280, AX = 230, LANE = 852;
   // What each condition is, beneath its station, each part drawn on its own words.
   const said = (g, zh, english, lead = .15) => ramp(t, cue(s, zh, english) - lead, .4) * g;
   const glyphs = [
@@ -7110,7 +7347,8 @@ scenes["22"] = function (s, t) {
       ring(x - 56, y + 8, 20, {color: P.ink, alpha: aim, width: 2.5});
       dot(x - 56, y + 8, 5, {color: P.ink, alpha: aim});
       box(x - 17, y - 14, 34, 44, {fill: P.row, stroke: P.ink, alpha: basis, radius: 4, width: 2});
-      [y - 2, y + 10].forEach((ry, i) => line(x - 9, ry, x + (i ? 3 : 9), ry, {color: P.muted, alpha: basis, width: 2}));
+      // The source's two lines of text are short details of its mark, not ruled rows of a list.
+      [y - 2, y + 10].forEach((ry, i) => line(x - 7, ry, x + (i ? 3 : 7), ry, {color: P.muted, alpha: basis, width: 2}));
       person(x + 56, y + 16, {size: .8, alpha: who});
       [[x - 56, aim], [x, basis], [x + 56, who]].forEach(([qx, q]) => text("?", qx, y - 38, 26, {role: "mark", align: "center", color: P.unknown, alpha: q * unknown}));
     },
@@ -7118,7 +7356,7 @@ scenes["22"] = function (s, t) {
     (x, y, g) => {
       lock(x - 46, y + 6, {alpha: said(g, "权限不够", "authority is insufficient"), size: 1.1});
       const way = cue(s, "越过", "would cross");
-      link(x - 12, y + 4, x + 70, y + 4, {color: P.unknown, alpha: ramp(t, way - .15, .4) * g, upto: soon(t, way + .05, .6), end: false, dash: [6, 6]});
+      link(x - 12, y + 4, x + 70, y + 4, {color: P.unknown, alpha: ramp(t, way - .15, .4) * g, upto: drawShare(t, way + .05, Math.abs(x + 70 - (x - 12)), .6), end: false, dash: [6, 6]});
       line(x + 30, y - 32, x + 30, y + 40, {color: P.unknown, alpha: said(g, "合规", "a permission"), width: 4});
     },
     // A step that cannot be taken back: the authorization it lacks is an empty seal, and the recovery it lacks is the
@@ -7183,9 +7421,11 @@ scenes["22"] = function (s, t) {
     const owner = named(t, escalate) * g1;
     person(PX, OY, {alpha: owner, color: P.authority, size: 1.1});
     nameText(L("上报", "Escalate"), PX + 15 * 1.1 + NAME_GAP, OY - 15 * 1.1 * 1.15, {align: "left", color: P.authority, alpha: owner});
-    // The stations stand at one pitch from the first to the last, as railStations pitches them when every pair of
-    // names fits; the names are measured as railNames wraps them within that pitch.
-    const xs = railStations(names, 500, 1660, {wrap: 260});
+    // The stations stand at one pitch from the first to the last: the Chinese as railStations pitches them when every
+    // pair of names fits, the names measured as railNames wraps them within that pitch; the English, whose names stand
+    // on two baselines, from a first station far enough right that its name stands a word space and more clear of the
+    // group's name, to a last whose name ends with the way.
+    const xs = en ? names.map((_, i) => 540 + i * 270) : railStations(names, 500, 1660, {wrap: 260});
     // The first sign stands on the words that stop the Agent and its escalation rises on "escalate"; every later sign
     // stands with its kind's name, and its escalation rises as it stands.
     const signAt = i => (i ? nameAts[i] : stopAt) - .15, rise = i => i ? nameAts[i] + .05 : escalate;
@@ -7212,10 +7452,12 @@ scenes["22"] = function (s, t) {
       link(x, SY - SR - 4, PX, OY + 34, {route: "vhv", mid: BUS, color: P.authority, alpha: g1 * mix(restMark(P.authority), 1, lit), upto: up, width: 2.5,
         flowing: escalating, last: i + 1 < xs.length ? since(signAt(i + 1) + .35, rise(i) + .85) : Infinity});
       const held = kinds[i];
-      held.forEach((k, n) => glyphs[k](x, GY + (held.length > 1 ? (n ? PAIR : -PAIR) : 0), g1));
+      held.forEach((k, n) => glyphs[k](x, GY + (held.length > 1 ? (n ? PAIR : -PAIR) : ONE), g1));
     });
-    // The names hang on one baseline beneath the glyphs, and build as one list.
-    railNames(names, xs, WY, {gap: NY - WY, wrap: 460, alpha: i => g1 * listIn(t, nameAts, i), set: "conditions"});
+    // The names hang on one baseline beneath the glyphs, and build as one list; in English every other name hangs a row
+    // lower, on a short stem that rises from it toward its column.
+    if (en) xs.forEach((x, i) => { if (i % 2) line(x, NY + 2, x, NY + RAIL_ROW - 6, {alpha: g1 * ramp(t, nameAts[i] - .15, .4), width: 2}); });
+    railNames(names, xs, WY, {gap: i => NY - WY + (en && i % 2 ? RAIL_ROW : 0), wrap: 460, alpha: i => g1 * listIn(t, nameAts, i), set: "conditions"});
     // Independent authorized work keeps moving on its own lane, unaffected by the stops.
     const lane = ramp(t, independent + .05, .5) * g1;
     if (lane > 0) {
@@ -7254,7 +7496,7 @@ scenes["22"] = function (s, t) {
     // The handoff moves along the way until the work pauses.
     handway(g2, 1 - ramp(t, interrupt, .4), handoff + STAGE_CUT);
     const items = en ? [["The work", "work"], ["Delivery state", "state"], ["Evidence", "evidence"], ["Limits", "limits"], ["Acceptance still needed", "acceptance"]]
-      : [["做到了哪一步", "state"], ["做了什么", "work"], ["怎么核验的", "evidence"], ["还有哪些限度", "limits"]];
+      : [["做到了哪一步", "state"], ["做了什么", "work"], ["怎么核验的", "evidence"], ["还有哪些限度", "limits"], ["还要谁验收", "acceptance"]];
     const names3 = en ? ["The state", "Uncommitted work", "Attempts and failures", "Where to resume"] : ["现场", "没提交的改动", "试过和失败的办法", "从哪里接着做"];
     // The report and the frame hang side by side with their tops on one line and their feet on one line: the report's
     // page is as tall as the finished frame, whose rows keep one and a half of the report's row. The report's first row
@@ -7270,7 +7512,7 @@ scenes["22"] = function (s, t) {
     // each row as it comes, keeping the heading's padding below the last.
     const length = told.reduce((h, at, k) => h + (k ? PITCH : FIRST - HEAD / 2) * soon(t, pauseHold(at - .45, .4), .4), HEAD);
     documentIcon(px0, PT, PW, length, {alpha: g2, rows: 0});
-    nameText(L("汇报完成或交接", "A report"), px0 + 28, PT + HEAD / 2, {align: "left", alpha: g2 * named(t, handoff)});
+    nameText(L("汇报完成或交接", "A completion report"), px0 + 28, PT + HEAD / 2, {align: "left", alpha: g2 * named(t, handoff)});
     items.forEach(([v, kind], k) => {
       const y = PT + FIRST + k * PITCH, x = px0 + IX, q = ramp(t, told[k] - .15, .4) * g2, lit = speaking(t, told, k);
       if (lit > 0) ring(x, y, 25, {color: P.evidence, alpha: lit * restMark(P.evidence, .6) * g2, width: 2});
@@ -7358,40 +7600,42 @@ function s23Page(x, y, w, h, {alpha = 1, stroke: s = P.ink, rows = 0} = {}) {
 }
 scenes["23"] = function (s, t) {
   const [work, comm, become, others, answers, notYet, process] = cues(s, [["工作的成果", "results"], ["沟通", "communication"],
-    ["变成", "become"], ["别人", "others can act"], ["回答", "answers"], ["别急着", "before"], ["从头讲过程", "recounting the whole process"]]);
+    ["变成", "become"], ["别人", "others can act"], ["回答", "answer the reader"], ["别急着", "before"], ["从头讲过程", "recounting the whole process"]]);
   const [purpose, update] = cues(s, [["这次交流的目的", "name the purpose"], ["重要的汇报", "important update"]]);
   const base = ramp(t, opening(s), .7), RY = 470;
   // 1. Through communication, results become something others can act on: the result, the channel and the reader stand as
-  // three stations on one rail, each arriving on its own words, the result's page with the first words under the
-  // rising chapter title; the way between them draws on when the result becomes action, and one point then travels it
-  // from the result to the reader. The reader stands as the result becomes action, just before the words name them.
-  // In English the result and the channel stand together from the first words: until the reader comes they stand
-  // centred as a pair, and on the words that make the result action they move left to their stations. The Chinese
-  // names the result alone first: it stands centred until the channel is named, the two then stand centred as a pair,
-  // and on the words that make the result action they move to their stations.
+  // three stations on one rail, each arriving on its own words; the way between them draws on when the result becomes
+  // action, and one point then travels it from the result to the reader. The reader stands as the result becomes action,
+  // just before the words name them. Each edition opens on what it names first, which stands from the first words under
+  // the rising chapter title, so the chapter opens on it at full contrast. The Chinese names the result alone first: it
+  // stands centred until the channel is named, the two then stand centred as a pair, and on the words that make the
+  // result action they move to their stations. The English names the channel first and the result just before it
+  // becomes action, so there each stands at its station from its words, the channel alone at the centre.
   const one = base * stageOut(t, answers);
   if (one > 0) {
     const names = en ? ["Results", "Communication", "What others can act on"] : ["工作的成果", "沟通", "别人能接着做的事"];
     const centred = 960 - (460 - 60 + 960 + Math.max(42, measure(names[1]) / 2)) / 2, settle = 1 - glide(t, become + .05, Math.abs(centred));
-    const pair = (en ? centred : mix(960 - 460, centred, glide(t, comm + .05, centred - 500))) * settle;
-    // The channel arrives at its place in the centred pair and stays there until the stations; only the result moves.
-    const xs = [460 + pair, 960 + centred * settle, 1460], at = [work, comm, others], seen = i => ramp(t, (i === 2 ? Math.min(at[i], become + .05) : at[i]) - .15, .4) * one;
+    const pair = (en ? 0 : mix(960 - 460, centred, glide(t, comm + .05, centred - 500))) * settle;
+    // The Chinese channel arrives at its place in the centred pair and stays there until the stations; only the result
+    // moves. The first of each edition stands from the opening.
+    const xs = [460 + pair, 960 + L(centred, 0) * settle, 1460], at = [work, comm, others], first = L(0, 1);
+    const seen = i => (i === first ? 1 : ramp(t, (i === 2 ? Math.min(at[i], become + .05) : at[i]) - .15, .4)) * one;
     const clear = y => clearOfTitle(s, t, y);
     const go = soon(t, become - .05, .9);
     link(xs[0] + 76, RY, xs[2] - 60, RY, {color: P.evidence, alpha: one * ramp(t, become - .05, .3) * clear(RY), upto: go, width: 2.5,
       flowing: since(t, become + .9)});
-    // The result's page stands from the scene's first words, so the chapter opens on it at full contrast; the Chinese
-    // names it there, the English after naming communication.
-    documentIcon(xs[0] - 60, RY - 75, 120, 150, {alpha: one * clear(RY - 75), rows: 4});
-    // The channel sits on the way once it is named, its disc covering the way where they meet; both editions name it
-    // before the result becomes action, so the way then draws on beneath it.
+    // The result's page, a station of the rail.
+    documentIcon(xs[0] - 60, RY - 75, 120, 150, {alpha: seen(0) * clear(RY - 75), rows: 4});
+    // The channel sits on the way, its disc covering the way where they meet; both editions name it before the result
+    // becomes action, so the way then draws on beneath it.
     dot(xs[1], RY, 40, {color: P.ground, alpha: seen(1) * clear(RY - 40)});
     dot(xs[1], RY, 40, {color: P.evidence, alpha: seen(1) * clear(RY - 40), hollow: true, width: 3});
     dot(xs[1], RY, 12, {color: P.evidence, alpha: seen(1) * clear(RY - 40)});
     person(xs[2], RY + 4, {alpha: seen(2) * clear(RY - 64), size: 2});
-    railNames(names, xs, RY + 75, {gap: NAME_GAP, wrap: 340, alpha: i => one * named(t, at[i]) * clear(RY + 97)});
+    // Each name stands whole on one line, so it keeps one layout while the stations glide apart.
+    railNames(names.map(v => [v]), xs, RY + 75, {gap: NAME_GAP, wrap: 340, alpha: i => one * named(t, at[i]) * clear(RY + 97)});
   }
-  // 2. Communication answers the reader's actual need before recounting the whole process: the answer is one card next
+  // 2. So answer the reader's actual need before recounting the whole process: the answer is one card next
   // to the reader, a tick and its two lines, and it reaches the reader on its words; the whole process waits beneath it
   // as a long tape that unrolls on its words. The reader and the answer stand as one group about the centre, and on the
   // words that hold the process back they move left, so the group and the process's name beside its tape are centred.
@@ -7409,15 +7653,18 @@ scenes["23"] = function (s, t) {
     // The answer reaches the reader, and goes on reaching them while the stage stands.
     const reach = soon(t, answers + .1, .5);
     link(ax - 14, RY, px + 72, RY, {color: P.evidence, alpha: ans, upto: reach, width: 2.5, flowing: since(t, answers + .6)});
-    nameText(L("回答对方真正需要的", "Answers the reader's actual need"), ax + aw / 2, RY + ah / 2 + NAME_GAP, {valign: "top", width: 440, color: P.evidence,
+    nameText(L("回答对方真正需要的", "Answer the reader's actual need"), ax + aw / 2, RY + ah / 2 + NAME_GAP, {valign: "top", width: 440, color: P.evidence,
       alpha: two * named(t, answers)});
     // The process unrolls as a tape on its words and waits there; the unrolling advances in voice time, so a tape still
     // unrolling when the thought ends rests in the quiet and finishes on the next words.
     const tape = standard((voiceTime(t) - voiceTime(process - .1)) / 1.2), ta = ramp(t, process - .15, .4) * two, x1 = mix(tx0, tx1, tape);
     if (tape > 0) {
       box(tx0, ty - 30, x1 - tx0, 60, {fill: P.row, stroke: P.muted, alpha: ta, radius: 8});
-      // The tape's steps, one ruled strip that lengthens with it.
-      stroke(() => { for (let x = tx0 + 24; x < x1 - 12; x += 28) { ctx.moveTo(x, ty - 12); ctx.lineTo(x, ty + 12); } }, {color: P.muted, alpha: ta * .7, width: 2});
+      // The tape's steps, one ruled strip that lengthens with it; each step grows to its height as the tape's end passes
+      // it, so no step appears at once, and the strip fades in over its first three steps, so the first step does not
+      // stand at full ink in the frame it appears.
+      stroke(() => { for (let x = tx0 + 24; x < x1 - 12; x += 28) { const h = 12 * clamp((x1 - 12 - x) / 28); ctx.moveTo(x, ty - h); ctx.lineTo(x, ty + h); } },
+        {color: P.muted, alpha: ta * .7 * clamp((x1 - tx0 - 36) / 84), width: 2});
     }
     nameText(later, tx1 + NAME_GAP, ty, {align: "left", color: P.muted, alpha: two * named(t, notYet)});
   }
@@ -7692,7 +7939,9 @@ scenes["24"] = function (s, t) {
     const go = soon(t, noMeeting - .05, .6);
     link(px + 26, 472, mx - 150, 472, {color: P.unknown, alpha: one * ramp(t, noMeeting - .05, .3), upto: .5 * go, end: false, dash: [8, 8]});
     line(bx, 442, bx, 502, {color: P.unknown, alpha: ramp(t, noMeeting + .45, .3) * one, width: 4});
-    nameText(L("不开会", "Don't meet"), bx, 442 - NAME_GAP, {valign: "bottom", alpha: one * named(t, noMeeting)});
+    // The refusal is named under its bar, clear of the row of the table's seats, so it reads as the bar's name and not
+    // as a name for the seat beside it.
+    nameText(L("不开会", "Don't meet"), bx, 502 + NAME_GAP, {valign: "top", alpha: one * named(t, noMeeting)});
   }
 
   // 2. The meeting's way is a rail with two gates, each standing on the words that name it: alignment of facts and
@@ -7732,10 +7981,12 @@ scenes["24"] = function (s, t) {
       {gap: 130, wrap: 280, alpha: i => two * named(t, [alignAt, compare][i]), color: i => [P.evidence, P.ink][i]});
     // The question runs along the way as far as the gates let it, one point at a time at the film's flow pace, passing
     // each gate once it opens: a point leaves by its size where the way ends; where the way ends a disagreement stands
-    // split in two.
-    const reach = mix(mix(g1 - 30, g2 - 30, ramp(t, defs + .25, .45)), sx - 26, ramp(t, options + .25, .45));
+    // split in two. The way's reach extends past each opened gate as a glide in voice time, so a point that has left at
+    // the closed gate comes back beyond it by its size rather than at once.
+    const reach = mix(mix(g1 - 30, g2 - 30, glide(t, defs + .25, g2 - g1)), sx - 26, glide(t, options + .25, sx - g2 + 4));
     const full = sx - 26 - x0 - 10, way = reach - x0 - 10, run = loopPhase(since(t, align), full), sp = ramp(t, split + .05, .4);
-    if (run !== null && run * full < way) dot(x0 + 10 + run * full, y, 9 * pass(run * full / way), {color: P.evidence, alpha: two * (1 - sp)});
+    // The point fades out before the split, so it has left before the stage eases left and never reverses on screen.
+    if (run !== null && run * full < way) dot(x0 + 10 + run * full, y, 9 * pass(run * full / way), {color: P.evidence, alpha: two * (1 - ramp(t, split - .25, .3))});
     if (sp > 0) [-1, 1].forEach(k => token(sx, y + k * 13, {color: P.unknown, alpha: two * sp, r: 11}));
     // The disagreement is named where the way ends as the words turn to it ("and locate any disagreement", in English).
     nameText(L("分歧", "Disagreement"), sx, y - 50, {valign: "bottom", alpha: two * named(t, en ? cue(s, "", "and locate") : split)});
@@ -7816,19 +8067,19 @@ scenes["24"] = function (s, t) {
   // who reads it through a lens; the title above names what the card should hold. First the principle: the card is
   // ticked on "check". Then each vague phrase opens its own card on its words and is struck there, and the statements
   // that replace it are added beneath it on their own words, each with the mark of what it states: a check that passed,
-  // the person still to confirm (in Chinese the acceptor, with the day the conclusion is due), a risk that remains, the
-  // Agent's facts, how far the conclusion reaches. The card lengthens to take each statement as it comes, and the next
-  // phrase replaces the card in one cut.
+  // the acceptor still to confirm, with the day the conclusion is due, a risk that remains, the Agent's facts, how far
+  // the conclusion reaches. The Chinese due day reads 周五前给出结论, not its caption's whole line 周五前给结论. The card
+  // lengthens to take each statement as it comes, and the next phrase replaces the card in one cut.
   const four = base * stageIn(t, updates);
   if (four > 0) {
     const vague = cues(s, [["积极推进", "actively progressing"], ["应该没问题", "probably fine"], ["智能体分析过了", "the Agent analyzed it"]]);
     const instead = vague.map(at => cueFrom(s, "不如说", "say", at)), sayAt = cue(s, "说别人", "say things");
     const groups = en ? [
-      [["Tests pass", "tests pass", "check"], ["Release owner still needs to confirm", "release owner", "owner"]],
+      [["Tests pass", "tests pass", "check"], ["The acceptor still needs to confirm", "the acceptor still needs", "owner"], ["We'll conclude by Friday", "we'll conclude", "due"]],
       [["Passed verification", "what passed verification", "check"], ["What risk remains", "what risk remains", "risk"]],
       [["Facts it produced", "which facts it produced", "agent"], ["What you verified", "what you verified", "check"], ["Where the conclusion stops", "where the conclusion stops", "limit"]]]
     : [
-      [["测试通过了", "测试通过", "check"], ["还要等验收人确认", "还要等", "owner"], ["周五前给结论", "周五前", "due"]],
+      [["测试通过了", "测试通过", "check"], ["还要等验收人确认", "还要等", "owner"], ["周五前给出结论", "周五前", "due"]],
       [["哪些核验通过了", "哪些核验", "check"], ["还剩什么风险", "还剩", "risk"]],
       [["它给出了哪些事实", "它给出了", "agent"], ["你核实了什么", "你核实了", "check"], ["结论能说到哪里", "结论能说到", "limit"]]];
     const refused = en ? ["“Actively progressing”", "“Probably fine”", "“The Agent analyzed it”"] : ["“积极推进”", "“应该没问题”", "“智能体分析过了”"];
@@ -7873,12 +8124,16 @@ scenes["24"] = function (s, t) {
       // stands centred alone, and it steps left by half the cross's room as the cross arrives. The phrase is measured by
       // its ink, from its opening quote's to its closing quote's: each quote leaves blank beyond its ink, 0.625 em of a
       // Chinese quote's em and 0.072 em of an English quote. The cross stands 18 px after that ink, where a Chinese
-      // phrase's advance ends, and its room is that gap, its 26 px and its stroke's round end.
+      // phrase's advance ends, and its room is that gap, its 26 px and its stroke's round end. Where that centring would
+      // leave the phrase's left edge within three quarters of an em of the statements' names, the eye reads the two as
+      // almost aligned, so the phrase steps instead to stand flush with them, its em box on their left edge.
       const ats = g.map(([, said]) => cue(s, said, said)), em = labelSize(LABEL), blank = L(.625, .072) * em;
       const phrase = measure(refused[k]) - 2 * blank, room = 18 + Math.min(26, em * .9) + 1.5;
       // A statement's lit ring reaches 24 px left of its axis, and its name starts 52 px right of it.
       const rowsW = 24 + 30 + NAME_GAP + Math.max(...g.map(([v]) => measure(v))), w = 72 + Math.max(phrase + room, rowsW), x0 = 960 - w / 2;
-      const MX = (w - rowsW) / 2 + 24, NX = MX + 30 + NAME_GAP, ink = x0 + (w - phrase - room * soon(t, instead[k] + .05, .35)) / 2;
+      const MX = (w - rowsW) / 2 + 24, NX = MX + 30 + NAME_GAP, centred = x0 + (w - phrase - room) / 2;
+      const inkEnd = Math.abs(centred - blank - (x0 + NX)) <= .75 * em ? x0 + NX + blank : centred;
+      const ink = mix(x0 + (w - phrase) / 2, inkEnd, soon(t, instead[k] + .05, .35));
       const h = ats.reduce((sum, at) => sum + ROW * soon(t, pauseHold(at - .45, .4), .4), ROW + 34);
       card(x0, w, h, shown);
       rejectedName(refused[k], ink - blank, LY, {align: "left", alpha: shown * named(t, vague[k]), mark: ramp(t, instead[k] + .05, .35), markLeft: ink + phrase + 18});
@@ -7903,11 +8158,11 @@ scenes["25"] = function (s, t) {
   const [concrete, titleAt, conclusionAt, onePoint, terms, beforeSend, outsider] = cues(s, [["具体怎样算达", "clarity has concrete checks"], ["标题", "a title"],
     ["结论放在最前", "the conclusion first"], ["一段只讲一个意思", "one point per paragraph"], ["重要的术语", "important terms"], ["发出之前", "before sending"], ["局外人", "a reader outside"]]);
   const restate = [cue(s, "结论", "conclusion", {last: true}), cue(s, "依据", "basis"), cue(s, "限度", "limits", {last: true}), cue(s, "下一步", "next action")];
-  // Chinese names each part by number before what it holds (一是风险, 二是影响, 三是控制影响, 四是决定), so each part's
-  // cue is its numbered name and the facts follow the impact; English keeps its order: the risk, the facts and impact.
+  // Both editions name each part before what it holds, the Chinese by its number (一是风险, 二是影响, 三是控制影响,
+  // 四是决定), so each part's cue is its name and the facts follow the impact.
   const [escalate, risk, facts, impact2, safe, contain, effect, options, costs, recommend, who] = cues(s, [["上报风险", "escalating a risk"],
-    ["一是风险", "the risk"], ["有哪些事实", "the facts"], ["二是影响", "impact and the latest"], ["最晚什么时候决定还来得及", "latest safe time to decide"],
-    ["三是控制影响", "what containment"], ["效果怎样", "with what result"], ["四是决定", "the options"], ["代价", "their costs"], ["你的建议", "your recommendation"],
+    ["一是风险", "the risk"], ["有哪些事实", "the facts"], ["二是影响", "its impact"], ["最晚什么时候决定还来得及", "latest safe time to decide"],
+    ["三是控制影响", "containment"], ["效果怎样", "with what result"], ["四是决定", "the decision the options"], ["代价", "their costs"], ["你的建议", "your recommendation"],
     ["谁必须", "who must decide"]]);
   const base = ramp(t, opening(s), .7);
   const colors = [P.evidence, P.ink, P.authority], aims = en ? ["Fidelity", "Clarity", "Elegance"] : ["信", "达", "雅"];
@@ -8076,7 +8331,7 @@ scenes["25"] = function (s, t) {
     link(qx, ay + 16, qx, sy - 28, {alpha: gF * ramp(t, write - .15, .4), upto: soon(t, write - .1, .5), end: false});
     nameText(truth, qx, sy, {color: P.evidence, alpha: gF * named(t, write)});
     check(qx + measure(truth) / 2 + 30, sy, 26, {alpha: gF * ramp(t, fidelityIs - .15, .4)});
-    link(px, ay + 16, px, sy - 28, {alpha: gF * ramp(t, roughly - .15, .4), upto: soon(t, roughly - .1, .5), end: false, dash: [6, 6]});
+    link(px, ay + 16, px, sy - 28, {alpha: gF * ramp(t, roughly - .15, .4), upto: drawShare(t, roughly - .1, Math.abs(sy - 28 - (ay + 16)), .5), end: false, dash: [6, 6]});
     rejectedName(L("“基本按时”", "“Roughly on time”"), px, sy, {alpha: gF * named(t, roughly), mark: ramp(t, roughly + .4, .4)});
   }
   const gC = gE * stageIn(t, firstLead);
@@ -8104,7 +8359,9 @@ scenes["25"] = function (s, t) {
   }
   // 4. Clarity's concrete checks: a page on the left and its checklist beside it, row for row. Each check is ticked on its
   // own words and lights the part of the page it governs: the title of two parts, the conclusion at the top, one point
-  // to a paragraph, a term defined where it first appears. The list builds and stays until the question before sending.
+  // to a paragraph, a term defined where it first appears. English names the third check "One point to a paragraph",
+  // not its caption line's words, since each English check is a caption line of its own. The list builds and stays
+  // until the question before sending.
   // In English that question continues the thought that lists the checks, so the checked page is named as the draft
   // before sending on those words and the list holds until the outside reader is named; in Chinese it begins its own
   // thought, which cuts to the draft on its first words.
@@ -8112,8 +8369,8 @@ scenes["25"] = function (s, t) {
   const gc = base * stageIn(t, concrete) * stageOut(t, sendCut);
   if (gc > 0) {
     const titleParts = cues(s, [["说清讲什么", "names the subject"], ["为了什么", "purpose"]]), firstUse = cue(s, "第一次出现", "defined at first use");
-    const rows = en ? [[["A title"], [titleAt], ["names the subject", " and purpose"], titleParts], [["Conclusion on top"], [conclusionAt], [], []],
-      [["One point per paragraph"], [onePoint], [], []], [["Terms"], [terms], ["defined at first use"], [firstUse]]]
+    const rows = en ? [[["A title"], [titleAt], ["names the subject", " and purpose"], titleParts], [["Conclusion first"], [conclusionAt], [], []],
+      [["One point to a paragraph"], [onePoint], [], []], [["Terms"], [terms], ["defined at first use"], [firstUse]]]
       : [[["标题"], [titleAt], ["说清讲什么", "、为了什么"], titleParts], [["结论放在最前"], [conclusionAt], [], []],
       [["一段只讲一个意思"], [onePoint], [], []], [["术语"], [terms], ["第一次出现就讲明白"], [firstUse]]];
     const rowW = ([term, , qual]) => measure(term.join("")) + (qual.length ? TERM_GAP + measure(qual.join(""), NOTE) : 0);
@@ -8197,23 +8454,24 @@ scenes["25"] = function (s, t) {
       nameText(v, CX + 11 + NAME_GAP, mids[i], {align: "left", alpha: gr * got * Math.max(listLevel(t, restate, i), whole), set: "restate"});
     });
   }
-  // 5. Escalating a risk takes four parts, and the report assembles them so that a decision can be made. The report is
-  // a page headed by its title from the words that name the escalation, and it lengthens to take each part on the
-  // part's own first words, stepping up a little each time so it stays about the centre: the part slides into its place
-  // from the right with its name on the page beside it, while what it states draws on its own words: the risk; the
-  // impact, the facts and how long a decision stays in time; the containment and how well it held; the decision's
-  // options with their costs and the one recommended. Chinese names each part by its number and its name, so the page
-  // names them risk, impact, containment and decision. No place stands before its part. When the words name who must
-  // decide, that person stands beside the report and the report goes to them, with the time they must decide by.
+  // 5. Escalating a risk takes four parts, and the report assembles them so that a decision can be made. The report is a
+  // page headed by its title from the words that name the escalation, and it lengthens to take each part on the part's
+  // own first words, stepping up a little each time so it stays about the centre: the part slides into its place from
+  // the right with its name on the page beside it, while what it states draws on its own words: the risk; the impact,
+  // the facts and how long a decision stays in time; the containment and how well it held; the decision's options with
+  // their costs and the one recommended. Both editions name each part, so the page names them risk, impact, containment
+  // and decision. No place stands before its part. The report goes to the person who must decide: that person stands
+  // muted beside the report from the escalation's first words, so the stage stands whole about the centre while the
+  // report lengthens, and when the words name who must decide, the person takes the authority's colour, the report goes
+  // to them, with the time they must decide by.
   const g4 = base * stageIn(t, escalate);
   if (g4 > 0) {
-    const names = en ? ["Risk", "Facts, impact", "Containment", "Options, their costs"] : ["风险", "影响", "控制影响", "决定"];
+    const names = en ? ["Risk", "Impact", "Containment", "Decision"] : ["风险", "影响", "控制影响", "决定"];
     const GW = 320, nameW = Math.max(...names.map(v => measure(v))), SW = GW + 40, PW = 28 + nameW + 32 + SW + 24, HEAD = 96, SH = 96, STEP = 32;
-    // The second part arrives on its first words: the facts in English, the impact in Chinese.
+    // The second part arrives on its first words, which name the impact.
     const starts = [risk, Math.min(facts, impact2), contain, options], grown = starts.map(at => soon(t, pauseHold(at - .5, .4), .35));
-    // The report stands alone 20 px left of the centre, so the person who must decide arrives clear of its edge, and eases
-    // left as that person is named, to where it centres with the person 200 px beyond it and their clock (305 px in all).
-    const PX0 = 960 - PW / 2 - 152, PX = mix(960 - PW / 2 - 20, PX0, glide(t, who - .1, 132));
+    // The report stands where it centres with the person who must decide 200 px beyond it and their clock (305 px in all).
+    const PX = 960 - PW / 2 - 152;
     const PY = 380 - STEP * grown.slice(1).reduce((a, b) => a + b, 0), SX = PX + 28 + nameW + 32, gx = SX + SW / 2;
     const tops = starts.map((_, k) => PY + HEAD + k * (SH + 12)), mids = tops.map(v => v + SH / 2);
     const length = grown.reduce((h, q, k) => h + (k ? SH + 12 : SH + 24) * q, HEAD);
@@ -8266,12 +8524,12 @@ scenes["25"] = function (s, t) {
         line(ox - 36, y + 24, ox - 36 + [66, 32][i], y + 24, {color: P.unknown, alpha: on(costs), width: 7});
       });
     }
-    // Who must decide, and by when: the person stands beside the report, the report goes to them, and the time they
+    // Who must decide, and by when: the person beside the report lights, the report goes to them, and the time they
     // must decide by stands with them.
-    // The report's way draws on to them as a glide, its point riding the way's tip.
-    const DX = PX0 + PW + 200, DY = mids[1] + 54, go = glide(t, who + .05, DX - 48 - PX - PW - 14);
-    person(DX, DY + 10, {color: P.authority, alpha: on(who), size: 1.4});
-    link(PX + PW + 14, DY, DX - 48, DY, {color: P.authority, alpha: on(who), upto: go, width: 2.5, flow: go > 0 && go < 1 ? go * .999 : null});
+    // The report's way draws on to them as a glide and ends in its point, which grows in as the way arrives.
+    const DX = PX + PW + 200, DY = mids[1] + 54, go = glide(t, who + .05, DX - 48 - PX - PW - 14);
+    person(DX, DY + 10, {color: blend(P.muted, P.authority, ramp(t, who - .15, .4)), alpha: g4, size: 1.4});
+    link(PX + PW + 14, DY, DX - 48, DY, {color: P.authority, alpha: on(who), upto: go, width: 2.5});
     clock(DX + 80, DY - 34, 24, {color: P.authority, alpha: on(cue(s, "在什么时候决定", "by when")), hand: .8});
   }
 };
@@ -8285,7 +8543,7 @@ scenes["26"] = function (s, t) {
     ["小范围试点", "a bounded trial"], ["谁来维护", "a named owner"]]);
   // Chinese opens what must still be explained by counting it, "three things", so the stage that holds them cuts on
   // those words; English cuts on the first of them.
-  const explain = cue(s, "还要讲三件事", "why the existing mechanism");
+  const explain = cue(s, "还要做到三件事", "why the existing mechanism");
   const [safeguards, noWait] = cues(s, [["必要的保障", "necessary safeguards"], ["不能等", "must not wait"]]);
   const retire = cue(s, "就撤掉", "retire a rule");
   // Chinese names the rule before its reasons and retires it last; English retires the rule first.
@@ -8303,11 +8561,13 @@ scenes["26"] = function (s, t) {
   // chapter's first words, with its way running along it from those words. Chinese names the lane by the next time and
   // the failure on it by its own word, as it says 下次的失败; English, which says "the next failure", names the failure
   // alone, at the start of the lane. Each name stands from the first words of the clause that says it, as a name may, so
-  // the opening words are not left unnamed: the Chinese clause after 总结经验, the English sentence. On the words that
-  // say it is found earlier, the place it is found stands near it while the place it used to be found stays as a muted
-  // trace further on, and the time gained lights along the lane from the old place to the new; no mark slides. The
-  // manual rescue it takes stands behind it as a long band on its words and shrinks, leaving the muted outline of its old
-  // reach. More files are refused beside the lane. The stage stands clear of the rising chapter title.
+  // the opening words are not left unnamed: the Chinese clause after 总结经验, the English sentence; and Chinese names
+  // its first clause too, the learning the lane is for, 总结经验 over the lane's start on those words, so the lane never
+  // stands unnamed through them. On the words that say it is found earlier, the place it is found stands near it while
+  // the place it used to be found stays as a muted trace further on, and the time gained lights along the lane from the
+  // old place to the new; no mark slides. The manual rescue it takes stands behind it as a long band on its words and
+  // shrinks, leaving the muted outline of its old reach. More files are refused beside the lane. The stage stands clear
+  // of the rising chapter title.
   const g1 = base * clearOfTitle(s, t, 360) * stageOut(t, kinds[0]);
   if (g1 > 0) {
     const [sooner, judge, less, more] = cues(s, [["更早被发现", "earlier"], ["更容易判断", "judge it more easily"], ["少靠人救火", "less manual rescue"],
@@ -8326,6 +8586,7 @@ scenes["26"] = function (s, t) {
     const way = s.words[0].start;
     line(X0 + 24, Y, mix(X0 + 24, X1 - 24, soon(t, way - .1, Math.max(1.2, sooner - way))), Y, {color: P.line, alpha: g1, width: 2});
     if (!en) nameText("下次", X0 - NAME_GAP, Y, {align: "right", alpha: g1 * named(t, cue(s, "是为了", ""))});
+    if (!en) nameText("总结经验", X0, top, {align: "left", valign: "bottom", alpha: g1 * named(t, cue(s, "总结经验", ""))});
     const fq = g1 * ramp(t, fails - .15, .4);
     ring(FX, Y, 14, {color: P.unknown, alpha: fq, width: 2.5});
     dot(FX, Y, 6, {color: P.unknown, alpha: fq});
@@ -8393,9 +8654,9 @@ scenes["26"] = function (s, t) {
       if (ly === 500) link(JX, 500, PX - PR - 10, 500, {alpha: g2 * ramp(t, kinds[0] - .15, .4), upto: soon(t, kinds[0] + .05, .9), width: 4, end: false,
         flowing: since(t, Math.max(practice + .6, kinds[0] + .95))});
       else {
-        // The way back from the round draws on from where the way out ends, as one way.
-        link(JX, 500, RX - 40, ly, {route: "hvh", mid: SX, alpha: q, upto: clamp(2 * round), width: 4, end: false});
-        link(RX - 40, ly, PX - PR - 10, 500, {route: "hvh", mid: RX, alpha: q, upto: clamp(2 * round - 1), width: 4, end: false});
+        // The way out to the round and the way back draw on as one stroke from the junction, so the way back grows on
+        // from where the way out ends rather than setting off as a second mark.
+        path(rounded([[JX, 500], [SX, 500], [SX, ly], [RX, ly], [RX, 500], [PX - PR - 10, 500]], 14), {color: P.line, alpha: q, upto: round, width: 4});
       }
       ring(NEED, ly, 14, {color: P.authority, alpha: q, width: 2.5});
       dot(NEED, ly, 6 + 2 * lit, {color: P.authority, alpha: q});
@@ -8467,7 +8728,7 @@ scenes["26"] = function (s, t) {
     check(PX, CONTENT_CY + 3, PR * .8, {color: P.authority, alpha: g3 * done});
     nameText(practiceName, PX, CONTENT_CY + PR + NAME_GAP, {valign: "top", color: P.authority, alpha: g3});
     // Chinese counts what must be explained before the column builds, and the count heads the column from its words.
-    if (!en) nameText("还要讲三件事", LX, top - 24 - NAME_GAP, {align: "left", valign: "bottom", color: P.muted, alpha: g3 * named(t, explain)});
+    if (!en) nameText("还要做到三件事", LX, top - 24 - NAME_GAP, {align: "left", valign: "bottom", color: P.muted, alpha: g3 * named(t, explain)});
   }
   // 4. Necessary safeguards do not wait: the safeguard stands now on the left, and the two things it must not wait for,
   // an incident or a new practice's approval, stand together on the right inside one bracket, which opens with the
@@ -8478,7 +8739,8 @@ scenes["26"] = function (s, t) {
   // the safeguard again as such a safeguard is said to take a trial too, and names the trial on its word, what it only
   // does, choosing how and verifying it, joining on its own words; whether to meet the safeguard, which the trial never
   // decides, is refused after them on its words. The Chinese safeguard stands nearer the centre, so the stage is
-  // balanced before the things it must not wait for arrive.
+  // balanced before the things it must not wait for arrive, and larger, its check with it, since it stands alone
+  // through its example, so the stage covers a tenth of the frame's band while the example is said.
   const g4 = base * stageIn(t, safeguards) * stageOut(t, judged);
   if (g4 > 0) {
     const [incidentAt, approvalAt] = cues(s, [["出事", "an incident"], ["新做法批下来", "a new practice to be approved"]]);
@@ -8486,12 +8748,12 @@ scenes["26"] = function (s, t) {
     // the trial's fork and names under them. It stands on the centre until the first thing it must not wait for is
     // named, and then eases left until the whole stage centres; the events and their bracket stand at their places.
     const LEFT = mix(L(140, 226), L(-150, -120), glide(t, incidentAt - .1, L(290, 346)));
-    const SX = L(620, 540) + LEFT, SR = 88, EX = 1300, BX = EX - 50, ys = [452, 548], E = SX - SR * .85;
+    const SX = L(620, 540) + LEFT, SR = L(120, 88), EX = 1300, BX = EX - 50, ys = [452, 548], E = SX - SR * .85;
     // Chinese has already said 试点 for the conditions' small trial, so its cue is the one that 这类保障也可以试点 says.
     const trialAt = cueFrom(s, "试点", "a trial decides", cue(s, "这类保障也可以试点", "a trial decides"));
     const onlyAt = cueFrom(s, "只用来选定", "decides only how", trialAt), howAt = cueFrom(s, "选定", "how", trialAt);
     shield(SX, CONTENT_CY, SR, {alpha: g4, fillColor: P.row});
-    check(SX, CONTENT_CY + 3, 46, {color: P.evidence, alpha: g4 * ramp(t, safeguards + .05, .4), width: 4.5});
+    check(SX, CONTENT_CY + 3, SR * .52, {color: P.evidence, alpha: g4 * ramp(t, safeguards + .05, .4), width: 4.5});
     if (en) growName(t, ["Necessary safeguards", " must not wait"], [safeguards, noWait], E, CONTENT_CY - SR - NAME_GAP,
       {valign: "bottom", alpha: g4, color: P.evidence});
     else {
@@ -8567,11 +8829,13 @@ scenes["26"] = function (s, t) {
     });
     const held = reasons.reduce((b, at, i) => mix(b, ys[i] + 24, soon(t, pauseHold(at - .45, .4), .4)), ys[0] + 24);
     path([[BX - 16, ys[0] - 24], [BX, ys[0] - 24], [BX, held], [BX - 16, held]], {color: P.line, alpha: g5 * ramp(t, reasons[0] - .15, .4), width: 2});
-    // The rule: a document crossed through and dimmed when retired. It stands with its name from the stage's first
-    // words, as the subject the reasons describe.
+    // The rule: a page crossed through and dimmed when retired. It stands with its name from the stage's first
+    // words, as the subject the reasons describe. It is drawn as 23's pages are, its ruled rows in one stroke, so the
+    // rows read as the page's text rather than as a list of rows whose last the retirement's name below would seem to
+    // name.
     const ruleOn = named(t, judged);
     link(BX, CONTENT_CY, RX - RW / 2 - 14, CONTENT_CY, {alpha: g5 * clamp((held - CONTENT_CY) / 80), end: false});
-    documentIcon(RX - RW / 2, CONTENT_CY - RH / 2, RW, RH, {alpha: g5 * ruleOn * mix(1, .7, out), rows: 4, stroke: blend(P.ink, P.muted, out)});
+    s23Page(RX - RW / 2, CONTENT_CY - RH / 2, RW, RH, {alpha: g5 * ruleOn * mix(1, .7, out), rows: 4, stroke: blend(P.ink, P.muted, out)});
     nameText(L("规则", "A rule"), RX, CONTENT_CY - RH / 2 - NAME_GAP, {valign: "bottom", alpha: g5 * ruleOn});
     cross(RX + RW / 2 + 44, CONTENT_CY, 36, {alpha: g5 * out, width: 3.5});
     nameText(L("撤掉", "Retire"), RX, CONTENT_CY + RH / 2 + NAME_GAP, {valign: "top", color: P.muted, alpha: g5 * named(t, retire)});
@@ -8581,10 +8845,10 @@ scenes["26"] = function (s, t) {
 /* ---------------- 27 evolve: detect drift before failure ---------------- */
 scenes["27"] = function (s, t) {
   const defects = cue(s, "很多系统问题", "many system defects");
-  // The small signals in spoken order: Chinese names five, English seven.
+  // The small signals in spoken order, seven in both editions.
   const signals = en ? cues(s, [["", "definitions drifting"], ["", "questions recurring"], ["", "people stepping"], ["", "evidence expiring"],
     ["", "ownership blurring"], ["", "intermittent failures"], ["", "slight delays"]])
-    : cues(s, [["定义慢慢变了", ""], ["同样的问题", ""], ["临时靠人救火", ""], ["证据过期", ""], ["责任说不清", ""]]);
+    : cues(s, [["定义慢慢变了", ""], ["同样的问题", ""], ["临时靠人救火", ""], ["证据过期", ""], ["责任说不清", ""], ["偶尔出错", ""], ["略有延迟", ""]]);
   const [anomaly, trend, pattern, impact, direction] = cues(s, [["一次异常", "one anomaly"], ["看成趋势", "not a trend"], ["先看它的模式", "check its pattern"],
     ["影响", "impact"], ["方向", "direction"]]);
   const [metric, weekly, signal] = cues(s, [["同一个指标", "the same metric"], ["每周都有人来问", "asks every week"], ["这就是一个苗头", "that is a signal"]]);
@@ -8616,16 +8880,17 @@ scenes["27"] = function (s, t) {
     return pts;
   };
   // 1. Many defects begin as small signals: the line runs on toward a defect at its end, and each small signal bumps the
-  // line at its place on its own words, the names building into one rail below (five in Chinese, seven in English).
+  // line at its place on its own words, the names building into one rail below.
   const one = base * stageOut(t, anomaly);
   if (one > 0) {
-    const names = en ? [["Definitions drifting"], ["Questions recurring"], ["Manual rescue"], ["Evidence expiring"], ["Ownership blurring"],
-      ["Intermittent failures"], ["Slight delays"]] : ["定义慢慢变了", ["同样的问题", "反复被问"], "临时靠人救火", "证据过期", "责任说不清"];
+    const names = en ? [["Definitions drifting"], ["Questions recurring"], ["Stepping in to rescue"], ["Evidence expiring"], ["Ownership blurring"],
+      ["Intermittent failures"], ["Slight delays"]] : ["定义慢慢变了", ["同样的问题", "反复被问"], "临时靠人救火", "证据过期", "责任说不清", "偶尔出错", "略有延迟"];
     // The seven English names stand whole, each on one line, on two baselines at one even pitch, every other name a row
     // lower on a short stem from the line; the one long Chinese name breaks at its phrase, the others stay whole, and
-    // the Chinese stations are spaced from each name's widest line.
+    // the Chinese stations are spaced from each name's widest line on a rail wide enough that its seven names stand on
+    // one baseline two ems or more apart.
     const wrap = 280, widest = v => Array.isArray(v) ? v.reduce((a, b) => measure(a, LABEL) >= measure(b, LABEL) ? a : b) : v;
-    const xs = en ? names.map((_, i) => 270 + i * 205) : railStations(names.map(widest), 270, 1500, {wrap}), lift = signals.map(at => soon(t, at - .1, .5));
+    const xs = en ? names.map((_, i) => 270 + i * 205) : railStations(names.map(widest), 230, 1560, {wrap}), lift = signals.map(at => soon(t, at - .1, .5));
     const yAt = x => Y0 - xs.reduce((a, sx, i) => a + 22 * lift[i] * Math.exp(-(((x - sx) / 22) ** 2)), 0);
     const draw = ramp(t, defects - .1, .6), shape = ramp(t, defects - .1, .6) * one;
     s27Line(yAt, one, {upto: draw, axis: shape});
@@ -8651,7 +8916,7 @@ scenes["27"] = function (s, t) {
     nameText(L("一次异常", "One anomaly"), PX, peak - 12 - NAME_GAP, {valign: "bottom", alpha: two * named(t, anomaly)});
     // The spike's level carried on to the right would read it as a trend: the way stops at a bar.
     const refuse = ramp(t, trend + .45, .3) * two, TX = 1420;
-    link(PX + 18, peak, TX - 10, peak, {color: P.unknown, alpha: two * ramp(t, trend + .05, .3), upto: soon(t, trend + .05, .6), end: false, dash: [8, 8]});
+    link(PX + 18, peak, TX - 10, peak, {color: P.unknown, alpha: two * ramp(t, trend + .05, .3), upto: drawShare(t, trend + .05, Math.abs(TX - 10 - (PX + 18)), .6), end: false, dash: [8, 8]});
     line(TX, peak - 24, TX, peak + 24, {color: P.unknown, alpha: refuse, width: 4});
     rejectedName(L("看成趋势", "A trend"), TX + 24, peak, {align: "left", alpha: two * named(t, trend), mark: refuse / Math.max(two, 1e-6)});
     // The checks: the pattern rings the points before the spike, the impact measures its height, the direction follows
@@ -8674,13 +8939,14 @@ scenes["27"] = function (s, t) {
     const yAt = x => Y0 - xs.reduce((a, sx, k) => a + 14 * asked[k] * Math.exp(-(((x - sx) / 20) ** 2)), 0);
     s27Line(yAt, three);
     nameText(L("同一个指标", "The same metric"), X0, Y0 - NAME_GAP, {align: "left", valign: "bottom", color: P.evidence, alpha: three * named(t, metric)});
-    xs.forEach((x, k) => {
-      const q = asked[k] * three;
-      // Each week's question arrives in turn on the words that say someone asks every week, on its own drop.
-      link(x, yAt(x) + 8, x, QY - 28, {alpha: q * .8, end: false});
-      ring(x, QY, 22, {color: P.authority, alpha: q, width: 2.5});
-      text("?", x, QY + 1, 26, {role: "mark", align: "center", color: P.authority, alpha: q});
-    });
+    // Each week's question arrives in turn on the words that say someone asks every week: its drop draws on from the
+    // line and its ring draws round from the drop's end. All the drops are one stroke and all the rings another, so the
+    // weekly questions read as one question asked again and again, not as six marks each waiting for a name of its own.
+    stroke(() => xs.forEach((x, k) => { if (asked[k] > 0) { ctx.moveTo(x, yAt(x) + 8); ctx.lineTo(x, mix(yAt(x) + 8, QY - 28, asked[k])); } }),
+      {color: P.line, alpha: three * .8, width: 2});
+    stroke(() => xs.forEach((x, k) => { if (asked[k] > 0) { ctx.moveTo(x, QY - 22); ctx.arc(x, QY, 22, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * asked[k]); } }),
+      {color: P.authority, alpha: three, width: 2.5});
+    xs.forEach((x, k) => text("?", x, QY + 1, 26, {role: "mark", align: "center", color: P.authority, alpha: asked[k] * three}));
     nameText(L("每周都有人来问", "Asked every week"), 910, QY + 40 + NAME_GAP,
       {valign: "top", width: 640, color: P.authority, alpha: three * named(t, weekly)});
     // The signal: the recurring questions, enclosed as one.
@@ -8877,8 +9143,10 @@ scenes["28"] = function (s, t) {
     ["不是给人贴标签", "never label a person"], ["看指标", "ask what decision"], ["支持哪个决定", "ask what decision"], ["钻空子", "could be gamed"],
     ["出了异常", "investigate anomalies"], ["案例", "cases"], ["机制", "and mechanisms"]]);
   const cadence = cues(s, [["按周", "calibrates judgment"], ["按月", "reviews mechanisms"], ["按季", "reviews practices"]]);
-  // The rhythms are the department's default; the stage changes on that word, before the first rhythm is named.
-  const byDefault = cue(s, "部门默认", "by default");
+  // The rhythms are the department's default; the stage changes on the words that name the department, its first mark,
+  // before the first rhythm is named: in English "the department", after "by default", so the stage never stands as its
+  // heading alone while the default is said.
+  const byDefault = cue(s, "部门默认", "the department");
   const base = ramp(t, opening(s), .7);
   // 1. Capability grows through real work. One task is a rail the member walks, named as the real work on its words,
   // stopping where the guidelines say to look: at the start, at important decisions and after delivery. The rail then
@@ -8999,8 +9267,10 @@ scenes["28"] = function (s, t) {
     line(cx - 120, cy + B, cx + 120, cy + B, {color: P.ink, alpha: g3, width: 3});
     line(lx, ly, rx, ry, {color: P.ink, alpha: g3, width: 4});
     dot(cx, cy, 7, {color: P.ink, alpha: g3});
+    // The two trays hang from the beam on one stroke, so the balance reads as one structure rather than as two like
+    // hangers each waiting for a name of its own.
+    stroke(() => [[lx, ly], [rx, ry]].forEach(([x, y]) => { ctx.moveTo(x, y); ctx.lineTo(x, y - H); }), {color: P.ink, alpha: g3, width: 3});
     [[lx, ly, P.muted, 170], [rx, ry, P.unknown, 220]].forEach(([x, y, color, w]) => {
-      line(x, y, x, y - H, {color: P.ink, alpha: g3, width: 3});
       line(x - w, y - H, x + w, y - H, {color, alpha: g3, width: 4});
       line(x - w, y - H, x - w, y - H - 12, {color, alpha: g3, width: 3}); line(x + w, y - H, x + w, y - H - 12, {color, alpha: g3, width: 3});
     });
@@ -9012,19 +9282,22 @@ scenes["28"] = function (s, t) {
       box(wLeft - 36, y - 9, 18, 18, {fill: P.muted, alpha: g3 * named(t, weights[i]), radius: 3});
       nameText(v, wLeft, y, {align: "left", alpha: g3 * listIn(t, weights, i), set: "qualities"});
     });
-    // The heavy tray: the risks, one column of term rows on the tray, each beside its weight, lit while it is said.
+    // The heavy tray: the risks, one column of term rows on the tray, each beside its weight, lit while it is said. Each
+    // risk is said as one caption line, so a row names its risk by the key words rather than repeating that line whole:
+    // the claimed completion stands currently unverified and the high-risk or irreversible action unauthorized, and
+    // Chinese drops the connecting 就 and 做 and lists 受阻、失败 as English lists its blockers and failures.
     const rows = en ? [
       [["Fabricated or unverified facts"], [risks[0]], ["as established"], [cue(s, "", "presented as established")]],
-      [["Completion claimed"], [risks[1]], ["without verification"], [cue(s, "", "without current verification")]],
+      [["Completion claimed"], [risks[1]], ["currently unverified"], [cue(s, "", "without current verification")]],
       [["Agent output"], [risks[2]], ["as fact, authorization or responsibility"], [cue(s, "", "standing in for")]],
-      [["High-risk action"], [risks[3]], ["beyond authorization"], [cue(s, "", "beyond authorization")]],
-      [["Hidden blockers"], [risks[4]], [], []]]
+      [["High-risk or irreversible action"], [risks[3]], ["unauthorized"], [cue(s, "", "beyond authorization")]],
+      [["Hidden blockers, failures"], [risks[4]], [], []]]
     : [
       [["没核实的、编造的、挑过的事实"], [risks[0]], ["说成确定"], [cue(s, "说成确定", "")]],
-      [["没核验当前版本"], [risks[1]], ["就说完成"], [cue(s, "就说完成", "")]],
+      [["没核验当前版本"], [risks[1]], ["说完成"], [cue(s, "就说完成", "")]],
       [["智能体的输出"], [risks[2]], ["充当事实或授权，", "或者让它替人负责"], [cue(s, "充当事实或授权", ""), cue(s, "或者让它替人负责", "")]],
-      [["越权"], [risks[3]], ["做高风险或不可逆的事"], [cue(s, "做高风险", "")]],
-      [["隐瞒受阻和失败"], [risks[4]], [], []]];
+      [["越权"], [risks[3]], ["高风险或不可逆的事"], [cue(s, "做高风险", "")]],
+      [["隐瞒受阻、失败"], [risks[4]], [], []]];
     const width = 520, slot = Math.max(...rows.map(([term, , qual]) => termRowLayout(term, qual, width, false).height)), heights = rows.map(() => slot);
     // Each risk is a name over its qualifier; the English rows, two lines each, stand 28 px apart, further than a risk's own
     // lines, so each risk reads as one item. The Chinese rows each keep room for three lines, which already sets them apart.
@@ -9039,19 +9312,17 @@ scenes["28"] = function (s, t) {
     });
   }
   // 4. If work is scored, the score expresses delivery risk and must never label a person: a pair, the delivery left of
-  // centre with the score's gauge filling it, and the person on the right, who arrives as the sentence that protects
-  // them begins. The stage opens, and the score is named, on the words that score the work. The
+  // centre with the score's gauge filling it, and the person whose work it is on the right, the two standing centred
+  // together from the words that score the work, on which the stage opens and the score is named. The
   // way from the score toward the person stops at a bar on the words that refuse it, and the refused label stands
   // under the bar. The metric's questions then take the picture in one cut on their words.
   const g4 = base * stageIn(t, score) * stageOut(t, byDefault);
   if (g4 > 0) {
     const d1 = g4 * stageOut(t, metric);
     if (d1 > 0) {
-      // The delivery stands alone on the centre until the score is said to express delivery risk, and then eases left to
-      // where it centres with the person, who stands at their place from their words; it has cleared the refused label's
-      // place before that label arrives on the same words as the person in Chinese.
-      const protect = cue(s, "不是给人贴标签", "it must never"), DX0 = 580, DX = mix(840, DX0, glide(t, deliveryRisk - .1, 840 - DX0));
-      const DY = 330, DW = 240, DH = 230, gx = DX + DW / 2, gy = DY + 205, gr = 74, PX = DX0 + 720, PY = 480;
+      // The delivery and the person stand at their places from the stage's first words, so the pair stands centred and
+      // the stage whole while the score is said, before the words turn to the person the score must never label.
+      const DX = 580, DY = 330, DW = 240, DH = 230, gx = DX + DW / 2, gy = DY + 205, gr = 74, PX = DX + 720, PY = 480;
       documentIcon(DX, DY, DW, DH, {alpha: d1, rows: 1});
       fill(() => ctx.arc(gx, gy, gr + 14, Math.PI, Math.PI * 2), {color: P.row, alpha: d1});
       stroke(() => ctx.arc(gx, gy, gr, Math.PI, Math.PI * 2), {color: P.line, alpha: d1, width: 9, cap: "butt"});
@@ -9061,10 +9332,9 @@ scenes["28"] = function (s, t) {
       line(gx, gy, gx + Math.cos(a) * gr * .78, gy + Math.sin(a) * gr * .78, {color: P.ink, alpha: d1, width: 3});
       nameText(L("打分", "The score"), gx, DY - NAME_GAP, {valign: "bottom", alpha: d1 * named(t, score)});
       nameText(L("交付风险", "Delivery risk"), gx, DY + DH + NAME_GAP, {valign: "top", color: P.authority, alpha: d1 * named(t, cue(s, "分数说的是", "expresses"))});
-      // The person stands on the words that refuse to label them; the score's way toward them stops at a bar halfway, the
-      // bar standing where the pair has settled, so the way runs to it while the delivery is still easing left.
-      person(PX, PY, {alpha: d1 * ramp(t, protect - .3, .55), size: 1.6});
-      const go = soon(t, noLabel - .05, .7), BX = (DX0 + DW + PX) / 2 - 15;
+      // The score's way toward the person stops at a bar halfway between the pair.
+      person(PX, PY, {alpha: d1, size: 1.6});
+      const go = soon(t, noLabel - .05, .7), BX = (DX + DW + PX) / 2 - 15;
       link(DX + DW + 30, PY, BX, PY, {color: P.unknown, alpha: d1 * named(t, noLabel), upto: go, end: false, dash: [8, 8]});
       // The refused phrase is named under the stop, beside the way it refuses.
       line(BX, PY - 34, BX, PY + 34, {color: P.unknown, alpha: d1 * ramp(t, noLabel + .55, .3), width: 4});
@@ -9126,8 +9396,10 @@ scenes["28"] = function (s, t) {
   const g5 = base * stageIn(t, byDefault);
   if (g5 > 0) {
     const ys = [400, 530, 660], colors = [P.evidence, P.ink, P.authority], ticks = [13, 3, 1], RW = 760;
+    // The Chinese quarterly rhythm is its caption's whole line, so its name joins the review's two objects with a list
+    // mark rather than with 和, and does not repeat that line.
     const parts = en ? [["Calibrate judgment", " weekly"], ["Review mechanisms", " monthly"], ["Review practices", " and priorities", " quarterly"]]
-      : [["按周", "校准判断"], ["按月", "审视机制"], ["按季", "评估做法和能力建设"]];
+      : [["按周", "校准判断"], ["按月", "审视机制"], ["按季", "评估做法、能力建设"]];
     const ats = en ? [[cadence[0], cue(s, "", "weekly")], [cadence[1], cue(s, "", "monthly")], [cadence[2], cueFrom(s, "", "capability", cadence[2]), cue(s, "", "quarterly")]]
       : [[cadence[0], cue(s, "校准判断", "")], [cadence[1], cue(s, "审视机制", "")], [cadence[2], cue(s, "评估做法", "")]];
     const NW = 720, widths = parts.map(p => Math.max(...growLines(p, NW).map(line => measure(line.map((k, j) => j ? p[k] : p[k].trimStart()).join(""), LABEL))));
@@ -9167,22 +9439,26 @@ scenes["28"] = function (s, t) {
 };
 
 /* ---------------- 29 evolve: management responsibilities and emergencies ---------------- */
+/* A gear's ten teeth outside its rim, turned by `turn` radians, drawn in one stroke so they read as the wheel's texture
+ * rather than as a list of like marks each waiting for a name of its own. */
+function s29Teeth(x, y, r, turn, {alpha = 1, color = P.ink} = {}) {
+  stroke(() => {
+    for (let k = 0; k < 10; k++) {
+      const a = k * Math.PI / 5 + Math.PI / 10 + turn;
+      ctx.moveTo(x + Math.cos(a) * r, y + Math.sin(a) * r); ctx.lineTo(x + Math.cos(a) * (r + r * .24), y + Math.sin(a) * (r + r * .24));
+    }
+  }, {color, alpha, width: r * .12, cap: "butt"});
+}
 /* A gear standing for a management mechanism: ten teeth outside a rim and a hub, turned by `turn` radians. */
 function s29Gear(x, y, r, {turn = 0, alpha = 1, color = P.ink} = {}) {
-  for (let k = 0; k < 10; k++) {
-    const a = k * Math.PI / 5 + Math.PI / 10 + turn;
-    line(x + Math.cos(a) * r, y + Math.sin(a) * r, x + Math.cos(a) * (r + r * .24), y + Math.sin(a) * (r + r * .24), {color, alpha, width: r * .12, cap: "butt"});
-  }
+  s29Teeth(x, y, r, turn, {color, alpha});
   ring(x, y, r, {color, alpha, width: r * .06});
   ring(x, y, r * .26, {color, alpha, width: 4});
 }
 /* The management system under strain: the same gear as s29Gear, but its rim stops just short of closing under one tooth,
  * so the wheel reads as one mark rather than an empty ring. Used only by scene 29's strain stage. */
 function s29Wheel(x, y, r, {turn = 0, alpha = 1, color = P.ink} = {}) {
-  for (let k = 0; k < 10; k++) {
-    const a = k * Math.PI / 5 + Math.PI / 10 + turn;
-    line(x + Math.cos(a) * r, y + Math.sin(a) * r, x + Math.cos(a) * (r + r * .24), y + Math.sin(a) * (r + r * .24), {color, alpha, width: r * .12, cap: "butt"});
-  }
+  s29Teeth(x, y, r, turn, {color, alpha});
   ring(x, y, r, {color, alpha, width: r * .06, start: Math.PI / 10 + turn + .03, upto: .99});
   ring(x, y, r * .26, {color, alpha, width: 4});
 }
@@ -9196,9 +9472,9 @@ scenes["29"] = function (s, t) {
   const [within, closest] = cues(s, [["在边界之内", "within the stated boundaries"], ["离事实最近的负责人", "the responsible person closest"]]);
   const paths = cues(s, [["选方法", "the method"], ["工具", "tools"], ["实施路径", "and path"]]);
   const kinds = cues(s, [["数据出错", "a data error"], ["生产故障", "production failure"], ["越权违规", "permission or compliance"]]);
-  // Chinese opens the incident with its condition, "in an emergency", a second before the first kind; the stage opens
-  // on those words. English opens on the first kind.
-  const emergency = cue(s, "紧急情况下", "a data error");
+  // Both editions open the incident with its condition, "in an emergency", a second before the first kind; the stage
+  // opens on those words.
+  const emergency = cue(s, "紧急情况下", "in an emergency");
   const [finder, contain, tell, ownerLeads] = cues(s, [["发现的人", "whoever finds it"], ["在自己权限内控制影响", "contains it within"], ["通知数据或生产负责人", "tells the data or production owner"],
     ["受影响工作的负责人", "the owner of the affected work"]]);
   const [urgency, uncertain, noAuthority] = cues(s, [["再紧急", "urgency does not"], ["不确定的结果", "an uncertain result"], ["权限也不会变大", "grant authority"], ["先控制影响", "contain first"]]);
@@ -9319,9 +9595,10 @@ scenes["29"] = function (s, t) {
   const boundCut = Math.min(closest - .35, within + L(0, .57)), four = base * stageIn(t, demo) * stageOut(t, boundCut);
   if (four > 0) {
     // The manager and the work stand on the centre while the demonstration is said, and ease left on the words that
-    // refuse the guidelines' misuse, to where they centre with the refused uses, which stand at their places.
+    // refuse the guidelines' misuse, to where they centre with the refused uses, which stand at their places. The work
+    // is a page tall enough that the pair alone covers a tenth of the frame's band while the demonstration is said.
     const pair = L(-52, -112), shift = mix(L(178, 184), pair, glide(t, cue(s, "不拿这份指南", "never use") - .1, L(178, 184) - pair));
-    const dx = 750 + shift, dy = 320, dw = 250, dh = 280, px = 610 + shift, py = dy + dh - 40;
+    const dx = 750 + shift, dy = 300, dw = 250, dh = 310, px = 610 + shift, py = dy + dh - 40;
     person(px, py, {alpha: four, color: P.authority, size: 1.2});
     // The work: a page with its title line and its rows, on which the manager marks each judgment in turn.
     documentIcon(dx, dy, dw, dh, {alpha: four, rows: 6});
@@ -9372,20 +9649,20 @@ scenes["29"] = function (s, t) {
       nameText(names[i], sx + 13 + NAME_GAP, ys[i], {align: "left", alpha: five * listIn(t, paths, i), set: "paths"});
     });
   }
-  // 5. An incident is contained by whoever finds it, within their own authority. Chinese opens it with the emergency:
-  // the urgency clock of the urgency stage below stands over the row, small and named on its words, as the stage's first
-  // mark. The kinds of incident build into one
-  // row, left to right in the order spoken, each a firm ring with its spreading pulse, inside one frame that opens
-  // around the first kind and widens to the right just before each next one; the frame is the finder's authority, and
-  // widens to the left to take the finder on the words that find it. On the containment
-  // the pulses stop at the firm rings, which turn to evidence, and the frame takes its name. The condition the path
-  // applies under stands beneath the frame, building on its words. Telling the owner draws one link from the finder out of the
-  // frame, under the condition with clear room, to the owner beyond it, in three straight runs. The stage holds until the
-  // owner takes over. The finder and the owner stand with their feet on the line of the rings' lowest points, and the
-  // finder at the kinds' pitch before the first; every name hangs under its mark on the kinds' names' line, and the frame
-  // keeps one padding above the finder's head and below the lowest name, and one at its two ends; the frame's name and,
-  // a line above it, the emergency are centred over the frame as it stands, moving with it as it widens, so the two
-  // headings keep one rule, the emergency's clock hung before its line.
+  // 5. An incident is contained by whoever finds it, within their own authority. Both editions open it with the
+  // emergency: the urgency clock of the urgency stage below stands over the row, small and named on its words, as the
+  // stage's first mark. The kinds of incident build into one row, left to right in the order spoken, each a firm ring
+  // with its spreading pulse, inside one frame that opens around the first kind and widens to the right just before each
+  // next one; the frame is the finder's authority, and widens to the left to take the finder on the words that find it.
+  // On the containment the pulses stop at the firm rings, which turn to evidence, and the frame takes its name. The
+  // condition the path applies under stands beneath the frame, building on its words. Telling the owner draws one link
+  // from the finder out of the frame, under the condition with clear room, to the owner beyond it, in three straight
+  // runs joined by quarter turns. The stage holds until the owner takes over. The finder and the owner stand with their
+  // feet on the line of the rings' lowest points, and the finder at the kinds' pitch before the first; every name hangs
+  // under its mark on the kinds' names' line, and the frame keeps one padding above the finder's head and below the
+  // lowest name, and one at its two ends; the frame's name and, a line above it, the emergency are centred over the
+  // frame as it stands, moving with it as it widens, so the two headings keep one rule, the emergency's clock hung
+  // before its line.
   const six = base * stageIn(t, emergency) * stageOut(t, ownerLeads);
   if (six > 0) {
     const KY = 470, M = 160, PAD = 30, py = KY + 26 - 29, NY6 = KY + 26 + NAME_GAP;
@@ -9414,11 +9691,11 @@ scenes["29"] = function (s, t) {
     const lines6 = Math.max(...names.map(v => wrapName(v, 300).length), wrapName(finderName, FW6).length);
     const fy = py - 15 * 1.2 * 2.15 - PAD, fh = NY6 + blockHeight(lines6) + row6 + PAD - fy;
     const left = left0 + shift, right = right0 + shift, FC = (left + right) / 2;
-    if (!en) {
-      const ex = FC - measure("紧急情况下") / 2, eq = named(t, emergency) * six;
+    {
+      const emergencyName = L("紧急情况下", "In an emergency"), ex = FC - measure(emergencyName) / 2, eq = named(t, emergency) * six;
       const ey = fy - NAME_GAP - labelSize(LABEL) / 2 - labelSize(LABEL) * LEADING;
       clock(ex - NAME_GAP - 18, ey, 18, {hand: (voiceTime(t) * .6) % 1, color: P.unknown, alpha: eq});
-      nameText("紧急情况下", FC, ey, {alpha: eq});
+      nameText(emergencyName, FC, ey, {alpha: eq});
     }
     box(left, fy, right - left, fh, {stroke: P.line, alpha: place, radius: 20, width: 3.5});
     nameText(L("在自己权限内控制影响", "Contains it within their authority"), FC, fy - NAME_GAP, {valign: "bottom", color: P.authority, alpha: six * named(t, contain)});
@@ -9436,9 +9713,10 @@ scenes["29"] = function (s, t) {
       dot(kx, KY, 8 + 2 * lit, {color: P.unknown, alpha: q});
       ring(kx, KY, 26, {color: tone, alpha: q, width: 3});
       // The incident spreads in pulses beyond its ring until it is contained; each pulse grows out of the ring at no
-      // width and thins as it widens, so it never stands out at once at the ring's edge.
-      const wave = (voiceTime(Math.min(t, contain - .15)) * .8 + i / 3) % 1;
-      ring(kx, KY, 26 + 24 * wave, {color: P.unknown, alpha: q * (1 - wave) * .7 * (1 - held6), width: 2 * clamp(wave / .15)});
+      // width, its ink rising with its width as a beat's does, and thins as it widens, so it never stands out at once at
+      // the ring's edge.
+      const wave = (voiceTime(Math.min(t, contain - .15)) * .8 + i / 3) % 1, swell = clamp(wave / .15);
+      ring(kx, KY, 26 + 24 * wave, {color: P.unknown, alpha: q * swell * (1 - wave) * .7 * (1 - held6), width: 2 * swell});
       if (en && i === 2) line(kx, KY + 32, kx, NY6 + row6 - 6, {alpha: q, width: 2});
       nameText(names[i], kx, NY6 + (i === 2 ? row6 : 0), {valign: "top", width: 300, alpha: six * listIn(t, kinds, i), set: "kinds"});
     });
@@ -9450,14 +9728,11 @@ scenes["29"] = function (s, t) {
     const ow = ramp(t, tell - .15, .4) * six;
     person(ox, py, {alpha: ow, color: P.authority, size: 1.2});
     const ownerBlock = nameText(ownerName, ox, NY6, {valign: "top", width: 340, color: P.authority, alpha: six * named(t, tell)});
-    // The link runs under the condition with clear room, so it never underlines it.
-    const lowY = conditionBottom + 18, runs = [[px, finderBlock.bottom + 12, px, lowY], [px, lowY, ox, lowY], [ox, lowY, ox, ownerBlock.bottom + 12]];
-    const runLen = runs.map(([x1, y1, x2, y2]) => Math.abs(x2 - x1) + Math.abs(y2 - y1));
-    const told = ease((voiceTime(t) - voiceTime(tell - .1)) / 2) * runLen.reduce((a, b) => a + b, 0);
-    runs.forEach(([x1, y1, x2, y2], k) => {
-      const before = runLen.slice(0, k).reduce((a, b) => a + b, 0);
-      link(x1, y1, x2, y2, {alpha: ow, upto: clamp((told - before) / runLen[k]), width: 2.5, end: k === 2});
-    });
+    // The link runs under the condition with clear room, so it never underlines it. It is one way, down, across and up
+    // in quarter turns, drawn on from the finder as one stroke, so each run grows on from the one before it.
+    const lowY = conditionBottom + 18;
+    link(px, finderBlock.bottom + 12, ox, ownerBlock.bottom + 12, {route: "vhv", mid: lowY, alpha: ow, width: 2.5,
+      upto: ease((voiceTime(t) - voiceTime(tell - .1)) / 2)});
   }
   // 6. The owner of the affected work leads the response: the owner stands at the head of a small tree, with the
   // affected work, a page marked by the incident, beside them from the words that name it. The preserved inputs and
@@ -9479,14 +9754,16 @@ scenes["29"] = function (s, t) {
     const OPEN = L(90, 100), wide = OPEN * soon(t, escAt - .1, .8);
     const lower = en ? 30 : 0, ox = 960 + wide, oy = 360 + lower, sy = 525 + lower, by = 610 + lower, xs = [640 + wide, 1280 + wide], ly = 730 + lower;
     person(ox, oy, {alpha: seven, color: P.authority, size: 1.3});
-    // The owner's role, each part on its own words.
+    // The owner's role, each part on its own words. The Chinese role is its caption's whole line, so it names what the
+    // owner does by its key word, 接手, on the words 接手应对.
     const [role, roleAts] = en ? [["Owner of the affected work", " sees the response through"], [ownerLeads, cue(s, "", "sees the response through")]]
-      : [["受影响工作的负责人", "接手应对"], [ownerLeads, cue(s, "接手应对", "")]];
+      : [["受影响工作的负责人", "接手"], [ownerLeads, cue(s, "接手应对", "")]];
     growName(t, role, roleAts, ox + 60, oy - 6, {width: 520, valign: "middle", color: P.authority, alpha: seven});
     // The affected work stands far enough left of the kept versions that its name keeps clear of them, and the versions'
-    // name stands on the line of the work's name.
+    // name stands on the line of the work's name. Its page is drawn as 23's pages are, its ruled rows in one stroke, so
+    // they read as the page's text rather than as rows each waiting for a name.
     const hit = seven * ramp(t, ownerLeads + STAGE_CUT, .3), WX = 700 + wide, WY = 440 + lower, workNameY = WY + 60 + NAME_GAP + labelSize(LABEL) / 2;
-    documentIcon(WX - 50, WY - 60, 100, 120, {alpha: hit, rows: 3});
+    s23Page(WX - 50, WY - 60, 100, 120, {alpha: hit, rows: 3});
     // The owner takes the affected work in hand on the words that say they see the response through.
     link(ox - 32, oy + 44, WX + 58, WY, {route: "vh", color: P.authority, alpha: hit, upto: soon(t, roleAts[1] + .05, .6), width: 2.5});
     nameText(L("受影响工作", "The affected work"), WX, WY + 60 + NAME_GAP, {valign: "top", alpha: hit});
@@ -9507,8 +9784,10 @@ scenes["29"] = function (s, t) {
       else check(x, ly + 2, 26, {color: P.evidence, alpha: q, upto: soon(t, at - .05, .5)});
     });
     railNames(names, xs, ly + 8, {wrap: 400, alpha: i => seven * listIn(t, uses, i), set: "uses"});
+    // The decision owner stands a size smaller than the owner, so the figure reads as one person, head and shoulders,
+    // which its one name names.
     const DX = 420 + OPEN, up = ramp(t, escAt - .15, .4) * seven;
-    person(DX, oy, {alpha: up, color: P.authority, size: 1.2});
+    person(DX, oy, {alpha: up, color: P.authority, size: 1.1});
     nameText(L("决策负责人", "Decision owner"), DX, oy + 44 + NAME_GAP, {valign: "top", color: P.authority, alpha: seven * named(t, escAt)});
     link(ox - 52, oy - 10, DX + 60, oy - 10, {color: P.authority, alpha: up, upto: soon(t, escAt - .05, .6), width: 2.5});
     // The further permission is named over the escalation's way as it stands once the tree has moved; Chinese names it
@@ -9530,7 +9809,10 @@ scenes["29"] = function (s, t) {
     // right of its axis, or its name further.
     const [reliable, target] = [cue(s, "变可靠", "reliable"), cue(s, "可靠", "reliable")], clockReach = Math.max(46, measure(L("再紧急", "Urgency")) / 2);
     const pairE = 960 - (600 - clockReach + 900 + Math.max(45, measure(L("不确定的结果", "An uncertain result")) / 2)) / 2;
-    const E = mix(mix(360, pairE, glide(t, uncertain - .1, 360 - pairE)), L(-70, -80), glide(t, target - .1, pairE - L(-70, -80)));
+    // The English says the result and reliable within a second, so its stage eases to its place in one move from the
+    // result's words rather than settling between two.
+    const E = en ? mix(360, -80, glide(t, uncertain - .1, 440))
+      : mix(mix(360, pairE, glide(t, uncertain - .1, 360 - pairE)), -70, glide(t, target - .1, pairE + 70));
     const cx = 600 + E, cy = 510, rows = [400, 620], sx = 900 + E, bx = 1200 + E, tx = 1480 + E;
     const un = ramp(t, uncertain - .15, .4) * eight;
     // The clock stands on the centre, near where the response's last marks stood, so it fades in over the cut's first
@@ -9538,13 +9820,15 @@ scenes["29"] = function (s, t) {
     clock(cx, cy, 44, {hand: (voiceTime(t) * .6) % 1, color: P.unknown, alpha: eight * ramp(t, urgency + STAGE_CUT, .15)});
     nameText(L("再紧急", "Urgency"), cx, cy + 44 + NAME_GAP, {valign: "top", alpha: eight * named(t, urgency)});
     link(cx + 52, cy, sx - 58, rows[0], {route: "hvh", mid: 750 + E, r: 18, alpha: un, end: false});
-    link(cx + 52, cy, bx - 16, rows[1], {route: "hvh", mid: 750 + E, r: 18, color: P.unknown, alpha: eight * ramp(t, noAuthority - .15, .2),
-      upto: soon(t, noAuthority - .15, .5), end: false, dash: [8, 8]});
+    // Each refused way inks in over 0.3 s while it draws on, as the film's other refused ways do, so it never stands at
+    // firm ink in the first frame it is seen.
+    link(cx + 52, cy, bx - 16, rows[1], {route: "hvh", mid: 750 + E, r: 18, color: P.unknown, alpha: eight * ramp(t, noAuthority - .15, .3),
+      upto: drawShare(t, noAuthority - .15, Math.abs(bx - 16 - (cx + 52)) + Math.abs(rows[1] - cy), .5), end: false, dash: [8, 8]});
     // The uncertain result keeps its question mark; the way on toward reliable stops at the bar.
     documentIcon(sx - 44, rows[0] - 56, 88, 112, {alpha: un, rows: 0});
     text("?", sx, rows[0] + 6, 44, {role: "mark", align: "center", color: P.unknown, alpha: un});
     nameText(L("不确定的结果", "An uncertain result"), sx, rows[0] + 56 + NAME_GAP, {valign: "top", alpha: eight * named(t, uncertain)});
-    link(sx + 58, rows[0], bx - 16, rows[0], {color: P.unknown, alpha: eight * ramp(t, reliable - .15, .2), upto: soon(t, reliable - .15, .45), end: false, dash: [8, 8]});
+    link(sx + 58, rows[0], bx - 16, rows[0], {color: P.unknown, alpha: eight * ramp(t, reliable - .15, .3), upto: drawShare(t, reliable - .15, Math.abs(bx - 16 - (sx + 58)), .45), end: false, dash: [8, 8]});
     [[rows[0], reliable], [rows[1], noAuthority]].forEach(([y, at]) => line(bx, y - 30, bx, y + 30, {color: P.unknown, alpha: ramp(t, at + .05, .3) * eight, width: 4}));
     // What urgency cannot reach stands beyond the bars, muted, on its words.
     ring(tx, rows[0], 34, {color: P.muted, alpha: eight * named(t, target), width: 2});
@@ -9555,21 +9839,23 @@ scenes["29"] = function (s, t) {
   }
   // 8. Contain first, then complete the record: the incident arrives held, a firm ring, on the words that contain it
   // first, at the left, and the record beside it fills row by row on the words that ask for each, one row per spoken
-  // clause. The record waits as a small page from the stage's first words, which name the recording, a clock on it
-  // turning while it would delay the response and why it waits beneath it; on the words that complete it the clock goes
-  // and the page opens into the record, headed by its name inside it and as long as the rows it holds, and each row
-  // arrives with its box, its check and its name on its own words. The name stands one row's pitch above the first row,
-  // and the open page keeps one padding round its words: above its name, at its left and below its last row. The page is
-  // as wide as its rows need, so the incident and the record stand about the centre.
+  // clause. The record waits as a small page at the middle of its place from the stage's first words, which name the
+  // recording, a clock on it turning while it would delay the response and why it waits beneath it; on the words that
+  // complete it the clock goes and the page opens about its middle into the record, headed by its name inside it and as
+  // long as the rows it holds, and each row arrives with its box, its check and its name on its own words. The name
+  // stands one row's pitch above the first row, and the open page keeps one padding round its words: above its name, at
+  // its left and below its last row. The page is as wide as its rows need, so the incident and the record stand about
+  // the centre, and while the record waits the incident and the waiting page stand apart about it.
   // Once it holds, the correction is verified and the cause reviewed: the held incident turns to a check on the words
   // that verify the correction, and the two acts are named beneath it, each on its own words. The stage holds until
   // recurrence is named.
   const nine = base * stageIn(t, recordAt) * stageOut(t, again);
   if (nine > 0) {
     const later = cue(s, "再补记录", "then complete the record"), ix = 590, cy = 500, rx = 800, rw = 640;
+    // The Chinese last row is its caption's whole line, so it drops the 下 of 什么情况下.
     const rows = en
       ? [["Who decided what"], ["On which facts", " and authority"], ["How long the measure lasts"], ["Who takes over"], ["When to roll back"]]
-      : [["谁", "凭哪些事实和权限，", "决定了什么"], ["措施管多久"], ["谁接手"], ["什么情况下回滚"]];
+      : [["谁", "凭哪些事实和权限，", "决定了什么"], ["措施管多久"], ["谁接手"], ["什么情况回滚"]];
     const rowAts = en
       ? [[fields[0]], [fields[1], cue(s, "", "and authority")], [fields[2]], [fields[3]], [fields[4]]]
       : [[fields[0], fields[1], cue(s, "决定了什么", "decided what")], [fields[2]], [fields[3]], [fields[4]]];
@@ -9596,20 +9882,26 @@ scenes["29"] = function (s, t) {
     // waiting page's top rises to the open page's as it opens.
     const rowTop = i => HC + RH * (i + 1) - labelSize(LABEL) / 2, grownRows = starts.map(at => soon(t, at - .5, .35));
     const OT = HC - labelSize(LABEL) / 2 - 44, foot = grownRows.reduce((y, q, i) => mix(y, rowTop(i) + 46 + 27, q), 2 * HC - OT);
-    // The waiting page opens into the record over 1.6 s of voice time from 0.45 s before its words, its edges and its
-    // corner peaking near 510 px/s; the name joins once the page stands open round it, and the rows' rules end inside the
-    // page as it stands.
-    const open = ease((voiceTime(t) - voiceTime(later - .45)) / 1.6), pageW = mix(96, rw, open);
-    documentIcon(rx, mix(PT9, OT, open), pageW, mix(120, foot - OT, open), {alpha: nine, rows: 0});
-    clock(rx + 48, top + 14, 24, {hand: (voiceTime(t) * .5) % 1, color: P.muted, alpha: nine * (1 - ramp(open, 0, .4))});
-    nameText(L("再补记录", "Then complete the record"), rx + 44, HC, {align: "left", alpha: nine * named(t, later + L(.3, .6))});
+    // The waiting page opens about its middle into the record over 1.6 s of voice time from 0.45 s before its words, each
+    // edge peaking near 260 px/s; the name joins on its words inside the page, carried with the page's left edge as it
+    // opens, as the frame's name of the incident moves with its frame, and the rows' rules end inside the page as it
+    // stands.
+    const open = ease((voiceTime(t) - voiceTime(later - .45)) / 1.6), pageW = mix(96, rw, open), waitX = rx + (rw - 96) / 2, px9 = mix(waitX, rx, open);
+    documentIcon(px9, mix(PT9, OT, open), pageW, mix(120, foot - OT, open), {alpha: nine, rows: 0});
+    clock(px9 + 48, top + 14, 24, {hand: (voiceTime(t) * .5) % 1, color: P.muted, alpha: nine * (1 - ramp(open, 0, .4))});
+    nameText(L("再补记录", "Then complete the record"), px9 + 44, HC, {align: "left", alpha: nine * named(t, later + L(.3, .6))});
     // Why the record waits, under the waiting page on the words that say so, until the page opens over it.
-    nameText(L("先记录会耽误应对", "Recording would delay the response"), rx, top + 60 + NAME_GAP, {align: "left", valign: "top", size: NOTE,
+    nameText(L("先记录会耽误应对", "Recording would delay the response"), waitX, top + 60 + NAME_GAP, {align: "left", valign: "top", size: NOTE,
       color: P.muted, alpha: nine * named(t, cue(s, "先记录会耽误应对", "recording would delay the response")) * (1 - ramp(t, later - .4, .25))});
+    // The rows' rules are one stroke, each drawn on from its row's name as its row arrives, so they read as the page's
+    // ruling and each row's name names its own box. A rule ends 44 px before the page's right border, the inset of its
+    // box from the left border.
+    stroke(() => starts.forEach((at, i) => {
+      const q = ramp(t, at - .15, .4), y = rowTop(i) + 46;
+      if (q > 0) { ctx.moveTo(rx + 96, y); ctx.lineTo(mix(rx + 96, Math.max(rx + 140, px9 + pageW - 44), q), y); }
+    }), {color: P.line, alpha: nine * .7, width: 2});
     rows.forEach((row, i) => {
       const y = rowTop(i), q = ramp(t, starts[i] - .15, .4), lit = speaking(t, starts, i), held = q * nine;
-      // A row's rule ends 44 px before the page's right border, the inset of its box from the left border.
-      line(rx + 96, y + 46, rx + Math.max(140, pageW - 44), y + 46, {color: P.line, alpha: held * .7, width: 2});
       box(rx + 44, y + 4, 24, 24, {stroke: lit > 0 ? blend(P.line, P.authority, lit) : P.line, alpha: held, radius: 4, width: 2});
       if (q > 0) check(rx + 56, y + 16, 22, {color: P.authority, alpha: q * nine, upto: q, width: 3});
       growName(t, row, rowAts[i], rx + 96, y, {alpha: nine * listLevel(t, starts, i), set: "record"});
@@ -9646,12 +9938,12 @@ scenes["30"] = function (s, t) {
   const [back, next, finished, rely] = cues(s, [["回到开头那份价格数据", "back to the price dataset"], ["下一位用它的人", "its next user"],
     ["做完了", "a finished dataset"], ["别人能放心依靠", "something others can"]]);
   const needs = cues(s, [["清楚的含义", "clear meaning"], ["当时能拿到的事实", "the facts available"], ["对得上说法的证据", "evidence that matches"],
-    ["经过准入", "a permitted"]]);
+    ["经过准入", "an admitted"]]);
   const results = cues(s, [["发布指南", "publishing these guidelines"], ["真正采用它", "adopting them"], ["让工作变好", "improving the work"]]);
   const three = cue(s, "三回事", "three different results");
   // Real work shows the last two results: Chinese names the two before what shows them, English after it.
   const [lastTwo, realAt, show] = cues(s, [["后两件", "the last two"], ["真实的工作", "real work"], ["才能证明", "can show"]]);
-  const [q1, q2, q3, yes] = cues(s, [["问题解决了吗", "was the problem solved"], ["判断经过检验", "do the judgment and its limits hold"],
+  const [q1, q2, q3, yes] = cues(s, [["问题解决了吗", "was the problem solved"], ["判断经过检验", "was the judgment tested its limits clear"],
     ["下一次", "and next time"], ["肯定的", "yes"]]);
   const base = ramp(t, opening(s), .7);
   // 1. The opening's dataset returns, with its next user to its right and the four things that user needs in one column
@@ -9660,7 +9952,7 @@ scenes["30"] = function (s, t) {
   // dataset becomes something others can safely rely on. The illustrative chip stands with the dataset and leaves with
   // this stage.
   const g1 = base * stageOut(t, results[0]);
-  const needNames = en ? ["Clear meaning", "Facts available then", "Evidence matching claims", "A permitted, bounded use"]
+  const needNames = en ? ["Clear meaning", "Facts available then", "Evidence matching claims", "An admitted, bounded use"]
     : ["清楚的含义", "当时能拿到的事实", "对得上说法的证据", "经过准入、有边界的用途"];
   // The settled stage: the opening's positions, moved in as far as the longest need requires to stay inside the safe
   // area, and then left until the card, its user and the needs centre (60 px in Chinese, 80 in English); the needs stand
@@ -9681,7 +9973,8 @@ scenes["30"] = function (s, t) {
     // The next user stands as the sentence that returns to the dataset ends, and is named on its own words.
     const card = g1 * lift(CY), user = named(t, Math.min(next, cue(s, "下一位用它的人", "with") + .05)) * g1 * lift(Y1 - 60);
     reportCard(CX, CY, {alpha: card, scale: K, done: 1, named: card * named(t, back)});
-    nameText(L("做完了", "A finished dataset"), CX + 150 * K, CY + 360 * K + NAME_GAP, {valign: "top", alpha: g1 * named(t, finished)});
+    // The card is named finished over its top, as a page is named over it, clear of the card's ruled rows below.
+    nameText(L("做完了", "A finished dataset"), CX + 150 * K, CY - NAME_GAP, {valign: "bottom", alpha: g1 * named(t, finished)});
     // The next user appears when named.
     person(PX, Y1, {alpha: user, size: 1.4});
     nameText(L("下一位用它的人", "Its next user"), PX, Y1 + 32 + NAME_GAP, {valign: "top", alpha: named(t, next) * g1 * lift(Y1 - 60)});
@@ -9714,8 +10007,10 @@ scenes["30"] = function (s, t) {
     // The English columns stand 40 px wider, so the first result's name stands whole on one line between its rules.
     const R = 62, D = L(380, 420), GAP = 70, wrap = D - 40, HW = Math.max(...heads.map(v => measure(v, LABEL)));
     const lines = names.map(v => wrapName(v, wrap)), nameHalf = Math.max(R, ...lines.map(ls => Math.max(...ls.map(l => measure(l, LABEL))) / 2));
-    // The English table stands 60 px further right until its third result is named, so the first two stand about the centre.
-    const total = 2 * D + nameHalf + R + GAP + HW, x0 = L(940, 965 + 60 * (1 - soon(t, results[2] - .1, .5))) - total / 2 + R + GAP + HW, xs = [x0, x0 + D, x0 + 2 * D], HX = x0 - R - GAP;
+    // The table stands further right until its third result is named (105 px in Chinese, 60 in English), so the first
+    // two stand about the centre, and eases back as a glide on the third result's words.
+    const total = 2 * D + nameHalf + R + GAP + HW, rightUntil = L(105, 60) * (1 - glide(t, results[2] - .1, L(105, 60)));
+    const x0 = L(940, 965) + rightUntil - total / 2 + R + GAP + HW, xs = [x0, x0 + D, x0 + 2 * D], HX = x0 - R - GAP;
     // The table stands a little below the content centre, so its first row, which stands alone while the results are
     // named, is not left in the upper part of the frame, and the whole table still balances on the centre.
     const bh = blockHeight(Math.max(...lines.map(ls => ls.length))), span = 2 * R + 10 + NAME_GAP + bh + 76 + 120;
@@ -9727,7 +10022,8 @@ scenes["30"] = function (s, t) {
       const x = xs[i], on = ramp(t, at - .15, .4) * g2, lit = speaking(t, results, i);
       ring(x, MY, R, {color: P.ink, alpha: on, width: 2.5});
       if (lit > 0) ring(x, MY, R + 10, {color: P.ink, alpha: lit * .4 * g2, width: 2});
-      if (i === 0) documentIcon(x - 22, MY - 30, 44, 58, {alpha: on, rows: 3});
+      // The published guidelines are a page drawn as 23's pages are, its ruled rows in one stroke.
+      if (i === 0) s23Page(x - 22, MY - 30, 44, 58, {alpha: on, rows: 3});
       else if (i === 1) person(x, MY + 10, {alpha: on, size: 1.15});
       else path([[x - 30, MY + 18], [x - 10, MY], [x + 6, MY + 8], [x + 30, MY - 20]], {color: P.ink, alpha: on, width: 3});
       if (!i) return;
@@ -9753,12 +10049,13 @@ scenes["30"] = function (s, t) {
   // three from above under that name, settled before the voice ends.
   const g3 = base * stageIn(t, asks);
   if (g3 > 0) {
-    const [earlier, better, worth] = cues(s, [["更早发现", "recognize it earlier"], ["应对得更好", "handle it better"], ["工作才算有了价值", "the work has value"]]);
+    const [earlier, better, worth] = cues(s, [["能不能更早发现", "recognize it earlier"], ["应对得更好", "handle it better"], ["工作才算有了价值", "the work has value"]]);
     // Each question is named by its spoken phrases, each line centred on its station; a phrase stays whole on its line.
+    // The Chinese second question is its caption's whole line, so its name says 经检验 for 经过检验.
     const asked = [q1, q2, q3], ats = [[q1], [q2], [q3, earlier, better]], all = cue(s, "三个问题的答案", "the answer to all three");
     const answered = ramp(t, pauseHold(all - .1, .3), .3) * (1 - ramp(t, yes + .05, .3));
-    const names = en ? [["Problem solved?"], ["Judgment and limits hold?"], ["Next time,", " recognize earlier", " or handle better?"]]
-      : [["问题解决了吗"], ["判断经过检验，", "限度清楚吗"], ["下一次，", "更早发现", "，或者应对得更好"]];
+    const names = en ? [["Problem solved?"], ["Judgment tested, limits clear?"], ["Next time,", " recognize earlier", " or handle better?"]]
+      : [["问题解决了吗"], ["判断经检验，", "限度清楚吗"], ["下一次，", "能不能更早发现", "，或者应对得更好"]];
     // The rail, its names and the bracket with the value above it are balanced on the content centre. A name wraps no
     // wider than W, the third a little wider; in Chinese W is the rail's own wrap width, so its two long questions break
     // at their clause marks and neighbouring names stand well apart.

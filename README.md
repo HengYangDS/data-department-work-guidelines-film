@@ -14,7 +14,7 @@ The films of `v1.2.0` are the current editions, and those of `v1.0.0` stay avail
 
 ## Rebuilding the films
 
-The films are built by [filmkit](https://github.com/HengYangDS/filmkit), the film engine, at the release that `pyproject.toml` pins by its tag `v0.5.0` and `uv.lock` by its commit; this repository holds the film's sources and none of the engine's. A rebuild needs an Apple-silicon Mac with [mise](https://mise.jdx.dev), which installs the locked Node, Python, uv and ETHOS, and three Homebrew tools: FFmpeg with VideoToolbox, ExifTool and rsync 3.
+The films are built by [filmkit](https://github.com/HengYangDS/filmkit), the film engine, at the release that `pyproject.toml` pins by its tag `v0.12.0` and `uv.lock` by its commit; this repository holds the film's sources and none of the engine's. A rebuild needs an Apple-silicon Mac with [mise](https://mise.jdx.dev), which installs the locked Node, Python, uv and ETHOS, and three Homebrew tools: FFmpeg with VideoToolbox, ExifTool and rsync 3.
 
 ```bash
 brew install mise ffmpeg exiftool rsync
@@ -58,18 +58,18 @@ The comparison refuses a published asset or a film-bound source that differs fro
 
 ## Checks
 
-`mise run check` runs the picture and Python test suites and the Markdown format check. The repository is governed by [ETHOS](https://github.com/HengYangDS/ethos): `ethos prove --full --execute` runs the portable proof that hosted CI also runs, including the `film-checks` gate, which runs the Python checks of the declaration, players, narration receipts and release manifest through the installed engine, and after a rebuild `ethos prove --host --gate film-media --gate film-reproduction --execute` verifies the films and their reproduction on this host. [CONTRIBUTING.md](CONTRIBUTING.md) explains how to change, verify, rebuild and release the films.
+`mise run check` runs the picture and Python test suites and the Markdown format check. The repository is governed by [ETHOS](https://github.com/HengYangDS/ethos): `ethos prove --full --execute` runs the portable proof that hosted CI also runs, including the `film-checks` gate, which runs the Python checks of the declaration, narration receipts and release manifest through the installed engine, and after a rebuild `ethos prove --host --gate film-media --gate film-reproduction --execute` verifies the films and their reproduction on this host. [CONTRIBUTING.md](CONTRIBUTING.md) explains how to change, verify, rebuild and release the films.
 
 ## Layout
 
-| Path                            | Contents                                                                                                                                              |
-| ------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `content/`                      | The film's declaration `film.toml`, both editions' scripts, casts, narration texts and players, the entry page, source manifest and release manifest. |
-| `picture/`                      | The film's picture composition.                                                                                                                       |
-| `assets/`                       | The narrator's reference recordings, the covers and the fonts.                                                                                        |
-| `tests/`                        | The film's tests: its composition against both scripts, its retained narration receipts, its release manifest, its declaration and players.           |
-| `openspec/`                     | The accepted specification and any open Change.                                                                                                       |
-| `system/gates.toml`, `.config/` | The ETHOS gates, the check policies, the CI declaration and the locked toolchain with its tasks.                                                      |
+| Path                            | Contents                                                                                                                                                                            |
+| ------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `content/`                      | The film's declaration `film.toml`, both editions' scripts, casts and narration texts with each player's summary and colours, the entry page, source manifest and release manifest. |
+| `picture/`                      | The film's picture composition.                                                                                                                                                     |
+| `assets/`                       | The narrator's reference recordings, the covers and the fonts.                                                                                                                      |
+| `tests/`                        | The film's tests: its composition against both scripts, its retained narration receipts, its release manifest, its declaration and players.                                         |
+| `openspec/`                     | The accepted specification and any open Change.                                                                                                                                     |
+| `system/gates.toml`, `.config/` | The ETHOS gates, the check policies, the CI declaration and the locked toolchain with its tasks.                                                                                    |
 
 ## License
 

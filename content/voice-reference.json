@@ -109,6 +109,10 @@
         "5": {
           "seed": 123465,
           "text_sha256": "906b6f5edd8ea2d1a62a9b77aa44f61411be1f378985bd689ef79357ec62f683"
+        },
+        "6": {
+          "seed": 828256,
+          "text_sha256": "3ba600329dfc48b2599f6fc0bfc31330c69bd1c8c34cc186816f3d2fc4173c6a"
         }
       }
     },
@@ -155,8 +159,12 @@
           "text_sha256": "c1d73f1149db650c8c082030e43140c5ef4f0b39bda21ef3161fa2d120d54b48"
         },
         "3": {
-          "seed": 384797,
-          "text_sha256": "f121d8b00e01be7976814a32e240167f0d72746d37f4723387218cd88e8ab1d6"
+          "seed": 804504,
+          "text_sha256": "1c84517e7c189633d3afa0dd750dc01f5b264faa5c33313c7ca8950f4db13c13"
+        },
+        "5": {
+          "seed": 875775,
+          "text_sha256": "7216567d6f3e9f7c00155d0b72054a70daa1da1804341f83c607ef88d4d92699"
         }
       }
     },
@@ -167,8 +175,14 @@
           "text_sha256": "dee2393edb46eb7e87f6388a9105e017f919f0dddcd1b0f364a156e054608fa4"
         },
         "2": {
-          "seed": 123471,
-          "text_sha256": "75ea8a89f0988270bee34b469c71f17d39ac3ead4eb7cfa2abc64d7b3ff694a3"
+          "seed": 970804,
+          "text_sha256": "d3bc60e9c7043a6d8264b2c93d1732f04a9a8b390ddeb25c5b11ea4df19f815f",
+          "spoken_sha256": "d3bc60e9c7043a6d8264b2c93d1732f04a9a8b390ddeb25c5b11ea4df19f815f"
+        },
+        "3": {
+          "seed": 978723,
+          "text_sha256": "3a1d8da3251b3c9559d8827e8da4f311916f8c4a718f14f946b377ae87a79d2e",
+          "spoken_sha256": "3a1d8da3251b3c9559d8827e8da4f311916f8c4a718f14f946b377ae87a79d2e"
         }
       }
     },
@@ -191,8 +205,12 @@
     "13": {
       "groups": {
         "2": {
-          "seed": 99718,
-          "text_sha256": "aba0019d34d22bbfd473169d0636262a1f19cc90f04c14902dd2b2b3f1d32754"
+          "seed": 891618,
+          "text_sha256": "36ac92e2c4c47686e47428ca96b7645922c7a98017063d5244cb759b958b191f",
+          "run_on": {
+            "spoken_text": "表结构选得再方便，也解决不了含义上的分歧。",
+            "cut_sample": 332880
+          }
         }
       }
     },
@@ -201,6 +219,10 @@
         "3": {
           "seed": 361049,
           "text_sha256": "b35bbd67069c7265894f85b69be4195eb28aa58db071f4219c5ff6bbad75b0ea"
+        },
+        "1": {
+          "seed": 836189,
+          "text_sha256": "25378a59d67eea5f89261c47d9de538399ada9f43046aaf252cd98f9fcddfe01"
         }
       }
     },
@@ -209,26 +231,39 @@
     },
     "19": {
       "groups": {
-        "1": {
-          "seed": 337294,
-          "text_sha256": "5a7ace9cbfd38c08c179d5fc39d748efefb57ba646a6a345a7d21d663a0caaf0"
-        },
         "3": {
           "seed": 91805,
           "text_sha256": "fd34b4b980a5a8a3d865daf8d91e87b8c22d1dbabf89adfb3f2e402260de0425"
+        },
+        "5": {
+          "seed": 812434,
+          "text_sha256": "60bd3f669cf4313f67cef250ea6c403d598bab62cce4d39e990aa9994b58641e"
+        },
+        "7": {
+          "seed": 804515,
+          "text_sha256": "8247c4c0c8fe63999122cacbf5e678d8153e4adc57c45d7df53cf2ce4e4c06a6"
+        },
+        "1": {
+          "seed": 986652,
+          "text_sha256": "00befb317f4ac6e80ba0945484a1d9f9640d7df06055dec906ae6dd1eab4002e",
+          "spoken_sha256": "00befb317f4ac6e80ba0945484a1d9f9640d7df06055dec906ae6dd1eab4002e"
         }
       }
     },
     "21": {
       "groups": {
         "3": {
-          "seed": 123483,
-          "text_sha256": "e546c7b691606311abc5c31791abb7b11168a4cfc4369e8a05ebb53bbdeb5c4f"
+          "seed": 804517,
+          "text_sha256": "7bc74a187b85eac0f78d713b4ea7d36456b6f4687a964d622612475a464820a7"
         }
       }
     },
     "22": {
       "groups": {
+        "1": {
+          "seed": 99727,
+          "text_sha256": "86d1b215b3ba91c8fac4bf11bf7e4c51ac511631fbee1c6a45193d22d8776e66"
+        },
         "2": {
           "seed": 384811,
           "text_sha256": "811c1020fc99d15eb1d918d9bd25b0514461f9e0f39ed582078ba732a318cc7c"
@@ -237,21 +272,17 @@
           "seed": 329378,
           "text_sha256": "437a225f67ad9da7820d2ed8e16f5c159bcbaa38ec273129ce42c57ecc880b95"
         },
-        "4": {
-          "seed": 107646,
-          "text_sha256": "a7b965fdb8a76c2b37cd720589f31f2a78360cb5e12ffa24f7844c0d8c43a763",
-          "run_on": {
-            "spoken_text": "最后写明接下来谁接手、做什么、什么时候做完，而不是一句“后续跟进”。",
-            "cut_sample": 262560
-          }
-        },
         "5": {
           "seed": 91808,
           "text_sha256": "997ec541d7baa49482eff597462d95c658da24abcc474c9754a7cabf833c418e"
         },
-        "1": {
-          "seed": 99727,
-          "text_sha256": "86d1b215b3ba91c8fac4bf11bf7e4c51ac511631fbee1c6a45193d22d8776e66"
+        "4": {
+          "seed": 923303,
+          "text_sha256": "e4ad0178c65ac05fc2ad05a5971cdefc1cd4c0df3964fa27f5e80c6f91c6498c",
+          "run_on": {
+            "spoken_text": "最后写明接下来谁接手、做什么、什么时候做完，而不是一句“后续跟进”。",
+            "cut_sample": 290640
+          }
         }
       }
     },
@@ -324,6 +355,10 @@
         "5": {
           "seed": 139326,
           "text_sha256": "869be0587dd23f1dfe009c36690f18f0c8c754eab9732ebc5eeff623072a9ca3"
+        },
+        "3": {
+          "seed": 820360,
+          "text_sha256": "c978427556b5ae1e7d7026aea9c6eeb9930d7cab97f7002e3242c782103219cd"
         }
       }
     },
@@ -357,13 +392,17 @@
             "cut_sample": 169680
           }
         },
-        "5": {
-          "seed": 376899,
-          "text_sha256": "0e1d63ee8504969625c14c5ac857c7ee98bdffa40b4ed57859526143dc2f5f87"
-        },
         "6": {
           "seed": 91815,
           "text_sha256": "f4448f2cb67e75516e790554c8189b21280539adc0612db1cf927f869a96da77"
+        },
+        "5": {
+          "seed": 875796,
+          "text_sha256": "78510dcf331a6611205a2c366090d8d12256486f42170aafbe5a2a1878b60945",
+          "run_on": {
+            "spoken_text": "受影响工作的负责人接手应对，保留查明影响、核验修正所需的输入和版本；需要更多权限时，上报决策负责人。",
+            "cut_sample": 260640
+          }
         }
       }
     },
@@ -396,6 +435,10 @@
         "3": {
           "seed": 107638,
           "text_sha256": "bdcd86a175815957237cdc92c218c9bc6d4e37b81eb3946751a676f8df742ca6"
+        },
+        "1": {
+          "seed": 812429,
+          "text_sha256": "618cfd13b3a88e79681813481f686cb314c54d58ddea880cfebfef4a7aad2675"
         }
       }
     },
@@ -404,6 +447,10 @@
         "7": {
           "seed": 115547,
           "text_sha256": "bdc10070ee4adec16aad3698d1dabcc4fb538f31b2927e8f105db8bc5f0b62ca"
+        },
+        "6": {
+          "seed": 820338,
+          "text_sha256": "a45c681573bc0f5685cc038059a2ad5c7392b01e73ca57866e95ce13cd8d507c"
         }
       }
     },
@@ -420,6 +467,14 @@
         "9": {
           "seed": 376881,
           "text_sha256": "03ae1216b66aa66e4d47bdbd83db19c70d2f708846ad3109b14de7acb68446e1"
+        },
+        "4": {
+          "seed": 836183,
+          "text_sha256": "ceae61d65814726eac2b1ce8d22771b6893f51b1e7d585b7531fbeed2ccaaedc"
+        },
+        "8": {
+          "seed": 804507,
+          "text_sha256": "9d683052ea20efc67b3550bb89410446e79ac088feff15b10b06b5ba09afb14d"
         }
       }
     },
@@ -428,6 +483,10 @@
         "5": {
           "seed": 376886,
           "text_sha256": "ab75c3ebad266611f811a8d1543b194e8b7f7e4ded4f1e620c0e5d38947d53bf"
+        },
+        "3": {
+          "seed": 804512,
+          "text_sha256": "07af88c61ab21386648945933334d31acadec37e01f6601663ed1c8870583848"
         }
       }
     },
@@ -440,39 +499,53 @@
         "4": {
           "seed": 321464,
           "text_sha256": "cece6cc0e1991f994605dd029429d799f373be9f2972279a59ab5b8eaf581ef8"
+        },
+        "1": {
+          "seed": 804523,
+          "text_sha256": "5117242de6bcf5058c590bb53fcc050208b803a6a754712c0f3af3daaef078f7"
         }
       }
     },
     "07": {
       "groups": {
+        "1": {
+          "seed": 392715,
+          "text_sha256": "a80ae0de06ce0bf98c2cff8bba441ca2bba5e1dc421a8bafe384e614ee05bb1d"
+        },
         "3": {
-          "seed": 123469,
-          "text_sha256": "2f589e921b2d8162d0cb4733bd4f50ed6f04291b9274808224491f62ad57c7b4"
+          "seed": 859936,
+          "text_sha256": "e99efd0cf2b6018b716418b3f700f128a2b1e7c87e5f1a906cb215de0cf66952"
         },
         "4": {
-          "seed": 99712,
-          "text_sha256": "f2918d055d06181219039acf2605d1365014e72f4e654b7f14e5f583386bb112"
+          "seed": 820341,
+          "text_sha256": "a55022e11feab1d00dc200487eb5ca4286975fa7539382027c8494c3292781bf"
         },
         "5": {
           "seed": 91793,
           "text_sha256": "b2c211e60c4c595006dedcd49ed72cc072777eaf3c8484a5c8ede87804bbc835"
         },
+        "6": {
+          "seed": 329363,
+          "text_sha256": "4612db89d809236573f108a34968d56821893da3b899e50d53de2efed897a814"
+        },
         "8": {
           "seed": 139307,
           "text_sha256": "709d6f33fb96c005939e77bc8b4cd855a7a5c391c5755d76c3b15bb676665137"
         },
-        "1": {
-          "seed": 392715,
-          "text_sha256": "a80ae0de06ce0bf98c2cff8bba441ca2bba5e1dc421a8bafe384e614ee05bb1d"
-        },
-        "6": {
-          "seed": 329363,
-          "text_sha256": "4612db89d809236573f108a34968d56821893da3b899e50d53de2efed897a814"
+        "2": {
+          "seed": 978721,
+          "text_sha256": "9b291ea92e64e6366cf3cdd20bc28ec1edd67cae62e9a35cf15064fbd6739143",
+          "spoken_sha256": "9b291ea92e64e6366cf3cdd20bc28ec1edd67cae62e9a35cf15064fbd6739143"
         }
       }
     },
     "12": {
-      "groups": {}
+      "groups": {
+        "3": {
+          "seed": 812427,
+          "text_sha256": "c67e7ef4bff42b545a94ac17547a74a4ebc5cd33bb250aa00bb81362500d0d97"
+        }
+      }
     },
     "15": {
       "groups": {

@@ -1,4 +1,4 @@
-"""This film's declaration, players and listening plan on the engine release that the lock pins."""
+"""This film's declaration and listening plan on the engine release that the lock pins."""
 
 import hashlib
 import importlib.metadata
@@ -18,7 +18,7 @@ CHINESE = re.compile(r"[\u3000-\u303f\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff\uff
 ENGINE_SOURCE = re.compile(r"^https://github\.com/HengYangDS/filmkit\?tag=v([^#]+)#[0-9a-f]{40}$")
 # The SHA-256 of the listening plan derived from the v1.3.0 repair's scripts, casts, contract and
 # readings.
-PLAN_SHA256 = "7b3b307d407c8fa43926689ef721e5eada8e4615abc671b6979b4a6d80ab88bb"
+PLAN_SHA256 = "278ae418474931c75f471f30592c30571b97c9326617865dbe08515356938feb"
 
 
 def test_the_declaration_loads_with_both_editions():
@@ -36,16 +36,26 @@ def test_the_engine_is_the_release_the_lock_pins():
     assert "site-packages" in Path(filmkit.__path__[0]).parts
 
 
-def test_each_edition_has_its_own_player():
+def test_each_edition_declares_the_summary_its_player_shows():
+    assert CHINESE.search(film.FILM.editions["zh"].summary) is not None
+    assert film.FILM.editions["en"].summary
+    assert CHINESE.search(film.FILM.editions["en"].summary) is None
+
+
+def test_the_declaration_holds_the_palette_of_the_players():
+    assert film.FILM.player.model_dump() == {
+        "background": "#0F1519",
+        "text": "#ECE8DF",
+        "muted": "#9BA8B1",
+        "line": "#34424E",
+        "accent": "#7DB7D8",
+    }
+
+
+def test_no_edition_holds_a_player_of_its_own():
+    # The engine renders each edition's player from the declaration.
     for code in CODES:
-        player = (repository.ROOT / Edition(code).player).read_text()
-        assert player.count("/*CHAPTERS*/[]") == 1
-        assert player.count("/*TRANSCRIPT*/") == 1
-        assert f'data-file="{Edition(code).prefix}-1080p-captioned.mp4"' in player
-
-
-def test_the_english_player_keeps_no_chinese_text():
-    assert CHINESE.search((repository.ROOT / Edition("en").player).read_text()) is None
+        assert not (repository.ROOT / Edition(code).sources / "player.html").exists()
 
 
 def test_the_listening_plan_is_the_one_the_v1_3_0_repair_derives(tmp_path):

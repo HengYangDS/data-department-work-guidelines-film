@@ -21,6 +21,10 @@
         "1": {
           "seed": 135932,
           "text_sha256": "16a3ca3f37ab0b6509ea0d835baf42df5f696fa441cbcf4d4f578e5654c23527"
+        },
+        "3": {
+          "seed": 840723,
+          "text_sha256": "720382ea54a58d70a88d254b907b70d5a0ca9fa4d48bba8d0f3670daaf8cd2b1"
         }
       }
     },
@@ -51,8 +55,8 @@
           }
         },
         "7": {
-          "seed": 99730,
-          "text_sha256": "c0dc568275ac709c8472ebf8f5e289c1ad0feadf19dfa2d6d96e425046fa98f5"
+          "seed": 859954,
+          "text_sha256": "8540b5fa8369b778e1769b962647832d614fc111f8671d1392cdcaa7f01c6c47"
         }
       }
     },
@@ -61,18 +65,22 @@
         "1": {
           "seed": 107627,
           "text_sha256": "9d07d1f0797d9f00fac389381e750f117efe629890f504996c467bf110c18b0e"
+        },
+        "6": {
+          "seed": 804499,
+          "text_sha256": "8d50b982b23727ab5293e0eff37a64a8ffaa306a22fa134cd0b41224d2089efe"
         }
       }
     },
     "30": {
       "groups": {
         "1": {
-          "seed": 186844,
-          "text_sha256": "b318e06b90ae91d4a7f825dcf4f9db5f3b30e97e681a87e5b1c5d2f6216c078e"
+          "seed": 812445,
+          "text_sha256": "4f1e395ef98099d8352f1b8fbd04214c96c5015f4e3ae1e20861f01c4c25894b"
         },
         "5": {
-          "seed": 242277,
-          "text_sha256": "6c16ace1ad6a41beaece2818a189001bbcd4220dcc288fff36be9f1239cbbb25"
+          "seed": 812445,
+          "text_sha256": "f4bfcb76cb6992fbda75999b613bf4feaec97ab9f07bcbc97852f7d02477f259"
         }
       }
     },
@@ -91,12 +99,12 @@
           "text_sha256": "a8f1c8fd1ed524ab4325b69c08825ddd4789f46d105ae38edf523183cfd82c76"
         },
         "4": {
-          "seed": 91791,
-          "text_sha256": "9bec600c93151e7638405ae6d008e749c096079ca9a5b827dc4b916ea6d8a7d5",
-          "run_on": {
-            "spoken_text": "Collecting information is not the goal. Say which judgment it could change. An attractive solution that names no subject is not yet a proposal.",
-            "cut_sample": 149280
-          }
+          "seed": 812420,
+          "text_sha256": "574f78279ddc3ee2092086b66c9661feb8726efcf383159bf61560230e7b6ff1"
+        },
+        "5": {
+          "seed": 820339,
+          "text_sha256": "60b9232e08a85345ab00fe0929f9acb4d00fd3a3899da9854098fd8386953551"
         }
       }
     },
@@ -109,22 +117,30 @@
         "4": {
           "seed": 131387,
           "text_sha256": "bd8a349c0faed30b92c0f0dc7638276683aeba03e302df0172c010c5b5a54d71"
+        },
+        "2": {
+          "seed": 812421,
+          "text_sha256": "055b16a7224ba83eb789bcf5375ec642a492b1b16980b40a642c56d0d28a9952"
         }
       }
     },
     "08": {
       "groups": {
-        "2": {
-          "seed": 147227,
-          "text_sha256": "0faba81758eb3a4894e34e51596d7b23cb731b4b0b792271f640279885fe5e8e"
+        "1": {
+          "seed": 139308,
+          "text_sha256": "5cd350b2a97591938f37cfa4a269aaec41a849dba94875f5b74e2f502fdfa1bf"
         },
         "3": {
           "seed": 91794,
           "text_sha256": "7ee9c9fe2ba75e1bd5ccdc9a497f99298e695f421f0b91c24a1c6cb42402c1ab"
         },
-        "1": {
-          "seed": 139308,
-          "text_sha256": "5cd350b2a97591938f37cfa4a269aaec41a849dba94875f5b74e2f502fdfa1bf"
+        "2": {
+          "seed": 812423,
+          "text_sha256": "35dd941ab81162824e777ffa10a2ca94159ee3c5772a6e8fe00565cf448a8f77"
+        },
+        "4": {
+          "seed": 820342,
+          "text_sha256": "94609fcf21440895c773676c7e70ec32de0d0b6d22ffa2bc2c7a2e3196ccd2ea"
         }
       }
     },
@@ -167,16 +183,20 @@
     "22": {
       "groups": {
         "4": {
-          "seed": 91808,
-          "text_sha256": "30ec28ebc44e90154d6fa9a213bee99fcae34d909ef6f4c3c573f5e2ac820604"
+          "seed": 820356,
+          "text_sha256": "b66ab2fff5aa839c59e898e87ee72716bc0383bc0ceb87e14c2d2c9a57c49669"
         }
       }
     },
     "23": {
       "groups": {
         "3": {
-          "seed": 186837,
-          "text_sha256": "5f5a7cc5f97561735f37be5029384ac49b4f4ead403796a1380a6d37c3f0384f"
+          "seed": 812438,
+          "text_sha256": "5c4e7211aee47473ceba83e0f98f9a2b1bbca6061db9c80472ae4f0acee3223f"
+        },
+        "1": {
+          "seed": 875790,
+          "text_sha256": "5c0260b3c85cfeea9a70ffeb2b5581be5da73a63ee7a7963294884ef3ac24182"
         }
       }
     },
@@ -198,33 +218,45 @@
     },
     "04": {
       "groups": {
-        "2": {
-          "seed": 123466,
-          "text_sha256": "7919672ff3a95d1f954877acb2f0972945614138b33194f4763f8fe33c1106dd"
-        },
         "5": {
           "seed": 91790,
           "text_sha256": "e026ec31c8f4c91d7e5ffabcb19d18db3ad7e4f6c45e4cb8e2e07e4120d3b6e8"
+        },
+        "6": {
+          "seed": 804500,
+          "text_sha256": "b2734d2dedcca269af30e1969b3d00b90f59ee13e4756c6291fdfa480b551604"
+        },
+        "2": {
+          "seed": 867852,
+          "text_sha256": "9d9f4ef6b4e698e47b6f72593a1f28651897a9c2411296df0884dea1faadfb4b",
+          "run_on": {
+            "spoken_text": "Third, name the owner: every important judgment, decision, change and acceptance has an accountable person. Fourth, do not claim false completion: without current evidence matching the claim, call nothing complete, correct, usable or adopted. ",
+            "cut_sample": 338640
+          }
         }
       }
     },
     "19": {
       "groups": {
-        "1": {
-          "seed": 91805,
-          "text_sha256": "6fa1edc7d15703aa412b52faf12c86a7e20c25b1b56845b6878c27d2c56e68fb"
-        },
         "2": {
           "seed": 91805,
           "text_sha256": "09122c63a3e52726d6be23ce188c183c64c31532e194dc13323edd4f9205f058"
+        },
+        "1": {
+          "seed": 828272,
+          "text_sha256": "39c71aa763e4edec63a049ccf3d8424a3530a5d5d94a64b3eb5cd91c6a1d8db0"
         }
       }
     },
     "17": {
       "groups": {
         "1": {
-          "seed": 99722,
-          "text_sha256": "752fc703edaadc3275c1dfbf0fbb481a62b4792262fe1ba99ea751b585413bc6"
+          "seed": 804513,
+          "text_sha256": "0a138e6dc45bc82fc1dd62a0a1990ba090cce7fa3551ad50a5904e218adb5b88"
+        },
+        "3": {
+          "seed": 804513,
+          "text_sha256": "b8cf04c3ee0847353d6587838a157fd4157a63b41103839347202505e267708e"
         }
       }
     },
@@ -241,6 +273,11 @@
             "spoken_text": "Urgency does not make an uncertain result reliable, or grant authority. If recording would delay the response, contain first, then complete the record: who decided what, on which facts and authority, how long the measure lasts, who takes over, and when to roll back. Then verify the correction and review the cause. Treat a recurring exception as a mechanism problem.",
             "cut_sample": 282960
           }
+        },
+        "4": {
+          "seed": 962905,
+          "text_sha256": "f4b41ab54fe3b8ca9252150a9a5675df6941fc13dd7230254a0826fce3a820d1",
+          "spoken_sha256": "f4b41ab54fe3b8ca9252150a9a5675df6941fc13dd7230254a0826fce3a820d1"
         }
       }
     },
@@ -249,6 +286,14 @@
         "2": {
           "seed": 123474,
           "text_sha256": "ccf1434aaedfdeb2e4bdf6a395d31cac836f7434e616e4954dc5d9b12dff86b4"
+        },
+        "4": {
+          "seed": 820346,
+          "text_sha256": "e4171cb3905b47e0fc6f0cbbb07db204885fb8ef9a4fbea4c0fb907d9662ef11"
+        },
+        "5": {
+          "seed": 804508,
+          "text_sha256": "5bd4137325881fe765e059e65f599f102fd96c86a3ad167eb7e4744fea950900"
         }
       }
     },
@@ -269,7 +314,12 @@
       }
     },
     "20": {
-      "groups": {}
+      "groups": {
+        "1": {
+          "seed": 804516,
+          "text_sha256": "f8de3ca1d7092bb88599a96a4836e0aea60096e3f5d142f3ff724d7cac8224a7"
+        }
+      }
     },
     "26": {
       "groups": {
@@ -284,6 +334,11 @@
         "2": {
           "seed": 91793,
           "text_sha256": "f09a3bf845872b3f2cb0abcd844350321b51049eef246cc4a2c5eb30e949e638"
+        },
+        "6": {
+          "seed": 994559,
+          "text_sha256": "cd08ca9f3b422251d3414b6cb08ab373219a97e167061ba7df9af9e02024c00d",
+          "spoken_sha256": "cd08ca9f3b422251d3414b6cb08ab373219a97e167061ba7df9af9e02024c00d"
         }
       }
     },
@@ -306,8 +361,8 @@
           "text_sha256": "3da10832ddef030839f14193837058d528cd4fce20246d9d2ab683653de17a0c"
         },
         "2": {
-          "seed": 107637,
-          "text_sha256": "5dfa7709713acdb672aa6d724dede5930e0756389fb121ba8ea05a7b4bf89566"
+          "seed": 804509,
+          "text_sha256": "1b060a3eb836c7d9ba92926ce6f0cc5279f98e589c888692fdbddcf2edf3b6ac"
         }
       }
     },
@@ -316,6 +371,10 @@
         "4": {
           "seed": 91801,
           "text_sha256": "650b5927d02bab72e32f75fb6a994c5e9dc7a343d1dd0303bacdd054da3cd83c"
+        },
+        "2": {
+          "seed": 820349,
+          "text_sha256": "612ac11adfb02024e6caf1d66c42a3f60b9918578f445fe3e49e2307a5b100e3"
         }
       }
     },
@@ -325,13 +384,17 @@
           "seed": 155159,
           "text_sha256": "a17d3a83f06218c6c8a515d183b3e9baf0961a70d47e04b3b7d4284061c99286"
         },
-        "4": {
-          "seed": 91807,
-          "text_sha256": "1385039c521cbd4164f14296569b6c8fbaff1b0ed60065d0fd7699bc652cae04"
-        },
         "5": {
           "seed": 99726,
           "text_sha256": "1ae73959cef83c85260d686842cdfc7a2caf0ffc8adb067ef3d378257941f928"
+        },
+        "2": {
+          "seed": 804517,
+          "text_sha256": "342742d64b4ff13ad4e19f7930c3f4154228d83ee60494734467248df951846c"
+        },
+        "4": {
+          "seed": 812436,
+          "text_sha256": "61de6c13a2afe456eec612f2af4f4f2d095d38e4eb91fb2b5d83ebc3eeadb595"
         }
       }
     },
@@ -340,6 +403,27 @@
         "2": {
           "seed": 131390,
           "text_sha256": "efe45a0ae2d8dad55e39e630722345a5cde5e94173e6056f9fb0fdd3a5d0b36c"
+        },
+        "4": {
+          "seed": 986642,
+          "text_sha256": "9c00c97a65492976645d45bc241abc5cd4dbc7e3d44ce1e6bf9d6203d7c47af2",
+          "spoken_sha256": "9c00c97a65492976645d45bc241abc5cd4dbc7e3d44ce1e6bf9d6203d7c47af2"
+        }
+      }
+    },
+    "10": {
+      "groups": {
+        "1": {
+          "seed": 820344,
+          "text_sha256": "896ba8255445cac438c8b592cbd5f7d36e77c8fc1c8f7ba76e590b6b08671c6b"
+        }
+      }
+    },
+    "24": {
+      "groups": {
+        "3": {
+          "seed": 852034,
+          "text_sha256": "2609a18fcc4398d0b2f9614d8a6979a354bdf77c10dc947062977d2bdb1275c9"
         }
       }
     }

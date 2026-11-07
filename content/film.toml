@@ -13,13 +13,15 @@ source_manifest = "content/source-manifest.json"
 # What each concept the films name means in those documents, and each edition's words for it.
 concepts = "content/concepts.toml"
 
-# Each edition's folder of script, cast and player, and its 16:9 cover.
+# Each edition's folder of script and cast, its 16:9 cover, and the summary its player shows.
 [editions.zh]
 sources = "content"
+summary = "从判断、数据与交付，讲到人与人工智能的协作、沟通和持续改进。片中情境用于解释工作机制，未据此声称实际部署或团队采用。"
 cover = "assets/cover/ddwg-cover.png"
 
 [editions.en]
 sources = "content/en"
+summary = "From judgment, data and delivery to human–AI collaboration, communication and continuous improvement. Situations illustrate mechanisms; they do not establish deployment or team adoption."
 cover = "assets/cover/ddwg-cover-en.png"
 # A term that reads as one name stays on one caption line, as do a verb and the object it
 # takes, and a modifier and the noun it qualifies.
@@ -47,6 +49,13 @@ caption_terms = [
   "authority about facts",
   "fact source",
   "human–AI collaboration",
+  "better able to recognize",
+  "responsibility for consequences",
+  "but verification finds the data wrong",
+  "a correlation presented as a cause",
+  "the product owner identifies",
+  "dependent consumers",
+  "and governance confirms",
 ]
 
 # The fonts the picture stages below fonts/, in this order: Noto Sans CJK SC for any text with a
@@ -58,6 +67,26 @@ fonts = [
   "assets/fonts/IBMPlexSans-Regular.ttf",
   "assets/fonts/IBMPlexSans-Bold.ttf",
 ]
+
+# Wrapped labels kept against the wrapping rules, each a deliberate phrase break.
+[[picture.wrapping.exceptions]]
+edition = "en"
+lines = ["Cross-role or extended work,", "competing options or material uncertainty"]
+reason = "04.6's work breaks at its comma, between its two conditions; every other break splits a noun phrase or leaves the last line under three fifths."
+
+[[picture.wrapping.exceptions]]
+edition = "en"
+lines = ["Examine", "the reasoning"]
+reason = "28.1's middle action stands verb over object; on one line it would stand about 6 px from the next station's name, the widest of the row."
+
+# The colours of each edition's player page: its ground, text, quieter text, rules and borders,
+# and the accent of a chosen or focused control.
+[player]
+background = "#0F1519"
+text = "#ECE8DF"
+muted = "#9BA8B1"
+line = "#34424E"
+accent = "#7DB7D8"
 
 [review]
 # The reviewer prompt: a str.format template that each round fills for each edition.
@@ -118,3 +147,40 @@ credits_and_deliverable_craft = """\
   Yang HENG metadata; subtitles and transcript match the speech; chapters; player; a runtime \
   that is a whole multiple of five minutes; opening, ending, covers and entry form one \
   edition."""
+
+# The review's three levels, the owner's 信、达、雅, by which a first-time viewer judges the whole film: each asks one
+# thing of the film and holds some of the dimensions, every dimension in one level. A review passes only when each
+# level does, with every dimension it holds at the floor and no material finding in it.
+[review.levels."信"]
+asks = """\\
+  faithful: every statement says what its cited source says, with its conditions, modality and scope; each concept \\
+  keeps its contract rendering and one name, and the Chinese carries a Latin term's number in the noun's own clause; \\
+  names and readings are said as declared; both editions say the same things in the same order, and the picture names \\
+  what the voice says, in its words."""
+dimensions = ["subject_and_faithfulness", "concept_fidelity", "pronunciation"]
+
+[review.levels."达"]
+asks = """\\
+  conveyed: a newcomer understands each sentence the first time it is heard, with a clear subject, familiar \\
+  collocations and every term explained where it first appears; the argument moves step by step and the ending \\
+  returns to the opening; the voice speaks in thought groups, with no pause inside a phrase and no swallowed ending; \\
+  the picture shows what is said as it is said; the player, transcript and files work as a viewer expects."""
+dimensions = [
+  "narrative_and_clarity",
+  "narration_performance",
+  "sound_picture_continuity",
+  "credits_and_deliverable_craft",
+]
+
+[review.levels."雅"]
+asks = """\\
+  graceful: plain spoken words a fluent speaker would say, Chinese that is not a translation of the English, and no \\
+  machine tells; a clear, warm voice; every movement eases in and out, and nothing halts, sets off, pops, jumps or \\
+  races outside a stage cut; text aligned, even and tidy, frames balanced, one palette."""
+dimensions = [
+  "language_quality",
+  "voice_quality",
+  "visual_explanation_and_motion",
+  "composition_and_typography",
+  "visual_aesthetics_and_color",
+]
