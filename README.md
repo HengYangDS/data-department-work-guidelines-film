@@ -2,7 +2,7 @@
 
 Two introduction films to the [Data Department Work Guidelines](https://github.com/HengYangDS/data-department-work-guidelines), one in Chinese and one in English, and everything needed to rebuild them from source.
 
-Each film explains the guidelines' seven documents, from the charter and decisions through delivery, data, communication and human–AI collaboration to practice evolution, with illustrative examples from a data department's work. Each edition lasts exactly 1500 seconds: 90,000 native 60 fps frames of 2D picture in 16:9, 48 kHz stereo narration in one synthetic voice, small single-line captions and no music. Each comes as a UHD master and a captioned 1080p film.
+Each film explains the guidelines' seven documents, from the charter and decisions through delivery, data, communication and human–AI collaboration to practice evolution, with illustrative examples from a data department's work. Each edition lasts exactly 1500 seconds: 90,000 native 60 fps frames of 2D picture in 16:9, 48 kHz stereo narration in one synthetic voice, small single-line captions and no music. Each comes as a UHD master and a 1080p film, each with its captions drawn in the picture and again without them; the player's captions control switches between the two.
 
 Author: Yang HENG.
 
@@ -14,7 +14,7 @@ The films of `v1.2.0` are the current editions, and those of `v1.0.0` stay avail
 
 ## Rebuilding the films
 
-The films are built by [filmkit](https://github.com/HengYangDS/filmkit), the film engine, at the release that `pyproject.toml` pins by its tag `v0.12.0` and `uv.lock` by its commit; this repository holds the film's sources and none of the engine's. A rebuild needs an Apple-silicon Mac with [mise](https://mise.jdx.dev), which installs the locked Node, Python, uv and ETHOS, and three Homebrew tools: FFmpeg with VideoToolbox, ExifTool and rsync 3.
+The films are built by [filmkit](https://github.com/HengYangDS/filmkit), the film engine, at the release that `pyproject.toml` pins by its tag `v0.16.0` and `uv.lock` by its commit; this repository holds the film's sources and none of the engine's. A rebuild needs an Apple-silicon Mac with [mise](https://mise.jdx.dev), which installs the locked Node, Python, uv and ETHOS, and three Homebrew tools: FFmpeg with VideoToolbox, ExifTool and rsync 3.
 
 ```bash
 brew install mise ffmpeg exiftool rsync

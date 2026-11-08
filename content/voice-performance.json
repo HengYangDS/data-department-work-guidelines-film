@@ -30,11 +30,6 @@
         "normalization": [],
         "targets": [
           {
-            "term": "一字不差",
-            "kind": "contextual-mandarin-word",
-            "target_reading": "yī zì bù chà"
-          },
-          {
             "term": "不了",
             "kind": "contextual-mandarin-word",
             "target_reading": "bù liǎo"
@@ -154,8 +149,7 @@
           {
             "term": "值得",
             "kind": "contextual-mandarin-word",
-            "target_reading": "zhí dé",
-            "dictionary_disagreement": "值得 is zhí dé as one word; the dictionary's segmenter splits 得做 in 值得做 and reads de."
+            "target_reading": "zhí dé"
           },
           {
             "term": "假",
@@ -334,11 +328,6 @@
             "target_reading": "zhǐ zuò"
           },
           {
-            "term": "只决定",
-            "kind": "contextual-mandarin-word",
-            "target_reading": "zhǐ jué dìng"
-          },
-          {
             "term": "只在",
             "kind": "contextual-mandarin-word",
             "target_reading": "zhǐ zài"
@@ -437,11 +426,6 @@
             "term": "回答",
             "kind": "contextual-mandarin-word",
             "target_reading": "huí dá"
-          },
-          {
-            "term": "因为",
-            "kind": "contextual-mandarin-word",
-            "target_reading": "yīn wèi"
           },
           {
             "term": "在为",
@@ -573,11 +557,6 @@
             "status": "planned-not-listened"
           },
           {
-            "term": "应该",
-            "kind": "contextual-mandarin-word",
-            "target_reading": "yīng gāi"
-          },
-          {
             "term": "开会",
             "kind": "contextual-mandarin-word",
             "target_reading": "kāi huì"
@@ -600,8 +579,7 @@
           {
             "term": "当前",
             "kind": "contextual-mandarin-word",
-            "target_reading": "dāng qián",
-            "dictionary_disagreement": "当前 is dāng; the dictionary's segmenter takes 上当 in 对得上当前 and reads dàng."
+            "target_reading": "dāng qián"
           },
           {
             "term": "当时",
@@ -720,11 +698,6 @@
             "dictionary_disagreement": "得 is the complement particle de in 撑得住; the dictionary reads 得 alone as dé."
           },
           {
-            "term": "改正",
-            "kind": "contextual-mandarin-word",
-            "target_reading": "gǎi zhèng"
-          },
-          {
             "term": "放行",
             "kind": "contextual-mandarin-word",
             "target_reading": "fàng xíng"
@@ -791,16 +764,6 @@
             "target_reading": "lái de jí"
           },
           {
-            "term": "校准",
-            "kind": "contextual-mandarin-word",
-            "target_reading": "jiào zhǔn"
-          },
-          {
-            "term": "格调",
-            "kind": "contextual-mandarin-word",
-            "target_reading": "gé diào"
-          },
-          {
             "term": "模",
             "kind": "contextual-mandarin-word",
             "target_reading": "mó"
@@ -819,11 +782,6 @@
             "term": "模拟",
             "kind": "contextual-mandarin-word",
             "target_reading": "mó nǐ"
-          },
-          {
-            "term": "模板",
-            "kind": "contextual-mandarin-word",
-            "target_reading": "mú bǎn"
           },
           {
             "term": "正在",
@@ -864,11 +822,6 @@
             "term": "流行",
             "kind": "contextual-mandarin-word",
             "target_reading": "liú xíng"
-          },
-          {
-            "term": "漂亮",
-            "kind": "contextual-mandarin-word",
-            "target_reading": "piào liàng"
           },
           {
             "term": "现场",
@@ -1073,11 +1026,6 @@
             "target_reading": "guī huà"
           },
           {
-            "term": "觉得",
-            "kind": "contextual-mandarin-word",
-            "target_reading": "jué de"
-          },
-          {
             "term": "角色",
             "kind": "contextual-mandarin-word",
             "target_reading": "juésè",
@@ -1223,11 +1171,6 @@
             "term": "这种",
             "kind": "contextual-mandarin-word",
             "target_reading": "zhè zhǒng"
-          },
-          {
-            "term": "进行",
-            "kind": "contextual-mandarin-word",
-            "target_reading": "jìn xíng"
           },
           {
             "term": "选得",

@@ -210,28 +210,24 @@ test("a Chinese name breaks only after a list or clause mark, and keeps every ch
   );
 });
 
-test("a label whose words hold no joint is authored as its lines", async () => {
+test("a label whose words hold no joint stands whole or is authored as its lines", async () => {
   const film = await authoredTimeline("zh"),
     texts = new Set(),
     composition = openComposition(film);
   // Each label is named late in its stage, so the whole segment is read rather than a sample of it.
-  for (const segment of film.segments.filter((v) => ["09", "14", "21"].includes(v.id)))
+  for (const segment of film.segments.filter((v) => ["09", "21"].includes(v.id)))
     for (let t = segment.voice_start; t < segment.voice_end; t += 0.5)
       for (const v of composition.render(t).texts) texts.add(v.text);
-  for (const line of [
-    "证据要对得上",
-    "当前的版本",
-    "看起来有效的",
-    "模型信号",
-    "跑完和说法对得上的核验",
-  ])
+  // 09's model signal stands whole on one line, so its modifier never leaves its noun; 21's check is authored as its
+  // lines.
+  for (const line of ["看起来有效的模型信号", "跑完对得上说法的核验"])
     assert.ok(texts.has(line), `missing line ${line}`);
   for (const v of texts) assert.ok(!/^的/u.test(v), `a line begins with 的: ${v}`);
 });
 
 for (const [code, law, owner, decision] of [
   ["zh", "法律、", "这件事的决策负责人", "明确决定"],
-  ["en", "Law,", "of the decision owner", "The explicit decision"],
+  ["en", "Law,", "The decision owner", "explicitly decides"],
 ]) {
   test(`${code} order of authority to act ranks the owner's decision, never the owner`, async () => {
     const film = await authoredTimeline(code),
@@ -253,24 +249,18 @@ for (const [code, law, owner, decision] of [
   });
 }
 
-test("English keeps the five refusals of 17 on one table until missing evidence is named", async () => {
+test("English keeps the two refusals of 17 on one table until missing evidence is named", async () => {
   const film = await authoredTimeline("en"),
     composition = openComposition(film),
     segment = film.segments.find((v) => v.id === "17");
   const at = (word) => segment.words.find((v) => v.text === word).start;
-  const reached = [
-    "A passing test",
-    "An exact copy",
-    "A merged change",
-    "Published",
-    "An Agent reports completion",
-  ];
+  const reached = ["A passing test", "An Agent reports completion"];
   const standing = (t, alpha) =>
     reached.filter((name) =>
       composition.render(t).texts.some((v) => v.scene && v.text === name && v.alpha > alpha),
     );
-  // The first two refusals still stand while the merged change is said, and all five as the claim begins to narrow.
-  assert.deepEqual(standing(at("merged") + 0.5, 0.2).slice(0, 2), reached.slice(0, 2));
+  // The first refusal still stands while the Agent's report is said, and both as the claim begins to narrow.
+  assert.deepEqual(standing(at("Agent") + 0.5, 0.2).slice(0, 1), reached.slice(0, 1));
   assert.deepEqual(standing(at("When") - 0.3, 0.5), reached);
 });
 
@@ -279,16 +269,10 @@ test("English grows the table of 17's refusals about the content centre", async 
     composition = openComposition(film),
     segment = film.segments.find((v) => v.id === "17");
   const at = (word) => segment.words.find((v) => v.text === word).start;
-  const reached = [
-    "A passing test",
-    "An exact copy",
-    "A merged change",
-    "Published",
-    "An Agent reports completion",
-  ];
+  const reached = ["A passing test", "An Agent reports completion"];
   // As each refusal arrives, the names standing in the table stay within the reviewers' 12% balance limit of the
   // content centre (960, 510), so the table never opens high and fills downwards.
-  for (const t of [at("copy") + 0.6, at("merged") + 0.6, at("When") - 0.3]) {
+  for (const t of [at("proves") + 0.6, at("Agent") + 0.6, at("When") - 0.3]) {
     const boxes = composition
       .render(t)
       .texts.filter((v) => v.scene && reached.includes(v.text) && v.alpha > 0.2)

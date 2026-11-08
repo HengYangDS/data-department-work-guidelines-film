@@ -16,12 +16,12 @@ concepts = "content/concepts.toml"
 # Each edition's folder of script and cast, its 16:9 cover, and the summary its player shows.
 [editions.zh]
 sources = "content"
-summary = "从判断、数据与交付，讲到人与人工智能的协作、沟通和持续改进。片中情境用于解释工作机制，未据此声称实际部署或团队采用。"
+summary = "从判断、数据与交付，讲到人与人工智能的协作、沟通和持续改进。片中的例子都是示意，不代表指南已经部署或被采用。"
 cover = "assets/cover/ddwg-cover.png"
 
 [editions.en]
 sources = "content/en"
-summary = "From judgment, data and delivery to human–AI collaboration, communication and continuous improvement. Situations illustrate mechanisms; they do not establish deployment or team adoption."
+summary = "From judgment, data and delivery to human–AI collaboration, communication and continuous improvement. Its examples are illustrative, and the film does not claim the guidelines are deployed or adopted."
 cover = "assets/cover/ddwg-cover-en.png"
 # A term that reads as one name stays on one caption line, as do a verb and the object it
 # takes, and a modifier and the noun it qualifies.
@@ -56,6 +56,9 @@ caption_terms = [
   "the product owner identifies",
   "dependent consumers",
   "and governance confirms",
+  "earlier and revised price snapshots",
+  "risks like these",
+  "something others can safely rely on",
 ]
 
 # The fonts the picture stages below fonts/, in this order: Noto Sans CJK SC for any text with a
@@ -71,13 +74,22 @@ fonts = [
 # Wrapped labels kept against the wrapping rules, each a deliberate phrase break.
 [[picture.wrapping.exceptions]]
 edition = "en"
-lines = ["Cross-role or extended work,", "competing options or material uncertainty"]
-reason = "04.6's work breaks at its comma, between its two conditions; every other break splits a noun phrase or leaves the last line under three fifths."
+lines = ["Examine", "the reasoning"]
+reason = "28.1's middle action stands verb over object; on one line it would stand about 6 px from the next station's name, the widest of the row."
+
+[[picture.wrapping.exceptions]]
+edition = "zh"
+lines = ["工作跨角色、做得久、", "有几种方案，", "或者有重大不确定性"]
+reason = "04.6's work breaks after its options, so 或者 opens its last condition instead of ending a line; the middle line is the options alone, under four fifths."
 
 [[picture.wrapping.exceptions]]
 edition = "en"
-lines = ["Examine", "the reasoning"]
-reason = "28.1's middle action stands verb over object; on one line it would stand about 6 px from the next station's name, the widest of the row."
+lines = [
+  "Production, funds, sensitive data,",
+  "security or compliance, deletion or overwrite,",
+  "external commitments or irreversible consequences",
+]
+reason = "04.7's high-risk work breaks only between its conditions, so 'security or compliance' and 'deletion or overwrite' each stay whole; no break of the seven keeps an even block in the work column, and set as a list the ladder would show eighteen names."
 
 # The colours of each edition's player page: its ground, text, quieter text, rules and borders,
 # and the accent of a chosen or focused control.
@@ -97,6 +109,8 @@ readings = "content/review/readings.json"
 # The verifier's floor: the overall score and every dimension at least this.
 overall_minimum = 95
 dimension_minimum = 95
+# The voice's clarity floor per edition, which the review measurement checks on every segment.
+clarity_minimum_db = { zh = 18.0, en = 17.0 }
 
 # The scored dimensions in record order, with what each one asks reviewers to judge.
 [review.dimensions]
