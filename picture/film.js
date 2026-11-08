@@ -1282,18 +1282,20 @@ scenes["02"] = function (s, t) {
     });
     // Failure 1: the late data, a fact, and the change of vendors, a choice, are bound together by one tie that draws on
     // from the fact once the choice is named; on the words that set them apart, 'two different things' or the choice
-    // named as a choice, the tie is cut and a divider stands between them.
+    // named as a choice, the tie fades as a divider draws down between them at the tip pace, so neither the tie leaves
+    // nor the divider arrives in one frame.
     const [late, vendor, apart] = cues(s, [["数据晚到了", "data arriving late"], ["要不要换供应商", "changing vendors"],
       ["是两件事", "is a choice"]]);
     {
-      const [x0, y0] = cells[0], my = y0 + 175, fx = x0 + 210, cx = x0 + 550, split = stageIn(t, apart);
+      const [x0, y0] = cells[0], my = y0 + 175, fx = x0 + 210, cx = x0 + 550, split = ramp(t, apart + .05, .35);
       clock(fx, my, 30, {hand: .2, color: P.evidence, alpha: named(t, late) * two});
       diamond(cx, my, 30, {color: P.authority, alpha: named(t, vendor) * two});
       link(fx + 44, my, cx - 44, my, {alpha: two * (1 - split), draw: {t, at: vendor + .05}});
       // The divider that sets them apart stands midway in the clear space between their names.
       const lateName = L("数据晚到了", "Data arriving late"), vendorName = L("要不要换供应商", "Changing vendors");
       const wide = v => Math.max(...wrapName(v, 300).map(line => measure(line))), dx = (fx + wide(lateName) / 2 + cx - wide(vendorName) / 2) / 2;
-      line(dx, my - 54, dx, my + 96, {color: P.line, alpha: two * split, width: 2});
+      const divided = drawShare(t, apart + .05, 150);
+      if (divided > .01) line(dx, my - 54, dx, my - 54 + 150 * divided, {color: P.line, alpha: two, width: 2});
       nameText(lateName, fx, my + 40 + NAME_GAP, {valign: "top", width: 300, color: P.evidence, alpha: two * named(t, late)});
       nameText(vendorName, cx, my + 40 + NAME_GAP, {valign: "top", width: 300, color: P.authority, alpha: two * named(t, vendor)});
     }
@@ -1918,8 +1920,8 @@ scenes["04"] = function (s, t) {
     ["已经越线", "after a breach"], ["要留多少记录", "risk sets the process"], ["涉及生产", "production funds"],
     ["不论风险高低", "whatever the risk"]]);
   // The field the four boundaries enclose stands through the first two stages; its sides run clockwise from the top, one
-  // for each boundary. While the four are only counted it stands centred, and the stage re-forms in a cut on the first
-  // boundary's words with the field at the left and the column beside it.
+  // for each boundary. While the four are only counted it stands centred; from the first boundary's thought it glides
+  // with its name to its place at the left, and the first boundary's row comes in beside it as the field clears it.
   // The column beside the field: the four boundaries in the first stage and the three cases in the second, each a key
   // term with, under it, what it rules out or covers in its key words. Each column is set narrow enough that its rows'
   // blocks are about one width, so it builds as one block.
@@ -1954,7 +1956,11 @@ scenes["04"] = function (s, t) {
   const ox = mix(place(LX1, boundaryRows.map(v => rowW(v, W1)), 1), L(place(LX2, caseW, 2), place(LX2, caseW.slice(0, 2), 2)), soon(t, inside + .05, .55))
     + L(0, place(LX2, caseW, 3) - place(LX2, caseW.slice(0, 2), 2)) * soon(t, breach + .05, .55);
   const formed = stageIn(t, truth);
-  const FX = formed ? 290 + ox : 735, FY = 275, FS = 450, corner = [[FX, FY], [FX + FS, FY], [FX + FS, FY + FS], [FX, FY + FS]];
+  // The glide sets off on the first word of the first boundary's thought, over the field's whole way, and the first
+  // row's key and words wait until the field's right side has passed them.
+  const go = Math.max(...thoughtJoins.map(([, next]) => next).filter(v => v <= truth + 1e-6)) + .05;
+  const way = 735 - 290 - place(LX1, boundaryRows.map(v => rowW(v, W1)), 1), clear = go + .85 * glideTime(way);
+  const FX = mix(735, 290 + ox, glide(t, go, way)), FY = 275, FS = 450, corner = [[FX, FY], [FX + FS, FY], [FX + FS, FY + FS], [FX, FY + FS]];
   const starts = [truth, bounds, owner, done], field = stageOut(t, form);
   // What each boundary rules out or covers, part by part as it is said.
   const said = en ? [
@@ -2005,14 +2011,14 @@ scenes["04"] = function (s, t) {
     const rows = boundaryRows, LX = LX1 + ox, W = W1, G = 36;
     const tops = stackTops(rows.map(([term, qual]) => termRowLayout([term], qual, W, false).height), CONTENT_CY, 44);
     rows.forEach(([term, qual], r) => {
-      // The first boundary's row comes in on the cut that re-forms the stage, so it never stands inside the counted
-      // square; each further row comes in on its own words.
-      const at = r ? starts[r] : truth + STAGE_CUT + .15;
+      // The first boundary's row comes in as the gliding field clears it, its key a quarter second after its words, so
+      // neither stands inside the field; each further row comes in on its own words.
+      const at = r ? starts[r] : Math.max(truth + STAGE_CUT + .15, clear), keyAt = r ? at : at + .25;
       const my = tops[r] + labelSize(LABEL) / 2, gx = LX - 34 - G, h = G / 2;
       const c = [[gx, my - h], [gx + G, my - h], [gx + G, my + h], [gx, my + h]], [a, b] = [c[r], c[(r + 1) % 4]];
-      box(gx, my - h, G, G, {stroke: P.line, alpha: one * ramp(t, at - .15, .4), radius: 2, width: 2});
+      box(gx, my - h, G, G, {stroke: P.line, alpha: one * ramp(t, keyAt - .15, .4), radius: 2, width: 2});
       // The boundary's own side, solid and thick, so the key reads as that side of the field rather than a checkbox.
-      const drawn = soon(t, at - .15, .5);
+      const drawn = soon(t, keyAt - .15, .5);
       if (drawn > 0) line(a[0], a[1], mix(a[0], b[0], drawn), mix(a[1], b[1], drawn), {color: P.authority, alpha: one, width: 8, cap: "butt"});
       // The English fourth boundary is said over five seconds, the claims it withholds last, so its qualifier builds
       // part by part on their words; the other rows stand whole on theirs.
@@ -2094,7 +2100,7 @@ scenes["04"] = function (s, t) {
           " or irreversible consequences"], triggers, needs]]
     : [
       [["一次讲清", "结论", "、依据", "和做法"], [onceAt, ...onceRows], ["局部", "、可逆", "、不对外承诺的小事"], lowAts, onceRows],
-      [["在现有的工作记录里写清", "问题", "、方案", "、做法", "和验收"], [recordAt, ...recordRows], ["工作跨角色", "、做得久", "、有几种方案，", "或者有重大不确定性"],
+      [["在现有的工作记录里写清", "问题", "、方案", "、做法", "和验收"], [recordAt, ...recordRows], ["工作跨角色", "做得久", "有几种方案", "或者有重大不确定性"],
         [midAts[0], cue(s, "做得久", ""), midAts[1], cueFrom(s, "或者", "", midAts[1])], recordRows],
       [["书面决定", "、明确授权", "、回滚或降级运行的预案", "、独立评审", "，最后由人验收"], needs,
         ["涉及生产", "、资金", "、敏感数据", "、安全合规，", "或者删除覆盖", "、对外承诺", "、后果不可逆的事"], triggers, needs]];
@@ -2103,9 +2109,9 @@ scenes["04"] = function (s, t) {
     // Each side is set as a balanced block of a few lines, so the highest tier's requirements face the conditions that
     // call for them as two even blocks, and each document is large enough to read as its rung of the ladder.
     // The work column sets each condition as a block of even lines; the English column is narrower, so its blocks
-    // balance the forms across the spine. In Chinese the first tier's work stands on one line; the middle tier's breaks
-    // into three lines, its options alone on the second and 「或者」 opening the last; and the high-risk work, the
-    // longest, is one block of three even lines, each part joining it on its words, so no line of a block stands under
+    // balance the forms across the spine. In Chinese the first tier's work stands on one line; the middle tier's four
+    // conditions stand as a list, one to a line at one pitch, 「或者」 opening the last, as no break of them keeps an even
+    // block; and the high-risk work, the longest, is one block of three even lines, each part joining it on its words, so no line of a block stands under
     // four fifths of its longest and no last line under three fifths. In English the first tier's work stands on one
     // line, which no break would keep even, and the middle tier's breaks before each "or". The high-risk work and
     // requirements keep the words they are said in. In English no break of the seven conditions keeps an even block
@@ -2116,11 +2122,11 @@ scenes["04"] = function (s, t) {
     // even lines, so their block ends near the lower tiers' processes instead of running past them.
     // The Chinese work column is 360 px for the first and last tiers, which takes the first tier's fourteen characters on
     // one line and breaks the last tier's thirty-seven into lines of twelve, eleven and twelve; the middle tier's 280 px
-    // breaks its twenty-five after its options' comma, so 「或者」 opens its last line.
+    // holds its longest condition, 「或者有重大不确定性」, on one line.
     const W = 600, QW = i => L([360, 280, 360][i], [620, 420, 600][i]), tw = i => i === 2 ? L(360, 760) : W, docs = [[60, 76], [86, 110], [118, 152]], GAP = 45 + 34;
     // The parts that begin each group of a tier's work, and each name of a tier's form: the English high-risk
     // requirements are five names, one to a line.
-    const groups = () => [0], forms = i => en && i === 2 ? [0, 1, 2, 3, 4] : [0];
+    const groups = i => !en && i === 1 ? [0, 1, 2, 3] : [0], forms = i => en && i === 2 ? [0, 1, 2, 3, 4] : [0];
     // The spine stands where the ladder is balanced. Each tier's work reaches left of the spine and its form right of
     // it, and where a side holds no block yet the spine's own names and documents reach half their width. The ladder's
     // pictures follow the words: each tier's work and then its form, except the English high-risk tier, which says its
@@ -2311,13 +2317,15 @@ scenes["05"] = function (s, t) {
   }
   // 2. An illustrative case, a better data catalog, as a tree: either people cannot find the data, or they find it and
   // three questions stay open. The case opens centred on the catalog and the people who use it, each on its own words;
-  // on the words of its first question the stage re-forms in a cut as a tree from the catalog at the left. Each node and
+  // on the words of its first question the tree grows from the catalog, which in English glides to the left with it. Each node and
   // the branch to it arrive on the node's own words; when the fixes are said to differ every problem lights and gains a
   // fix of its own shape in one column, linked along its row.
   const two = base * stageIn(t, caseAt) * stageOut(t, frame);
   illustrative(two);
   if (two > 0) {
-    const tree = stageIn(t, notFound), CY = 485, rows = [310, 660, 530, 660, 790];
+    // The tree grows on the case where it stands: each node and branch arrives on its own words, and in English the case
+    // glides from the first question's words to stand centred on the answers.
+    const tree = 1, CY = 485, rows = [310, 660, 530, 660, 790];
     const names = en ? ["Can't find the data", "They find it", "What it means", "How good it is", "Whether they may use it"]
       : ["找不到数据", "找到了", "看不懂含义", "拿不准质量", "不知道能不能用"];
     // The tree's places from the catalog at x 520: the two answers at 800, the three questions at 1160, and the fixes one
@@ -2340,7 +2348,8 @@ scenes["05"] = function (s, t) {
     const answered = en ? centred(Math.max(ends[0], ends[1])) : opened - 520, asked = centred(Math.max(...ends)), whole = centred(FX0 + fixW);
     const T = answered + (asked - answered) * glide(t, meaning + .05, asked - answered) + (whole - asked) * glide(t, differ + .05, whole - asked) + lone;
     // The fixes join the tree at their final place, as it moves to stand centred with them.
-    const CX = tree ? 520 + T : opened + lone, N1 = 800 + T, N2 = 1160 + T, FX = FX0 + whole;
+    const lead = en ? (opened - 520 - answered) * (1 - glide(t, notFound + .05, opened - 520 - answered)) : 0;
+    const CX = 520 + T + lead, N1 = 800 + T + lead, N2 = 1160 + T + lead, FX = FX0 + whole;
     const team = named(t, teamAt) * two, TX = CX - TEAM;
     [TX - 45, TX, TX + 45].forEach(x => person(x, 325, {alpha: team, size: .75}));
     nameText(L("大家", "A team"), TX, 342 + NAME_GAP, {valign: "top", alpha: team});
@@ -2355,7 +2364,7 @@ scenes["05"] = function (s, t) {
     const all = ramp(t, differ - .1, .3) * two * tree;
     // The tree: the catalog forks to the two answers, and "found" forks to its three open questions.
     if (tree) [0, 1].forEach(i => link(CX + 118, CY, N1 - 24, rows[i], {route: "hvh", mid: CX + 190, alpha: two,
-      draw: {t, at: Math.max(ats[i] - .15, notFound + STAGE_CUT)}}));
+      draw: {t, at: ats[i] - .15}}));
     const fork = N1 + 16 + NAME_GAP + measure(names[1], LABEL) + 24;
     if (tree) [2, 3, 4].forEach(i => link(fork, rows[1], N2 - 24, rows[i], {route: "hvh", mid: fork + 70, alpha: two, draw: {t, at: ats[i] - .15}}));
     if (tree) ats.forEach((at, i) => {
@@ -2647,7 +2656,9 @@ scenes["06"] = function (s, t) {
   // arrives at its kind's ring on its own words. The inference's term, whose place the case holds until its words begin,
   // arrives with the cut that clears it.
   const three = base * stageIn(t, starts[1]) * stageOut(t, conditions);
-  if (three > 0) rows.forEach((_, i) => statement(i, ...s06Place(i), three, true, kindAts[i], i === 2 ? rows[2][1].map(() => starts[2] + STAGE_CUT + .15) : rows[i][1]));
+  // The stage begins on the hypothesis's own first words, so its term, like the inference's, inks in from the cut rather
+  // than standing at most of its ink in the cut's first frame.
+  if (three > 0) rows.forEach((_, i) => statement(i, ...s06Place(i), three, true, kindAts[i], i === 1 || i === 2 ? rows[i][1].map(() => starts[i] + STAGE_CUT + .15) : rows[i][1]));
   // 4. Each kind carries its own conditions. The case's statements leave in one cut on the thought's first words, which
   // begin the conditions in English and in Chinese first say that each kind has its own to account for, named above
   // the grid until the next thought; the six kinds keep their marks, positions and names, and each
@@ -4660,9 +4671,12 @@ scenes["13"] = function (s, t) {
       {color: P.evidence, alpha: fq, width: 2.5});
     nameText(L("下游的因子计算", "Downstream factor calculation"), rl, ctop - NAME_GAP, {align: "left", valign: "bottom", width: 420, alpha: p1 * named(t, factorAt)});
     // The join on the old identifier draws on from the data to the calculation, its key above it and its name below;
-    // when the wrong matches are named it turns into a dashed, doubtful way.
+    // when the wrong matches are named it breaks into a dashed, doubtful way over a third of a second: each 16 px of it
+    // opens a gap from its end, so the dashes keep their places and nothing changes in one frame.
     const j = {t, at: join - .1}, bad = ramp(t, wrong - .1, .4), jx0 = dl - 12, jx1 = rl + RW + 12, jm = (jx0 + jx1) / 2;
-    if (t >= join - .1) link(jx0, Y, jx1, Y, {color: blend(P.ink, P.unknown, bad), alpha: p1, draw: j, width: 2.5, dash: t < wrong + .05 ? null : [8, 8]});
+    const broken = ramp(t, wrong + .05, .35);
+    if (t >= join - .1) link(jx0, Y, jx1, Y, {color: blend(P.ink, P.unknown, bad), alpha: p1, draw: j, width: 2.5,
+      dash: broken > 0 ? [16 - 8 * broken, 8 * broken] : null});
     text("A1", jm, Y - 34, 26, {role: "mark", align: "center", color: blend(P.muted, P.unknown, bad), alpha: p1 * ramp(t, join - .1, .4)});
     nameText(L("按旧代码关联财务数据", "Joins on the old one"), jm, Y + NAME_GAP, {valign: "top", alpha: p1 * named(t, join)});
     // What the old join may do to the calculation: match the wrong companies or entities, or lose some; each row's mark
@@ -9366,8 +9380,9 @@ scenes["29"] = function (s, t) {
   if (six > 0) {
     const KY = 470, M = 160, PAD = 30, py = KY + 26 - 29, NY6 = KY + 26 + NAME_GAP;
     const held6 = ramp(t, contain - .15, .4), place = ramp(t, kinds[0] - .1, .5) * six;
-    // The English third kind stands whole on one line, a row lower on a short stem from its ring, so the kinds keep one
-    // pitch; the frame reaches 44 px past its name, and the finder's side keeps that padding.
+    // The English kinds alternate on two baselines, as the film's dense rails set their names: the first and the third,
+    // whole on one line, stand a row lower on a short stem from their rings, so the kinds keep one pitch; the frame
+    // reaches 44 px past the third's name, and the finder's side keeps that padding.
     const names = en ? ["Data error", "Production failure", ["Permission or compliance breach"]] : ["数据出错", "生产故障", "越权、违规"];
     const finderName = L("发现的人", "Whoever finds it"), FW6 = 280, half = (v, w) => Math.max(...wrapName(v, w).map(line => measure(line))) / 2;
     // The frame's edges follow its members: each next kind widens it to the right just before it arrives, and the
@@ -9416,8 +9431,9 @@ scenes["29"] = function (s, t) {
       // the ring's edge.
       const wave = (voiceTime(Math.min(t, contain - .15)) * .8 + i / 3) % 1, swell = clamp(wave / .15);
       ring(kx, KY, 26 + 24 * wave, {color: P.unknown, alpha: q * swell * (1 - wave) * .7 * (1 - held6), width: 2 * swell});
-      if (en && i === 2) line(kx, KY + 32, kx, NY6 + row6 - 6, {alpha: q, width: 2});
-      nameText(names[i], kx, NY6 + (i === 2 ? row6 : 0), {valign: "top", width: 300, alpha: six * listIn(t, kinds, i), set: "kinds"});
+      const lower = en && i !== 1;
+      if (lower) line(kx, KY + 32, kx, NY6 + row6 - 6, {alpha: q, width: 2});
+      nameText(names[i], kx, NY6 + (lower ? row6 : 0), {valign: "top", width: 300, alpha: six * listIn(t, kinds, i), set: "kinds"});
     });
     // The finder stands inside the frame at its left and the owner beyond the frame, each named under them, and the link
     // from the finder runs down from under the finder's name out of the frame, under it, and up to under the owner's.

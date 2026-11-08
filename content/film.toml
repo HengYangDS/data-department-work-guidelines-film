@@ -78,11 +78,6 @@ lines = ["Examine", "the reasoning"]
 reason = "28.1's middle action stands verb over object; on one line it would stand about 6 px from the next station's name, the widest of the row."
 
 [[picture.wrapping.exceptions]]
-edition = "zh"
-lines = ["工作跨角色、做得久、", "有几种方案，", "或者有重大不确定性"]
-reason = "04.6's work breaks after its options, so 或者 opens its last condition instead of ending a line; the middle line is the options alone, under four fifths."
-
-[[picture.wrapping.exceptions]]
 edition = "en"
 lines = [
   "Production, funds, sensitive data,",
