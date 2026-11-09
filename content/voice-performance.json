@@ -774,11 +774,6 @@
             "target_reading": "mó xíng"
           },
           {
-            "term": "模式",
-            "kind": "contextual-mandarin-word",
-            "target_reading": "mó shì"
-          },
-          {
             "term": "模拟",
             "kind": "contextual-mandarin-word",
             "target_reading": "mó nǐ"
@@ -1249,6 +1244,21 @@
             "term": "颠倒",
             "kind": "contextual-mandarin-word",
             "target_reading": "diān dǎo"
+          },
+          {
+            "term": "当成",
+            "kind": "contextual-mandarin-word",
+            "target_reading": "dàng chéng"
+          },
+          {
+            "term": "成为",
+            "kind": "contextual-mandarin-word",
+            "target_reading": "chéng wéi"
+          },
+          {
+            "term": "三种",
+            "kind": "contextual-mandarin-word",
+            "target_reading": "sān zhǒng"
           }
         ],
         "sandhi": "Natural Mandarin connected-speech tone sandhi and weak grammatical syllables; never force isolated citation tones.",

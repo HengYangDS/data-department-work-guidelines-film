@@ -477,12 +477,15 @@ const speaking = (t, ats, i) => {
 const saidShare = (t, ats) => ats.reduce((v, at) => v + soon(t, at + .05, .35), 0) / ats.length;
 /* One beat for each part said over a single mark: the mark's ring flashes on the part's words, within its own extent,
  * so a list spoken at one place shows each part arriving. A beat swells and thins by its width at its colour's level,
- * as a flow's dot enters by its size, so it never stands as a faint ring. */
-function beats(t, x, y, r, ats, {color = P.ink, alpha = 1} = {}) {
+ * as a flow's dot enters by its size, so it never stands as a faint ring. A station whose halo, lighting the item being
+ * spoken (`lit`), stands at the beat's own radius draws both as this one ring, which swells from the halo's width on
+ * each beat, so no two rings stand in one place to be taken for each other as one fades and the other swells. */
+function beats(t, x, y, r, ats, {color = P.ink, alpha = 1, lit = 0} = {}) {
   const flash = Math.max(0, ...ats.map(at => { const p = clamp((t - at - .05) / .5); return p > 0 && p < 1 ? Math.sin(Math.PI * p) : 0; }));
   // Its ink follows its swell, so a beat fades in and out with its width and never ends as a hairline at its colour's
   // full level; it is never drawn thinner than 1 px.
-  if (flash > .02) ring(x, y, r, {color, alpha: alpha * restMark(color, .5) * flash, width: Math.max(1, 3.5 * flash)});
+  const level = Math.max(flash, lit);
+  if (level > .02) ring(x, y, r, {color, alpha: alpha * restMark(color, .5) * level, width: Math.max(1, 3.5 * flash, lit > 0 ? 2 : 0)});
 }
 /* A list said member by member keeps its spoken order along its axis and stays balanced while it builds: each member
  * stands at its place in the list's final layout, and the whole list stands `step` px toward its open end for each
@@ -1231,7 +1234,7 @@ scenes["01"] = function (s, t) {
 scenes["02"] = function (s, t) {
   const [guide, agree, four, task, three] = cues(s, [["数据部门工作指南", "Data Department Work Guidelines"], ["部门关于工作质量的契约", "contract for work quality"],
     ["四种失败", "four failures"], ["一项任务", "a task"], ["三件事", "achieve three things"]]);
-  const starts = cues(s, [["把事实和选择", "confuses facts with choices"], ["只治了症状", "fixes the symptom"], ["话说完了", "ends a conversation"],
+  const starts = cues(s, [["把事实和选择", "confuses facts with choices"], ["只治了症状", "fixes the symptom"], ["话说完了", "is communication"],
     ["人工智能写出了", "lets ai produce"]]);
   // 1. The guidelines as the scene's first words name them: the guideline stands in one cut at the centre on those
   // words, named as they are called, and its rows are written in turn; when it is called the department's contract, the
@@ -1266,8 +1269,9 @@ scenes["02"] = function (s, t) {
   // cell's content keeps one inset from the line at its left.
   const W = 760, H = 330, GY = CONTENT_CY + 40, cells = [0, 1, 2, 3].map(i => [960 + (i % 2 ? 20 : -20 - W), GY + (i > 1 ? 15 : -15 - H)]);
   if (two > 0) {
-    // Each failure is named by its key words, so the title reads at a glance beside the sentence that states it.
-    const titles = en ? [["Confusing facts with choices"], ["Fixing the symptom", ", not the mechanism"], ["Ending a conversation"],
+    // Each failure is named by its key words, so the title reads at a glance beside the sentence that states it; the
+    // English third is the communication the charter names, and its seats below say what it leaves.
+    const titles = en ? [["Confusing facts with choices"], ["Fixing the symptom", ", not the mechanism"], ["Communication"],
       ["Letting AI produce more material"]] : [["把事实和选择混在一起"], ["只治了症状", "，没改机制"], ["话说完了"], ["人工智能写出了更多材料"]];
     const titleAts = [[starts[0]], [starts[1], cue(s, "没改机制", "and leaves the mechanism")], [starts[2]], [starts[3]]];
     const top = cells[0][1], bottom = cells[3][1] + H;
@@ -1321,18 +1325,18 @@ scenes["02"] = function (s, t) {
       nameText(L("手工补一次数据", "Someone backfills by hand"), xb + 50 + NAME_GAP, PY, {align: "left", color: P.muted, alpha: patched});
       nameText(L("下个月照样出错", "Next month it breaks again"), xb + 50 + NAME_GAP, PY + 70, {align: "left", alpha: again});
     }
-    // Failure 3: the talk is over, and the two seats it should leave filled stay empty: nobody able to decide, nobody
+    // Failure 3: the talk is over, and the two seats it should leave filled stay empty: no one able to decide, no one
     // able to act, each seat standing on its own words with an open question in it. The two are one phrase, so they
     // take one name on one line under both seats, each seat standing over its own words in it, and the name joins its
     // second part on its own words; the part that decides keeps the authority's colour.
-    const [decide, act] = cues(s, [["没有人能做决定", "nobody able to decide"], ["没有人能动手", "or act"]]);
+    const [decide, act] = cues(s, [["没有人能做决定", "no one able to decide"], ["没有人能动手", "or act"]]);
     {
       const [x0, y0] = cells[2], my = y0 + 165, on = ramp(t, starts[2] - .15, .4) * two;
       [[x0 + 130, my - 14], [x0 + 190, my + 24]].forEach(([bx, by]) => {
         box(bx - 56, by - 22, 112, 44, {stroke: P.muted, alpha: on, radius: 18});
         [-16, 0, 16].forEach(dx => dot(bx + dx, by, 3, {color: P.muted, alpha: on}));
       });
-      const parts = L(["没有人能做决定", "，也没有人能动手"], ["Nobody able to decide", " or act"]), whole = parts.join("");
+      const parts = L(["没有人能做决定", "，也没有人能动手"], ["No one able to decide", " or act"]), whole = parts.join("");
       const w0 = measure(parts[0]), w1 = measure(parts[1]), lead = measure(parts[1].match(/^[，\s]+/u)[0]), left = x0 + 505 - (w0 + w1) / 2;
       [[left + w0 / 2, decide, P.authority], [left + w0 + (lead + w1) / 2, act, P.ink]].forEach(([sx, at, color], k) => {
         const q = named(t, at) * two;
@@ -1360,13 +1364,13 @@ scenes["02"] = function (s, t) {
   // which stands left of centre with its name, and the column it delivers to stands to its right. On the words that
   // count the outcomes the column is named and the task's three ways draw out to the outcomes' places, so the three
   // stand in view from the count; each outcome draws its ring at its way's end, inks the ring and takes its name on its
-  // own words, and lights while it is spoken. On the last thought three reports, aligned with its rows, are refused on
-  // the task's other side. Everything stands where it ends from the cut, so nothing slides when the reports join: the
-  // stage stands centred between its last two pictures, the task with its whole column and the whole stage with the
-  // reports, so the column leans as far right of the centre as the finished stage leans left.
+  // own words, and lights while it is spoken. On the last thought three required reports, aligned with its rows, are
+  // refused on the task's other side. Everything stands where it ends from the cut, so nothing slides when the reports
+  // join: the stage stands centred between its last two pictures, the task with its whole column and the whole stage
+  // with the reports, so the column leans as far right of the centre as the finished stage leans left.
   const out = stageIn(t, task);
   if (out > 0) {
-    const reports = cue(s, "三份报告", "three reports");
+    const reports = cue(s, "三份必须交的报告", "three required reports");
     // Each outcome is named by its key words: in English as a result, so its name reads at a glance rather than repeating
     // the spoken command, and in Chinese by the words that state it; the second, a clause in Chinese, keeps under its
     // name only what the test must state, when the judgment holds, so its row does not repeat the spoken clause whole;
@@ -1421,14 +1425,15 @@ scenes["02"] = function (s, t) {
       // The list sets every qualifier one way, under its term, since one of them is too long to run on its line.
       const top = y - termRowLayout(term, qual, widths[i], false).height / 2;
       termRow(t, term, termAts[i], qual, qualAts[i], NX, top, {width: widths[i], alpha: out * listLevel(t, ats, i), set: "outcomes", inline: false});
-      // Three reports, one level with each outcome on the task's other side, are refused on the last words.
+      // Three required reports, one level with each outcome on the task's other side, are refused on the last words.
       documentIcon(RX - 26, y - 34, 52, 68, {alpha: named(t, reports) * out * .8, stroke: P.muted, rows: 3});
     });
     const head = ys[0] - R - NAME_GAP;
     nameText(L("三件事", "Three things"), MX - R, head, {align: "left", valign: "bottom", alpha: out * named(t, three)});
     // The refused reports' name starts at their column's left edge, its cross following it, as the outcomes' name starts
-    // at its rings' left edge.
-    rejectedName(L("三份报告", "Three reports"), RX - 26, head, {align: "left", valign: "bottom", alpha: out * named(t, reports), mark: ramp(t, reports + .3, .4)});
+    // at its rings' left edge. The English name says the reports' kind, as its three pages count them: with its count
+    // it would run its cross into the outcomes' name.
+    rejectedName(L("三份必须交的报告", "Required reports"), RX - 26, head, {align: "left", valign: "bottom", alpha: out * named(t, reports), mark: ramp(t, reports + .3, .4)});
     ctx.restore();
   }
 };
@@ -1574,7 +1579,7 @@ scenes["03"] = function (s, t) {
   const truthQ = cueFrom(s, "事实依据", "authority about facts", ranks[3]);
   // English says what each kind answers as the thought about it begins, where Chinese says both as it names the two.
   const asks = en ? [cueFrom(s, "", "answers", actQ), cueFrom(s, "", "answers", truthQ)] : [Infinity, Infinity];
-  const [record, observe, onlyLeads] = cues(s, [["原始记录", "primary records"], ["能重复的观察", "repeatable observations"], ["都只能算线索", "only leads"]]);
+  const [record, observe, onlyLeads] = cues(s, [["原始记录", "primary records"], ["能重复的观察", "repeatable observations"], ["只能算线索", "only leads"]]);
   // What an observation must state, in the order each edition speaks it.
   const attrs = en ? cues(s, [["", "a source"], ["", "time"], ["", "subject"], ["", "scope"]]) : cues(s, [["并说清来源", ""], ["时间", ""], ["对象和范围", ""]]);
   // The leads, in the order each edition speaks them.
@@ -1739,8 +1744,7 @@ scenes["03"] = function (s, t) {
         dot(x, y, 11, {color: P.ground, alpha: q});
         dot(x, y, 11, {color: P.line, alpha: q, hollow: true, width: 2});
         dot(x, y, 12.5 - r * 1.5, {color: colors[r], alpha: q});
-        if (lit > 0) ring(x, y, 19, {color: colors[r], alpha: lit * restMark(colors[r], .5) * g2, width: 2});
-        beats(t, x, y, 19, members[r].slice(1), {color: colors[r], alpha: g2});
+        beats(t, x, y, 19, members[r].slice(1), {color: colors[r], alpha: g2, lit});
       }});
     // The order's title stands over the frame's corner from the words that announce it and leaves with the ranks.
     nameText(L("有先后", "An order"), head.SX - 110, L(320, 280) - NAME_GAP, {align: "left", valign: "bottom", color: P.muted,
@@ -1780,8 +1784,7 @@ scenes["03"] = function (s, t) {
         dot(x, y, 11, {color: P.ground, alpha: q});
         dot(x, y, 11, {color: P.line, alpha: q, hollow: true, width: 2});
         if (r < 2) dot(x, y, 12.5, {color: P.evidence, alpha: q}); else ring(x, y, 12.5, {color: P.unknown, alpha: q, width: 3});
-        if (lit > 0) ring(x, y, 19, {color: r < 2 ? P.evidence : P.unknown, alpha: lit * restMark(r < 2 ? P.evidence : P.unknown, .5) * g3f, width: 2});
-        beats(t, x, y, 19, parts[r].slice(1), {color: r < 2 ? P.evidence : P.unknown, alpha: g3f});
+        beats(t, x, y, 19, parts[r].slice(1), {color: r < 2 ? P.evidence : P.unknown, alpha: g3f, lit});
       }});
     const barY = tops[2] - 26, tried = ramp(t, leads[0] - .15, .4) * g3f;
     link(SX, ys[2] - 14, SX, barY + 12, {color: P.unknown, alpha: tried, upto: drawShare(t, leads[0] - .1, Math.abs(barY + 12 - (ys[2] - 14)), .7), end: false, dash: [6, 6]});
@@ -1886,12 +1889,13 @@ scenes["03"] = function (s, t) {
       if (lit > 0) ring(x, y - 24, 32, {color: P.evidence, alpha: lit * restMark(P.evidence, .5) * g5, width: 2});
     });
     // Competence lands in the left pan and the facts in the right; the facts leave when one is missing, and a question
-    // stands in their place until the domain owner's facts land there.
+    // stands in their place until the domain owner's facts land there. The question inks in over 0.4 s, as a mark that
+    // arrives does, so no frame takes it from unseen to firm.
     const [[lx, ly], [rx, ry]] = pans, q = needAts.map(at => ramp(t, at - .15, .4) * g5);
     ring(lx, ly - 24, 18, {color: P.evidence, alpha: q[0], width: 2.5});
     check(lx, ly - 23, 18, {alpha: q[0]});
     documentIcon(rx - 17, ry - 50, 34, 44, {alpha: q[1] * (1 - lost), rows: 3});
-    text("?", rx, ry - 26, 26, {role: "mark", align: "center", color: P.unknown, alpha: q[1] * ramp(t, missing + .35, .2) * (1 - back)});
+    text("?", rx, ry - 26, 26, {role: "mark", align: "center", color: P.unknown, alpha: q[1] * ramp(t, missing + .35, .4) * (1 - back)});
     nameText(L("既懂行", "Competence"), PX - B - PW - NAME_GAP, PY + HANG - 12, {align: "right", alpha: g5 * listIn(t, needAts, 0), set: "needs"});
     nameText(L("又了解事实", "The facts"), PX + B + PW + NAME_GAP, PY + HANG - 12, {align: "left", color: blend(P.ink, P.muted, gone),
       alpha: g5 * listIn(t, needAts, 1), set: "needs"});
@@ -1908,7 +1912,7 @@ scenes["03"] = function (s, t) {
     line(PX - 28, barY, PX + 28, barY, {color: P.unknown, alpha: ramp(t, noPower + .05, .3) * g5, width: 4});
     nameText(L("懂行", "Expertise alone"), PX - 24, (BASE + 10 + barY) / 2, {align: "right", alpha: g5 * named(t, alone)});
     seal(PX, SY, 34, {alpha: g5 * .9 * named(t, noPower), hollow: true});
-    nameText(L("有权", "Authority to decide or act"), PX, SY + 34 + NAME_GAP, {valign: "top", color: P.authority, alpha: g5 * named(t, noPower)});
+    nameText(L("有权决定或动手", "Authority to decide or act"), PX, SY + 34 + NAME_GAP, {valign: "top", color: P.authority, alpha: g5 * named(t, noPower)});
   }
 };
 
@@ -1933,7 +1937,7 @@ scenes["04"] = function (s, t) {
       ", usable", " or adopted"]]]
   : [
     ["说真话", ["不编造", "、不隐瞒", "、不挑着说", "、没把握的不说成有把握"]],
-    ["守边界", ["对象和时间", "、能力和权限", "，数据、安全、合规", "和行动的界限"]],
+    ["守边界", ["对象和时间", "、专业能力和权限", "，数据、安全、合规", "和行动的界限"]],
     ["责任落到人", ["重要的判断", "、决定", "、变更", "和验收", "，都有人负责"]],
     ["不虚报完成", ["说做完了", "、做对了", "、能用了", "、已经有人在用", "，都要有当前的、对得上的证据"]]];
   const caseRows = en ? [["Inside these boundaries", ["autonomy", ", exploration", ", creative work"]],
@@ -1970,7 +1974,7 @@ scenes["04"] = function (s, t) {
     cues(s, [["", "without current evidence"], ["", "matching the claim"], ["", "call nothing complete"], ["", "correct"], ["", "usable"],
       ["", "or adopted"]])] : [
     cues(s, [["不编造", ""], ["不隐瞒", ""], ["不挑着说", ""], ["没把握的", ""]]),
-    cues(s, [["对象和时间", ""], ["能力和权限", ""], ["数据安全合规", ""], ["行动的界限", ""]]),
+    cues(s, [["对象和时间", ""], ["专业能力和权限", ""], ["数据安全合规", ""], ["行动的界限", ""]]),
     cues(s, [["重要的", ""], ["决定", ""], ["变更", ""], ["验收", ""], ["有人负责", ""]]),
     cues(s, [["说做完了", ""], ["做对了", ""], ["能用了", ""], ["已经有人在用", ""], ["都要有当前的", ""]])];
   // Each boundary is drawn from what it covers: its side turns gold one step per part as the part is said, the English
@@ -3479,13 +3483,19 @@ function tableIcon(x, y, w, h, {alpha = 1, stroke: s = P.ink, rows = 4, cols = 3
 scenes["09"] = function (s, t) {
   const [specific, file, chart, signal, six, unclear, , , truth] = cues(s, [
     ["证明适合某个具体用途", "shown fit for a specific use"], ["能打开的文件", "a file that opens"], ["好看的图", "a chart that looks right"],
-    ["看起来有效的模型信号", "a promising model signal"], ["先问六个问题", "ask six questions"], ["说不清这些的数据", "data that cannot answer"],
+    ["看起来有效的模型信号", "a promising model signal"], ["先问六个问题", "ask six questions"], ["含义、质量或者", "data with unknown meaning"],
     ["探索", "explored"], ["共享", "sharing, production and decisions"], ["权威来源", "source of truth"]]);
   const asks = cues(s, [["从哪里来", "where did it come from"], ["最早什么时候能拿到", "when did it become available"], ["含义是什么", "what does it mean"],
     ["被什么改过", "what changed it"], ["质量怎么样", "how good is it"], ["能用在哪里", "how may it be used"]]);
   const views = cues(s, [["报告", "reports"], ["数据目录", "catalogs"], ["缓存", "caches"], ["智能体的摘要", "agent summaries"]]);
   const unknowns = cues(s, [["含义", "meaning"], ["质量", "quality"], ["使用权限", "permission"], ["复现", "reproducibility"]]);
   const [dataAt, useAt, trustAt] = cues(s, [["再来看数据", "data"], ["具体用途", "a specific use"], ["才谈得上可信", "earns trust"]]);
+  // The data that may only be explored is named with its unknowns. English names them as the data's own words open its
+  // thought, so the exploration stage cuts in on them. Chinese first recalls three of the six questions as the ones
+  // still unclear, 含义、质量或者最早能拿到的时间还说不清, so the ring holds through that clause and marks each on its
+  // words, and the exploration stage cuts in as the clause that allows exploring begins.
+  const explore = cue(s, "可以在授权范围里探索", "may be explored"), opensFour = en ? unclear : explore;
+  const recalled = en ? [] : [unclear, cue(s, "质量或者", ""), cue(s, "最早能拿到的时间", "")], recalls = [2, 4, 1];
   const base = ramp(t, opening(s), .7);
   const cx = 960, cy = 470, W = 560, H = 340, top = cy - H / 2;
   // Stages 1 to 3 stand about the data. The English open questions' names are long, so in English the data and all that
@@ -3498,7 +3508,7 @@ scenes["09"] = function (s, t) {
   // 1-3. The price data stands at the centre while it is questioned: its name above its left edge, the specific use it
   // must be shown fit for above its right edge on the same line, and its trust an open seal on its corner. Its rules are
   // one stroke with it, so the table reads as one mark under its name.
-  const center = base * stageOut(t, unclear) * clearOfTitle(s, t, top - 60);
+  const center = base * stageOut(t, opensFour) * clearOfTitle(s, t, top - 60);
   if (center > 0) {
     const core = ramp(t, Math.min(specific - .4, opening(s) + .2), .7) * center;
     tableIcon(cx - W / 2, top, W, H, {alpha: core, joined: true});
@@ -3541,11 +3551,13 @@ scenes["09"] = function (s, t) {
   // 3. Six questions ring the data from the words that count them, replacing the three non-proofs in one cut: the ring
   // is counted in at the structure tier and named as six questions under the data, and each question's station arrives
   // on the ring, filled, when its question is asked; the names build into the whole set and leave with the ring when
-  // unexplained data is named. Each question is named by the noun of what it asks, as its caption shows the whole
+  // the exploration stage cuts in. Each question is named by the noun of what it asks, as its caption shows the whole
   // question: in English, whose questions lose their sense without their question words, and in Chinese alike. The
   // Chinese sixth, where the data may be used, is named 使用范围: the scene says 用途 a few seconds later of the one use
-  // the data must be shown fit for, which 用途 here would seem to anticipate.
-  const three = base * stageIn(t, six) * stageOut(t, unclear);
+  // the data must be shown fit for, which 用途 here would seem to anticipate. As Chinese recalls meaning, quality and
+  // availability as still unclear, each of the three takes the open question's dashed ring of stage 2 on its words and
+  // keeps it while the ring stands.
+  const three = base * stageIn(t, six) * stageOut(t, opensFour);
   if (three > 0) {
     const rx = 460, ry = 320, names = en ? ["Source", "Availability", "Meaning", "Changes", "Quality", "Permitted use"]
       : ["来源", "可用时间", "含义", "改动", "质量", "使用范围"];
@@ -3559,19 +3571,25 @@ scenes["09"] = function (s, t) {
       dot(x, y, 12, {color: P.evidence, alpha: asked, hollow: true, width: 2.5});
       dot(x, y, 12, {color: P.evidence, alpha: asked});
       if (lit > 0) ring(x, y, 21, {color: P.evidence, alpha: lit * restMark(P.evidence, .5) * three, width: 2});
+      const k = recalls.indexOf(i), open = k >= 0 && k < recalled.length ? ramp(t, recalled[k] + .05, .4) * three : 0;
+      if (open > 0) ring(x, y, 24, {color: P.unknown, alpha: open, width: 2.5, dash: [4, 4]});
       radialName(names[i], cx, cy, rx + 12, a, {ry: ry + 12, alpha: three * listIn(t, asks, i), set: "questions"});
     });
   }
   ctx.restore();
-  // 4. Data that cannot answer them may be explored within an authorized scope but stays out of sharing, production
-  // and decisions until it is shown fit. The data that cannot answer stands from the cut; its exploration scope, a frame
-  // sized to it, stands round it on the words that allow exploring ("可以…", "may be explored"), and the work it stays
-  // out of stands beside it as a small frame whose three uses arrive on their words. The way from the data toward that
-  // work stops at a boundary halfway, on the words that refuse it. Both editions say what the data must first be shown,
-  // fit for this use, last, as the stage gives way, so the boundary stands for it unnamed.
-  const four = base * stageIn(t, unclear) * stageOut(t, views[0]);
+  // 4. Data with unknown meaning, quality or historical availability may be explored within an authorized scope but
+  // stays out of sharing, production and decisions until it is shown fit. The data stands from the cut with its
+  // question mark, named as the words say it: in English by its unknown meaning, the words the stage cuts in on, and in
+  // Chinese 还说不清, the words that close the clause before the cut, whose unknowns the ring has just marked. Its
+  // exploration scope, a frame sized to it, stands round it from the cut and takes its name on the words that allow
+  // exploring ("可以…", "may be explored"), with the cut in Chinese, so the English stage never stands as the data alone
+  // through the words that name its unknowns; the work it stays out of stands beside it as a small frame whose three
+  // uses arrive on their words. The way from the data toward that work stops at a boundary halfway, on the words that
+  // refuse it. Both editions say what the data must first be shown, fit for this use, last, as the stage gives way, so
+  // the boundary stands for it unnamed.
+  const four = base * stageIn(t, opensFour) * stageOut(t, views[0]);
   if (four > 0) {
-    const scope = cue(s, "可以在授权范围里探索", "may be explored"), uses = cues(s, [["共享", "sharing"], ["投产", "production"], ["做决策", "decisions"]]);
+    const scope = explore, uses = cues(s, [["共享", "sharing"], ["投产", "production"], ["做决策", "decisions"]]);
     // The exploration side stands right of its place while it builds alone, and the stage eases to 135 px left of it as
     // the work it stays out of is named, so the pair of frames stands centred once that work stands beside it. The
     // English stands 90 px right, so its table opens over the ring of questions it replaces.
@@ -3583,14 +3601,18 @@ scenes["09"] = function (s, t) {
     // The two frames stand on one top, so their names stand on one line above them, and the way from exploration runs
     // into the work's frame at its centre. What the exploration frame holds, the table, its question and its name,
     // stands centred in it, with equal room above and below; the English name stands whole on one line, centred in the
-    // frame under the table and its question.
-    const lx = 650, fy = 340, fw = 400, fh = 320, ax = 1250, ay = fy, aw = 290, ah = 200, mid = ay + ah / 2, unclearW = L(260, 320);
-    const unclearName = L("说不清这些的数据", "Data that cannot answer"), ct = fy + (fh - 150 - NAME_GAP - blockHeight(wrapName(unclearName, unclearW).length)) / 2;
-    box(lx, fy, fw, fh, {stroke: P.muted, alpha: four * named(t, scope), radius: 10});
+    // frame under the table and its question, and its frame is 80 px wider than the Chinese, what the frame holds moving
+    // with its centre, so the name keeps its padding and the frame, standing alone with what it holds until the
+    // exploration is named, covers a tenth of the band. The frame is drawn 2.5 px wide, so it reads as lit structure on
+    // its own, round quiet marks.
+    const lx = 650, fy = 340, fw = L(400, 480), fh = 320, ax = 1250, ay = fy, aw = 290, ah = 200, mid = ay + ah / 2, unclearW = L(260, 380), inset = (fw - 400) / 2;
+    const unclearName = L("还说不清", "Data with unknown meaning"), unclearAt = en ? unclear : cue(s, "还说不清", "");
+    const ct = fy + (fh - 150 - NAME_GAP - blockHeight(wrapName(unclearName, unclearW).length)) / 2;
+    box(lx, fy, fw, fh, {stroke: P.muted, width: 2.5, alpha: four, radius: 10});
     nameText(L("在授权范围里探索", "Explored within an authorized scope"), lx, fy - NAME_GAP, {align: "left", valign: "bottom", alpha: four * named(t, scope)});
-    tableIcon(lx + 50, ct, 220, 150, {alpha: four, stroke: P.muted, rows: 2, cols: 2});
-    text("?", lx + 330, ct + 75, 56, {align: "center", color: P.unknown, alpha: four, role: "mark"});
-    nameText(unclearName, lx + L(160, fw / 2), ct + 150 + NAME_GAP, {valign: "top", width: unclearW, color: P.muted, alpha: four * named(t, unclear)});
+    tableIcon(lx + 50 + inset, ct, 220, 150, {alpha: four, stroke: P.muted, rows: 2, cols: 2});
+    text("?", lx + 330 + inset, ct + 75, 56, {align: "center", color: P.unknown, alpha: four, role: "mark"});
+    nameText(unclearName, lx + L(160, fw / 2), ct + 150 + NAME_GAP, {valign: "top", width: unclearW, color: P.muted, alpha: four * named(t, unclearAt)});
     // The work it stays out of: shared use (two people), production (a running table) and decisions (a diamond).
     const wq = four * named(t, uses[0]);
     box(ax, ay, aw, ah, {fill: P.row, stroke: P.ink, alpha: wq, radius: 10});
@@ -3608,36 +3630,35 @@ scenes["09"] = function (s, t) {
   }
   // 5. Reports, catalogs, caches and Agent summaries are derived: they hang from the source of truth on
   // one trunk and one crossing row, the order of a family tree, and what flows down each drop is a copy. When the words
-  // say none may quietly become the source of truth, a short bar closes the trunk, the one way every view would take
-  // back up, and a point leaves the last view, runs up its drop and along the crossing row, and stops below the bar;
-  // every view keeps its position, so the names keep one baseline. The source of truth stands on the words that name
-  // it, at the position and size the next scene lifts its price from.
+  // say none may quietly be treated as the source of truth, a short bar closes the trunk, the one way every view would
+  // take back up, and a point leaves the last view, runs up its drop and along the crossing row, and stops below the
+  // bar; every view keeps its position, so the names keep one baseline. The source of truth stands on the words that
+  // name it, at the position and size the next scene lifts its price from.
   const five = base * stageIn(t, views[0]);
   if (five > 0) {
     // The views stand centred under their source: the crossing row's middle meets the trunk, so its two arms are equal.
-    // While the row builds from the left it stands half its 340 px pitch toward its open end for each view still to
-    // come, so the views shown stand centred under the trunk at every step, and it closes under the trunk on the last
-    // view's words. The source keeps the frame's centre, where the next scene lifts its price from, so the price's
-    // flight keeps its length.
-    const XS = [450, 790, 1130, 1470], shift = building(t, views, 170), sx = cx, sb = 360, bus = 410, iconTop = 480, xs = XS.map(x => x + shift);
-    const become = cue(s, "悄悄变成", "quietly become"), rootAt = cue(s, "权威来源", "source of truth");
+    // The row stands whole from the stage's first words, a rail that shows no direction, so the stage stands as wide as
+    // it will be, about the centre, while each view takes its place on it on its own words: the Chinese names its views
+    // late in its thought, after a long first sentence, so a row grown out to each view would leave the picture thin
+    // there. The source keeps the frame's centre, where the next scene lifts its price from, so the price's flight keeps
+    // its length.
+    const xs = [450, 790, 1130, 1470], sx = cx, sb = 360, bus = 410, iconTop = 480;
+    const become = cue(s, "悄悄被当成", "quietly be treated as"), rootAt = cue(s, "权威来源", "source of truth");
     tableIcon(sx - 120, 210, 240, 150, {alpha: five * ramp(t, rootAt - .15, .4)});
     growName(t, [L("权威来源", "Source of truth")], [rootAt], sx - 120, 210 - NAME_GAP, {valign: "bottom", alpha: five});
     const shown = views.map(at => ramp(t, at - .15, .4) * five);
-    // The row reaches each view from the view before it at the drawing pace, over one pitch, while the row's glide carries
-    // its left end with the first view.
-    // The crossing row grows out to each view as it is named, and the trunk rises from it to the source.
+    // The trunk rises from the crossing row to the source as the source is named.
     link(sx, sb + 12, sx, bus, {alpha: five * ramp(t, Math.min(rootAt, become) - .15, .4), end: false});
-    const left = Math.min(sx, xs[0]), right = xs.reduce((r, x, i) => mix(r, Math.max(r, x), drawShare(t, views[i] - .15, XS[1] - XS[0])), sx);
     // The crossing row is drawn 2.5 px wide, so it reads as lit structure on its own now that the copies on the drops
     // run in passes instead of standing on every drop at once.
-    line(left, bus, right, bus, {color: P.line, alpha: five, width: 2.5});
+    line(xs[0], bus, xs[3], bus, {color: P.line, alpha: five, width: 2.5});
     const names = en ? ["Reports", "Catalogs", "Caches", "Agent summaries"] : ["报告", "数据目录", "缓存", "智能体的摘要"];
     views.forEach((at, i) => {
       const q = shown[i];
       if (q <= 0) return;
       const y = iconTop;
-      // What flows down each drop is a copy; once the last view tries to become the source, no copy leaves for it again.
+      // What flows down each drop is a copy; once the last view is about to be treated as the source, no copy leaves for
+      // it again.
       link(xs[i], bus, xs[i], y - 10, {alpha: q, draw: {t, at: at + .15}, end: false, flowing: since(t, at + .45),
         last: i === 3 ? since(become + .05, at + .45) : Infinity});
       // A derived view: a copy drawn over a dashed trace of its source.
@@ -3707,11 +3728,13 @@ scenes["10"] = function (s, t) {
     const flight = cruise((voiceTime(t) - voiceTime(priceAt - .05)) / flightTime);
     // The rail shows no direction, so it stands whole rather than drawing on. The card's name, flying under the card,
     // crosses the rail's line only left of the second station, so the rail from there on fades in as the card sets off
-    // (and balances the card through its flight), and its first stretch, under the first station, fades in over the
-    // card's last tenth of flight, when the name stands 16 px or more below the rail.
+    // (and balances the card through its flight), and its first stretch, under the first station, fades in from the
+    // card's last tenth of flight, when the name stands 16 px or more below the rail, over 0.4 s of voice time however
+    // short the flight, so the stretch never inks in within a frame.
     const grouped = ramp(t, five + .1, .4), BY = ICON - R - 40;
+    const lastTenth = voiceTime(priceAt - .05) + (1 - Math.sqrt(.032)) * flightTime, first = ease((voiceTime(t) - lastTenth) / .4);
     if (flight > .35) line(xs[1] - 70, RAIL, xs[4] + 70, RAIL, {color: P.line, width: 2.5, alpha: ease((flight - .35) / .2)});
-    if (flight > .9) line(xs[0] - 70, RAIL, xs[1] - 70, RAIL, {color: P.line, width: 2.5, alpha: ease((flight - .9) / .1)});
+    if (first > 0) line(xs[0] - 70, RAIL, xs[1] - 70, RAIL, {color: P.line, width: 2.5, alpha: first});
     // The bracket spans the five moments' names as well as their marks, 16 px past the widest end name, symmetric about
     // the bracket's name.
     const endW = [names[0], names[4]].map(v => Math.max(...wrapName(v, RAIL_WRAP).map(line => measure(line))));
@@ -3956,9 +3979,10 @@ scenes["11"] = function (s, t) {
       ["讲明可用时间", "timing is unproven"], ["授权内的探索", "authorized exploration"]]);
     DEC.forEach((c, i) => {
       // The "?" stands above its decision until that snapshot is found; then the snapshot is drawn there, as far as its
-      // decision: what was known then. The mark gives way in the snapshot's first moment, fading as the drawing begins.
+      // decision: what was known then. The mark inks in from its stage's cut, which keeps the chart, and gives way in the
+      // snapshot's first moment, fading as the drawing begins.
       const found = snapAt - .1 + i * .25, fill = ramp(t, found, .5) * two;
-      text("?", c, FY + FH / 2, 26, {role: "mark", align: "center", color: P.unknown, alpha: two * (1 - ramp(t, found - .25, .25))});
+      text("?", c, FY + FH / 2, 26, {role: "mark", align: "center", color: P.unknown, alpha: two * ramp(t, unknownCut + STAGE_CUT, .4) * (1 - ramp(t, found - .25, .25))});
       box(c - FW / 2, FY, FW, FH, {stroke: P.evidence, width: 2, alpha: fill, radius: 6});
       const mx = x => c - FW / 2 + 12 + (x - X0) / (X1 - X0) * (FW - 24), my = v => FY + FH / 2 + (v - 552) * .3;
       path(series(priceAt, X0, c).map(([x, v]) => [mx(x), my(v)]), {color: P.evidence, width: 2, alpha: two, draw: {t, at: found}});
@@ -4059,7 +4083,9 @@ scenes["11"] = function (s, t) {
     // The whole set returns to full ink on the last item's words, inside its thought, so it stands complete before the
     // stage cuts; the item being spoken keeps its own light.
     const lastWhole = ramp(t, ats[3] + .05, .4), level = i => Math.max(listLevel(t, ats, i), lastWhole);
-    const dropAt = cueFrom(s, "偏差", "today's", ats[3]), dropped = t > dropAt + .05;
+    // The ended security's line breaks into dashes over a third of a second from its drop, as 13.1's join does: each
+    // 20 px of it opens a gap from its end, so the dashes keep their places and nothing changes in one frame.
+    const dropAt = cueFrom(s, "偏差", "today's", ats[3]), dropped = ramp(t, dropAt + .05, .35);
     // The bracket gathers the places present: it opens on the sample's rails and grows down to each further place.
     const ends = [SA[1], TK, CAL + 4, SV[1]].map(y => y + 22);
     const bottom = ends.slice(1).reduce((y, end, i) => mix(y, end, ramp(t, ats[i + 1] - .25, .4)), ends[0]);
@@ -4092,7 +4118,7 @@ scenes["11"] = function (s, t) {
     // it and is dropped, dashed and crossed, on "today". While the survivors are said their cross lights by its stroke,
     // as the sample's frame and the calendar's wrong day light by theirs, so it keeps one size, unlike the lens's handle.
     line(RX, SV[0], GX, SV[0], {color: P.ink, width: 3, alpha: on(3)});
-    line(RX, SV[1], END, SV[1], {color: P.line, width: 3.5, alpha: on(3), dash: dropped ? [10, 10] : null});
+    line(RX, SV[1], END, SV[1], {color: P.line, width: 3.5, alpha: on(3), dash: dropped > 0 ? [20 - 10 * dropped, 10 * dropped] : null});
     line(END, SV[1] - 18, END, SV[1] + 18, {color: P.line, width: 4, alpha: on(3)});
     cross(END + 30, SV[1], 24, {alpha: four * ramp(t, dropAt - .1, .3), width: 3 + 1.5 * lit(3)});
     const names = en ? ["Sample selection", "Changed tickers or issuers", "The trading calendar", "Only today's survivors"]
@@ -4397,15 +4423,27 @@ scenes["12"] = function (s, t) {
   // The ring of conditions stands around the data with one arc missing, and one way leaves it for the four labels: a
   // column on its own branches that builds as each label is said, each branch and mark arriving with its label. A
   // limited use needs its own evidence and permission: its row lights again and the qualifier joins it on those words.
-  // The ring and the column are composed about the centre: the limited use's qualifier stands under its term, so the
-  // column stays narrow, and the Chinese stage, whose first labels are short, stands 30 px right of the ring's first
-  // place, about the centre while they build and once the qualifier joins. While the ring stands alone it stands at the
-  // centre, and it eases to its place on the words that label the data, as its way out draws toward the labels.
+  // It does not make the data a fully qualified asset: a way from the limited use draws on on the words that deny it and
+  // stops at a bar, and the asset beyond stays an open dashed ring, the outline 12.4 gives what does not follow, named
+  // on its own words. The ring and the column are composed about the centre: the limited use's qualifier stands under
+  // its term, so the column stays narrow, and the Chinese stage, whose first labels are short, stands 30 px right of the
+  // ring's first place, about the centre while they build and once the qualifier joins. While the ring stands alone it
+  // stands at the centre, and it eases to its place on the words that label the data, as its way out draws toward the
+  // labels; on the words that deny the asset it eases left again by half the room the asset takes beyond the column,
+  // so it stands centred once the asset stands beside the limited use.
   const two = base * stageIn(t, missing) * stageOut(t, path_);
   if (two > 0) {
     const dx = L(30, 0), cx = 670 + dx, cy = CONTENT_CY, R = 150, gone = 7, sx = 1050 + dx, mx = 1110 + dx;
     const [labelAt, permitAt] = cues(s, [["标成", "label the data"], ["和权限", "and permission"]]);
-    ctx.save(); ctx.translate((960 - cx) * (1 - glide(t, labelAt + .05, 960 - cx)), 0);
+    const [denyAt, assetAt] = cues(s, [["并不因此", "does not make"], ["完全合格的资产", "fully qualified asset"]]);
+    const rows = en ? [["Exploratory"], ["Temporary"], ["Limited use"], ["Awaiting verification"]] : [["探索"], ["临时"], ["有限使用"], ["待核验"]];
+    const quals = [[], [], en ? ["own evidence", " and permission"] : ["自己的证据", "和权限"], []];
+    // The asset stands on the limited use's line beyond its block, at 12.4's spacing: its way, the bar that stops it,
+    // its open ring and its name after the ring.
+    const NX = mx + NAME_GAP + 8, blockW = r => Math.max(measure(rows[r].join("")), quals[r].length ? measure(quals[r].join(""), NOTE) : 0);
+    const columnEnd = NX + Math.max(...rows.map((_, r) => blockW(r))), wx = NX + blockW(2) + 24, bx = wx + 80, rx = bx + 60;
+    const assetName = L("完全合格的资产", "Fully qualified asset"), room = Math.max(0, (rx + 24 + NAME_GAP + measure(assetName) - columnEnd) / 2);
+    ctx.save(); ctx.translate((960 - cx) * (1 - glide(t, labelAt + .05, 960 - cx)) - room * glide(t, denyAt + .05, room), 0);
     const limitedAt = cueFrom(s, "有限使用也要", "a limited use needs", labels[2]);
     tableIcon(cx - 75, cy - 50, 150, 100, {alpha: two});
     conds.forEach((_, i) => {
@@ -4418,8 +4456,6 @@ scenes["12"] = function (s, t) {
     nameText(L("任何一条不满足", "If any condition is unmet"), cx, cy + R + 18 + NAME_GAP, {valign: "top", alpha: two});
     // The data's way out of the ring is the trunk of the labels' branches, drawn firm as it is said to be labelled.
     link(cx + R + 24, cy, sx, cy, {alpha: two, width: 3, draw: {t, at: labelAt + .05}, end: false});
-    const rows = en ? [["Exploratory"], ["Temporary"], ["Limited use"], ["Awaiting verification"]] : [["探索"], ["临时"], ["有限使用"], ["待核验"]];
-    const quals = [[], [], en ? ["own evidence", " and permission"] : ["自己的证据", "和权限"], []];
     const width = 1780 - mx - NAME_GAP - 8, tops = stackTops(rows.map((term, r) => termRowLayout(term, quals[r], width, false).height), cy, 60);
     rows.forEach((term, r) => {
       const my = tops[r] + labelSize(LABEL) / 2, q = ramp(t, labels[r] - .15, .4) * two, again = ramp(t, limitedAt - .15, .3);
@@ -4429,8 +4465,14 @@ scenes["12"] = function (s, t) {
       if (lit > 0) ring(mx, my, 17, {color: P.unknown, alpha: lit * restMark(P.unknown, .6) * two, width: 2});
       // Limited use returns to full ink when it is spoken again with its qualifier.
       const level = r === 2 ? Math.max(listLevel(t, labels, r), again) : listLevel(t, labels, r);
-      termRow(t, term, [labels[r]], quals[r], [limitedAt, permitAt], mx + NAME_GAP + 8, tops[r], {width, inline: false, alpha: two * level, set: "labels"});
+      termRow(t, term, [labels[r]], quals[r], [limitedAt, permitAt], NX, tops[r], {width, inline: false, alpha: two * level, set: "labels"});
     });
+    // The limited use does not reach the fully qualified asset: its way stops at the bar, and the asset stays open.
+    const ly = tops[2] + labelSize(LABEL) / 2;
+    link(wx, ly, bx - 12, ly, {alpha: two, draw: {t, at: denyAt + .05}, end: false});
+    line(bx, ly - 36, bx, ly + 36, {color: P.unknown, alpha: ramp(t, denyAt + .45, .3) * two, width: 4});
+    ring(rx, ly, 24, {color: P.muted, alpha: ramp(t, assetAt - .1, .4) * two, width: 2.5, dash: [6, 6]});
+    nameText(assetName, rx + 24 + NAME_GAP, ly, {align: "left", color: P.muted, alpha: two * named(t, assetAt)});
     ctx.restore();
   }
   // 3. From a signal to controlled use, the questions that apply are answered for the intended use. The way from the
@@ -4440,7 +4482,7 @@ scenes["12"] = function (s, t) {
   // lights it, named by its key words, and the six build around the use. Under the use, inside the ring, both editions
   // name the questions that apply. The stage hands over in one cut on the first inequality. The Chinese calls the signal
   // promising.
-  const [forUse, ctrlAt] = cues(s, [["针对这项用途", "the intended use"], ["受控使用", "controlled use"]]);
+  const [forUse, ctrlAt] = cues(s, [["针对计划中的用途", "the intended use"], ["受控使用", "controlled use"]]);
   const applyAt = cue(s, "适用的问题", "the questions that apply");
   const three = base * stageIn(t, path_) * stageOut(t, signalNot);
   if (three > 0) {
@@ -4470,7 +4512,7 @@ scenes["12"] = function (s, t) {
     const use = ramp(t, forUse - .1, .4) * three;
     ring(cx, cy - 64, 22, {color: P.evidence, alpha: use, width: 2.5});
     dot(cx, cy - 64, 8, {color: P.evidence, alpha: use});
-    nameText(L("针对这项用途", "The intended use"), cx, cy, {color: P.evidence, alpha: three * named(t, forUse)});
+    nameText(L("针对计划中的用途", "The intended use"), cx, cy, {color: P.evidence, alpha: three * named(t, forUse)});
     nameText(L("适用的问题", "The questions that apply"), cx, cy + 60, {alpha: three * named(t, applyAt)});
     steps.forEach((at, i) => {
       const a = -Math.PI / 2 + i * Math.PI / 3, x = cx + Math.cos(a) * R, y = cy + Math.sin(a) * R, lit = speaking(t, steps, i);
@@ -4485,21 +4527,20 @@ scenes["12"] = function (s, t) {
       else nameText(names[i], x + side * (12 + NAME_GAP), y - labelSize(LABEL) / 2, {...o, align: side > 0 ? "left" : "right", valign: "top"});
     });
   }
-  // 4. A signal does not mean production-ready (in English, is not yet production-ready); deployed does not mean
-  // admitted, still less that another use may follow (in English, admitted, let alone for every use). Three rows, each a
-  // way from what holds toward what is said not to follow: the way draws on on the words that deny it and stops at a
-  // gate's bar, and what lies beyond stays an open mark, named on its own words. The third row says what deployment
-  // brings still less, so its way branches from deployment's mark on the words that deny it, and it has no name of its
-  // own on the left.
+  // 4. A signal is not yet production-ready; deployed does not mean admitted, still less that another use may follow
+  // (in English, admitted, let alone for another use). Three rows, each a way from what holds toward what is said not to
+  // follow: the way draws on on the words that deny it and stops at a gate's bar, and what lies beyond stays an open
+  // mark, named on its own words. The third row says what deployment brings still less, so its way branches from
+  // deployment's mark on the words that deny it, and it has no name of its own on the left.
   // The marks and the gate are set at reading size, so the first row alone already spans the frame. The rows build into
   // one set until admission is named. The set stays centred as it grows: the first row stands on the centre line, and
   // the rows already shown step up by half a row as the words that bring the next one begin. The rows share one gate, a
   // bar through their whole extent at the structure tier, which stands where the first way meets it, so the table
   // stands as tall as it will be from its first refusal; each row's stretch of it takes its colour when its way reaches
   // it.
-  const rights = cues(s, [["能投产", "production ready"], ["准入了", "admitted"], ["别的用途", "for every use"]]);
+  const rights = cues(s, [["能投产", "production ready"], ["准入了", "admitted"], ["别的用途", "for another use"]]);
   const lefts = [signalNot, deployed];
-  const nots = [cueFrom(s, "不等于", "is not yet", signalNot), cueFrom(s, "不等于", "does not mean", deployed), cueFrom(s, "更不等于", "let alone", deployed)];
+  const nots = [cueFrom(s, "还不能", "is not yet", signalNot), cueFrom(s, "不等于", "does not mean", deployed), cueFrom(s, "更不等于", "let alone", deployed)];
   const rowAts = [...lefts, nots[2]];
   const four = base * stageIn(t, signalNot) * stageOut(t, admission);
   if (four > 0) {
@@ -4507,7 +4548,7 @@ scenes["12"] = function (s, t) {
     // marks of what holds stand as far left of the bar as centres the rows with their names: the English names of what
     // does not follow are longer than those of what holds, so there the ways from what holds are longer.
     const dx = L(0, 20), rx = 1380 + dx, bar = 960 + dx, MR = 24, PITCH = 96, pairs = en ? [["A signal", "Production-ready"],
-      ["Deployed", "Admitted"], [null, "For every use"]] : [["有信号", "能投产"], ["已经部署", "准入了"], [null, "别的用途"]];
+      ["Deployed", "Admitted"], [null, "For another use"]] : [["有信号", "能投产"], ["已经部署", "准入了"], [null, "别的用途"]];
     const widest = side => Math.max(...pairs.filter(v => v[side]).map(v => measure(v[side]))), lx = Math.min(540 + dx, 1920 - rx - widest(1) + widest(0));
     const grown = [1, 2].reduce((sum, k) => sum + soon(t, rowAts[k] - .3, .35), 0), ys = rowAts.map((_, i) => 510 + PITCH * (i - grown / 2));
     line(bar, 510 - PITCH - 36, bar, 510 + PITCH + 36, {color: P.line, alpha: ramp(t, nots[0] + .45, .3) * four, width: 4});
@@ -4603,7 +4644,7 @@ scenes["13"] = function (s, t) {
     ["关联到别的公司", "match the wrong entities"], ["几件不同的事", "several decisions"], ["表结构选得再方便", "convenient schema"]]);
   // Both editions name each role just before saying what it does.
   const roles = cues(s, [["开发", "development checks"], ["技术", "technical owners check"], ["产品", "product owner identifies"],
-    ["生产", "production plans"], ["治理", "governance confirms"]]);
+    ["生产", "production owner plans"], ["治理", "governance confirms"]]);
   const [seats, coordinate, retire, migrated, ended, notice] = cues(s, [["这些是责任", "responsibilities not seats"],
     ["任务负责人", "task lead"], ["旧公司代码要停用", "retiring the old identifier"], ["都已迁移", "has migrated"], ["终止了那项使用", "ended its use"], ["弃用通知", "deprecation notice"]]);
   // Each decision's owner is named on its own noun; the items it settles fill on their own words in stage 2.
@@ -4756,7 +4797,7 @@ scenes["13"] = function (s, t) {
   // five along one way up to a bracket under the row, and deciding for the others is refused under its name.
   const p3 = stageIn(t, roles[0]) * base * stageOut(t, retire);
   if (p3 > 0) {
-    const names = en ? ["Development", "Technical owners", "Product owner", "Production", "Governance"] : ["开发", "技术", "产品", "生产", "治理"];
+    const names = en ? ["Development", "Technical owners", "Product owner", "Production", "Governance"] : ["开发方", "技术方", "产品", "生产方", "治理方"];
     const acts = [["核对关联", "checks the joins"], ["检查兼容性", "check compatibility"], ["找出", "identifies"], ["规划发布", "plans the release"],
       ["确认", "confirms permission"]].map(([a, b], i) => cueFrom(s, a, b, roles[i]));
     const [pathsAt, recoverAt, exitAt] = [cueFrom(s, "安排迁移", "their migration paths", roles[2]), cueFrom(s, "恢复", "recovery", roles[3]),
@@ -4927,14 +4968,18 @@ scenes["14"] = function (s, t) {
   const vaultAts = cues(s, en ? [["", "production shared"], ["", "shared assets"], ["", "critical management chains"]] : [["生产环境", ""], ["共享资产", ""], ["关键管理链条", ""]]);
   // Each control's gate arrives on the words that begin it and opens one step per requirement said. A control whose key
   // phrase closes its clause arrives near those words, so its name never stands long before them: the rerun control on
-  // the outputs, and the Chinese way back once the release window has been said.
+  // the outputs, the Chinese way back once the release window has been said, and the evidence from the current version
+  // and environment on the words that say where it must come from.
   const lockAts = (en ? [[["", "a defined subject"], ["", "impact"], ["", "task lead"], ["", "and authority"]],
-    [["", "outputs that"], ["", "rerun exactly"]], [["", "tests acceptance"], ["", "acceptance"], ["", "watching how it runs"]],
+    [["", "outputs that"], ["", "rerun exactly"]], [["", "tests acceptance"], ["", "acceptance"], ["", "operational observation"]],
     [["", "release window"], ["", "rollback or degradation"]], [["", "security"], ["", "permission and"], ["", "sensitive-data checks"]],
     [["", "conditions"], ["", "hand control"], ["", "or stop"]]]
     : [[["讲明改什么", ""], ["影响谁", ""], ["谁负责", ""], ["谁授权", ""]], [["输出", ""], ["原样重跑", ""]],
       [["有测试", ""], ["验收和", ""], ["发布后的观察", ""]], [["回滚或降级预案", ""]], [["安全", ""], ["权限和", ""], ["敏感信息", ""]],
       [["什么时候上报", ""], ["交给人接管", ""], ["停下", ""]]]).map(pairs => cues(s, pairs));
+  // The seventh control's environment is the one said after the current version, as the hand-over names one before it.
+  const currentAt = cue(s, "当前的版本", "current version");
+  lockAts.push([cue(s, "来自当前", "come from"), currentAt, cueFrom(s, "环境", "environment", currentAt)]);
   const risky = cues(s, [["高风险", "high-risk"], ["权限变更", "permission changes"], ["生产发布", "production releases"], ["删除覆盖", "deletion"], ["不可逆", "irreversible"]]);
   const [ownerAt, approveAt, agentAt, cannotAt] = cues(s, [["决策负责人", "the decision owner"], ["批准", "must approve"], ["智能体", "an agent"],
     ["不能批准", "cannot approve"]]);
@@ -5106,23 +5151,27 @@ scenes["14"] = function (s, t) {
   token(docked ? RCX : tx, docked ? RCY : trackY, {alpha: tokQ * handOff, r: docked ? 24 : 10});
   // 3. Changing production, shared assets or critical management chains needs more. The change waits at the start
   // of a way to the vault that holds them, named from the cut by the voice's first word, the change itself, and the way
-  // crosses six gates, one per required control: each gate arrives shut on the words that name its control and opens
-  // one step per requirement as each is said, named by its key words, above and below the way in turn. The vault grows
-  // as each object it holds is named, and the objects are named together over it. When the last gate has opened, the
-  // change's way draws on through all of them into the vault. With the change's and the vault's names and, in English,
-  // its examples the stage carries ten names at most.
+  // crosses seven gates, one per required control, the last the evidence from the current version and environment:
+  // each gate arrives shut on the words that name its control and opens one step per requirement as each is said,
+  // named by its key words, above and below the way in turn. The vault grows as each object it holds is named, and the
+  // objects are named together over it. When the last gate has opened, the change's way draws on through all of them
+  // into the vault. With the change's and the vault's names and, in English, its examples the stage carries ten names
+  // in Chinese and eleven in English.
   const p3 = stageIn(t, changesCut) * base * stageOut(t, highCut);
   if (p3 > 0) {
     const keys = en ? [["Subject, impact", "Task lead, authority"], "Rerun exactly", "Tests, acceptance", "Rollback or degradation", "Security, permission",
-      "Escalate, hand over, stop"]
-      : [["改什么、影响谁", "谁负责、谁授权"], "原样重跑", "测试、验收", "回滚或降级预案", "查安全、权限", "上报、交人接管或停下"];
+      "Escalate, hand over, stop", "Current version\nand environment"]
+      : [["改什么、影响谁", "谁负责、谁授权"], "原样重跑", "测试、验收", "回滚或降级预案", "查安全、权限", "上报、交人接管或停下", "当前的版本和环境"];
     // The vault's name heads the vault, its lines centred on it, and the stage, from the change's ring to the name's
     // far edge, stands centred on the frame in each edition.
     const vaultName = L("生产环境、共享资产，或者风控、监管报送这类关键管理链条", "Production, shared assets or critical management chains");
     // The gates stand 144 px apart in Chinese and 180 px in English, so each control's name stands whole on one line, 40
-    // px or more from the next name on its side of the way; the vault stands 40 px clear of the last control's name.
-    const vaultNote = "Such as risk control or regulatory reporting", GP = L(144, 180), VX0 = 470 + 5 * GP + measure(keys[5]) / 2 + 40, VW = 140;
-    const half = Math.max(...wrapName(vaultName, 480).map(v => measure(v)), ...(en ? wrapName(vaultNote, 480, NOTE).map(v => measure(v, NOTE)) : [])) / 2, ox = 960 - (330 - 23 + VX0 + VW / 2 + half) / 2;
+    // px or more from the next name on its side of the way; the vault stands 40 px clear of the last control's name. The
+    // English last control stands as one name in two lines, broken before its "and", and the note under the vault in
+    // two, so the seven gates and the vault stand centred inside the safe area.
+    const lastW = Math.max(...wrapName(keys.at(-1), Infinity).map(v => measure(v)));
+    const vaultNote = "Such as risk control or regulatory reporting", GP = L(144, 180), VX0 = 470 + (keys.length - 1) * GP + lastW / 2 + 40, VW = 140;
+    const half = Math.max(...wrapName(vaultName, 480).map(v => measure(v)), ...(en ? wrapName(vaultNote, 400, NOTE).map(v => measure(v, NOTE)) : [])) / 2, ox = 960 - (330 - 23 + VX0 + VW / 2 + half) / 2;
     const LY = 510, CX0 = 330 + ox, gx = k => 470 + ox + k * GP, VX = VX0 + ox, starts = lockAts.map(ats => ats[0]);
     // The vault opens around its first object and grows on the words that bring each next one; its name moves with its
     // top edge, so the two always stand together.
@@ -5145,7 +5194,7 @@ scenes["14"] = function (s, t) {
     nameText(vaultName, VX + VW / 2, vy - NAME_GAP, {valign: "bottom", width: 480, alpha: p3 * named(t, vaultAts[0])});
     // English names the chains' examples after the chains, so they join under the vault on their own words, smaller and
     // muted, following its bottom edge and centred on it as its name is; the Chinese name says them before the chains.
-    if (en) nameText("Such as risk control or regulatory reporting", VX + VW / 2, vy + VH + NAME_GAP, {valign: "top", width: 480,
+    if (en) nameText(vaultNote, VX + VW / 2, vy + VH + NAME_GAP, {valign: "top", width: 400,
       size: NOTE, color: P.muted, alpha: p3 * named(t, cue(s, "", "such as risk control"))});
     // The change and its way to the vault stand from the cut, the change named under it from the way's start edge, as a
     // way's first name stands.
@@ -5649,21 +5698,25 @@ scenes["17"] = function (s, t) {
   // arc lights, the stamp's check is struck. The six stay whole across both thoughts and hand the picture to the
   // claim's questions in one cut. While the first condition stands alone at the upper left, the whole stage stands to
   // the right, so the two are balanced within 70 px of the centre; it returns, to within 15 px of the centre, as the
-  // second condition arrives.
+  // second condition arrives, and as the fourth, the widest, arrives it moves on to stand centred on its finished
+  // columns.
   // Each row: its key term and the word that begins it, its qualifier and its word, and the words that say it holds. A
-  // term given as lines keeps them, one under the other, in its column.
+  // term given as lines keeps them, one under the other, in its column. The risks, limits, uncovered cases and follow-up
+  // owners stand in two lines broken at the clause, the Chinese second line keeping the comma that leads to its
+  // qualifier 都已记录, so its block keeps the last line's share; as that row fits beside no qualifier, both editions set
+  // every qualifier under its term.
   const rows = (en ? [
     ["Deliverable", "the deliverable", "at the agreed location", "at the agreed location", "is at the agreed location"],
     ["Completion criteria", "every completion criterion", "all met", "is met", "is met"],
     ["Current verification", "current verification", "matching the claim, passed", "matching the claim", "has passed"],
-    ["Risks, limits, follow-up owners", "risks", "recorded", "are recorded", "are recorded"],
+    [["Risks, limits, uncovered cases", "and follow-up owners"], "risks", "recorded", "are recorded", "are recorded"],
     ["Agreed state", "the agreed state", "reached", "is reached", "is reached"],
     ["Human acceptance", "human acceptance", "where required", "where human acceptance", "has accepted it"]]
   : [
     ["交付物", "交付物", "在约定的位置", "在约定的位置", "在约定的位置"],
     ["每条完成标准", "每条完成标准", "达到了", "达到了", "都达到了"],
-    ["核验", "核验现在跑过", "现在跑过、和说法对得上", "现在跑过", "已经通过"],
-    ["风险、限度和后续由谁负责", "风险", "已记录", "都已记录", "都已记录"],
+    ["当前的核验", "当前的核验", "对得上说法，已经跑过", "对得上说法", "也通过了"],
+    [["风险、限度、没覆盖到的情况，", "以及后续由谁负责，"], "风险", "都已记录", "都已记录", "都已记录"],
     ["约定的状态", "约定的状态", "达到了", "达到了约定的状态", "达到了约定的状态"],
     ["验收人", "验收人", "需要时已经验收", "需要人来验收", "已经验收"]])
     .map(([term, termCue, qual, qualCue, holdCue]) => [[].concat(term), cue(s, termCue, termCue), qual, cue(s, qualCue, qualCue), cue(s, holdCue, holdCue)]);
@@ -5683,8 +5736,9 @@ scenes["17"] = function (s, t) {
     const blockW = ([term, , qual]) => inline ? termW(term) + TERM_GAP + measure(qual, NOTE)
       : Math.max(...growTexts(term, wrapAt(term)).map(line => line.reduce((w, [, v]) => w + measure(v), 0)), measure(qual, NOTE));
     const reach = side => Math.max(...rows.filter((_, r) => r % 2 === side).map(blockW));
-    const lean = Math.max(0, (BXo + 14 + NAME_GAP + blockW(rows[0]) - R) / 2 - 70), settle = Math.max(-15, Math.min(15, (reach(0) - reach(1)) / 2));
-    const SX = 960 + lean * glide(t, starts[0] + .05, lean) + (settle - lean) * glide(t, starts[1] + .05, settle - lean);
+    const lean = Math.max(0, (BXo + 14 + NAME_GAP + blockW(rows[0]) - R) / 2 - 70), finish = (reach(0) - reach(1)) / 2, settle = Math.max(-15, Math.min(15, finish));
+    const SX = 960 + lean * glide(t, starts[0] + .05, lean) + (settle - lean) * glide(t, starts[1] + .05, settle - lean)
+      + (finish - settle) * glide(t, starts[3] + .05, finish - settle);
     // Each row meets the ring at the angle of its own height, and its arc reaches halfway to its neighbours' angles.
     const meet = Math.asin(GY / R) * 180 / Math.PI, top = 180 + meet, low = 180 - meet;
     const arcs = [[(top + 180) / 2, 270], [270, (360 - meet + 360) / 2], [(low + 180) / 2, (top + 180) / 2], [-meet / 2, meet / 2], [90, (low + 180) / 2], [meet / 2, 90]];
@@ -5789,7 +5843,7 @@ scenes["17"] = function (s, t) {
   // about the content centre, its first row on the centre line and the first row stepping up by half a row as the words
   // that bring the second begin, and it stands centred across on the rows said so far.
   // In English the passing test's bar stands on "proves neither", and the Agent's on "does not".
-  const stopWords = en ? ["proves neither", "does not"] : ["不等于", "也不等于"];
+  const stopWords = en ? ["proves neither", "does not"] : ["不等于", "也不代表"];
   const stops = nots.map((at, i) => cueFrom(s, stopWords[i], stopWords[i], at));
   // A reached state given as lines would keep them, one under the other, each ending at the column's edge; every state
   // stands on one line, as said, the Chinese Agent's report among them.
@@ -6720,8 +6774,9 @@ scenes["20"] = function (s, t) {
     });
   }
   // 6. Delegation transfers the work, not that duty: the person and the Agent face each other across the way of the
-  // delegation, drawn and named on its first word. On "transfers" the work crosses along it to the Agent; the duty stays
-  // with the person, and its way across stops at a short bar.
+  // delegation, drawn and named on its first word, and the work is named with it, in the same clause, so its page never
+  // waits for its name. On "transfers" the work crosses along it to the Agent; the duty stays with the person, and its
+  // way across stops at a short bar.
   const examine = cue(s, "检查实际的工作和证据", "examines the actual work"), dutyAt = cue(s, "不是这份责任", "not that duty");
   const acceptor = cue(s, "验收人检查", "the acceptor examines");
   const g6 = base * stageIn(t, transfers) * stageOut(t, acceptor);
@@ -6735,7 +6790,7 @@ scenes["20"] = function (s, t) {
     link(lx + 120, 458, rx + fw - 120, 464, {route: "vhv", mid: 402, alpha: g6, draw: {t, at: transfers + .05}});
     nameText(L("委托", "Delegation"), (lx + fw + rx) / 2, 330, {valign: "bottom", alpha: g6 * named(t, transfers)});
     s17Page(wx - 50, 340, 100, 124, {alpha: g6, rows: 3});
-    nameText(L("工作", "The work"), wx, 340 + 124 + NAME_GAP, {valign: "top", alpha: g6 * named(t, cueFrom(s, "工作", "the work", transfers))});
+    nameText(L("工作", "The work"), wx, 340 + 124 + NAME_GAP, {valign: "top", alpha: g6 * named(t, transfers)});
     // The duty stays: a seal on the person's side whose way across stops at the gap between the two sides.
     seal(lx + 330, 600, 30, {alpha: g6 * ramp(t, dutyAt - .15, .4)});
     link(lx + 370, 600, 954, 600, {color: P.unknown, alpha: g6 * ramp(t, dutyAt + .05, .3), upto: drawShare(t, dutyAt + .05, Math.abs(954 - (lx + 370)), .5), end: false, dash: [8, 8]});
@@ -6840,7 +6895,7 @@ scenes["21"] = function (s, t) {
     line(x + 39, y + 39, x + 76, y + 76, {color: P.evidence, alpha: a, width: 5});
   };
   const [output, actual, summary, first] = cues(s, [["智能体的输出", "an agent's output"], ["实际的工作", "checking the work"], ["它写的摘要", "its summary"],
-    ["行动依据和现状", "is the authority to act right"]]);
+    ["行动依据和现状", "is the authority to act correct"]]);
   // 1. Checking an Agent's output means checking the work, not just its summary. The output stands near the centre on
   // the first words as one stack of pages under its name, with the check's lens over it; the lens settles onto the
   // pages on the words that name the work, and the summary the Agent wrote stands beside the stack on its own name,
@@ -7188,10 +7243,10 @@ scenes["22"] = function (s, t) {
   // its post read as one station, its escalation rises from the sign to the person, and what the kind holds shows
   // beneath the way under its name, each part drawn on its own words. The first sign stands on the words that stop the
   // Agent and is named there; its escalation rises on "escalate", and every later sign and its escalation arrive with
-  // the name of their kind. Kinds one and two each stack their two conditions in their column, the first above the
-  // second: the conflict over what cannot be identified, then too little authority over an irreversible step without
-  // authorization or recovery; the one condition of each other kind hangs just above
-  // its name, so the name reaches every part of it as it comes. The five build as one list
+  // the name of their kind. Kind one stacks its two conditions in its column, the conflict over what cannot be
+  // identified; kind two stands its first two, too little authority and a boundary the action would cross, side by
+  // side over its third, an irreversible step without authorization or recovery, in the order spoken; the one condition
+  // of each other kind hangs just above its name, so the name reaches every part of it as it comes. The five build as one list
   // across the two thoughts that number them and stand whole together until the handoff is named, while independent
   // authorized work keeps moving on its own lane below them; they are named as a group on the words that announce them,
   // left of their names and a word space and more clear of the first. The stations stand at one pitch along the way, so
@@ -7237,6 +7292,15 @@ scenes["22"] = function (s, t) {
     },
     // Authority that does not reach.
     (x, y, g) => lock(x, y + 6, {alpha: said(g, "权限不够", "authority is insufficient"), size: 1.1}),
+    // An action that would cross a permission, compliance, security or data boundary: the action's way reaches the
+    // boundary, which stands in the colour 04 gives the boundaries, and the stretch beyond it, where the action would
+    // go, draws on dashed in the unknown colour, after it, as the boundary is named.
+    (x, y, g) => {
+      const at = cue(s, "越过权限", "cross a permission"), q = said(g, "越过权限", "cross a permission");
+      line(x, y - 24, x, y + 24, {color: P.authority, alpha: q, width: 4});
+      link(x - 46, y, x - 12, y, {color: P.ink, alpha: q, width: 3, draw: {t, at: at + .05}, end: false});
+      link(x + 12, y, x + 44, y, {color: P.unknown, alpha: q, width: 2.5, dash: [5, 5], draw: {t, at: at + .3}});
+    },
     // A step that cannot be taken back: the authorization it lacks is an empty seal, and the recovery it lacks is the
     // recovery path's turn, drawn dashed and crossed.
     (x, y, g) => {
@@ -7289,7 +7353,7 @@ scenes["22"] = function (s, t) {
       [13, 22].forEach((r, i) => ring(x + 32, y + 28, mix(5, r, grow), {color: P.unknown, alpha: worse * restMark(P.unknown, 1 - i * .35), width: 2}));
     }];
   // The conditions each kind holds, stacked in its column beneath its station.
-  const kinds = [[0, 1], [2, 3], [4], [5], [6]];
+  const kinds = [[0, 1], [2, 3, 4], [5], [6], [7]];
   const g1 = base * stageOut(t, handoff);
   if (g1 > 0) {
     line(150, WY, 1770, WY, {color: P.line, alpha: g1, width: 3.5});
@@ -7330,7 +7394,10 @@ scenes["22"] = function (s, t) {
       link(x, SY - SR - 4, PX, OY + 34, {route: "vhv", mid: BUS, color: P.authority, alpha: g1 * mix(restMark(P.authority), 1, lit), draw: up, width: 2.5,
         flowing: escalating, last: i + 1 < xs.length ? since(signAt(i + 1) + .35, rise(i) + .85) : Infinity});
       const held = kinds[i];
-      held.forEach((k, n) => glyphs[k](x, GY + (held.length > 1 ? (n ? PAIR : -PAIR) : ONE), g1));
+      // Two conditions stand one over the other; of three, the first two stand side by side over the third, the pair
+      // centred on the column, the lock 30 px clear of the boundary's way.
+      const spots = held.length > 2 ? [[-62, -PAIR], [34, -PAIR], [0, PAIR]] : held.length > 1 ? [[0, -PAIR], [0, PAIR]] : [[0, ONE]];
+      held.forEach((k, n) => glyphs[k](x + spots[n][0], GY + spots[n][1], g1));
     });
     // The names hang on one baseline beneath the glyphs, and build as one list; in English every other name hangs a row
     // lower, on a short stem that rises from it toward its column.
@@ -7829,7 +7896,9 @@ scenes["24"] = function (s, t) {
   const four = base * stageIn(t, updates);
   if (four > 0) {
     const vague = cues(s, [["积极推进", "actively progressing"], ["智能体分析过了", "the Agent analyzed it"]]);
-    const instead = vague.map(at => cueFrom(s, "不如说", "say", at)), sayAt = cue(s, "说别人", "say things");
+    // Each vague phrase is struck on the words that say what replaces it: 不如说 after the first and, in Chinese, 要说
+    // after the second; English says "say" after both.
+    const instead = vague.map((at, k) => cueFrom(s, k ? "要说" : "不如说", "say", at)), sayAt = cue(s, "说别人", "say things");
     const groups = en ? [
       [["Tests pass", "tests pass", "check"], ["The acceptor still needs to confirm", "the acceptor still needs", "owner"], ["We'll conclude by Friday", "we'll conclude", "due"]],
       [["Facts it produced", "which facts it produced", "agent"], ["What you verified", "what you verified", "check"], ["Where the conclusion stops", "where the conclusion stops", "limit"]]]
@@ -7908,7 +7977,7 @@ scenes["25"] = function (s, t) {
   const [example, twoHours, write, roughly, fidelityIs, firstLead, decisionNeeded, detail, clarityIs] = cues(s, [["采集晚了两个小时", "collection ran two hours late"],
     ["晚了两个小时", "two hours late"], ["就写晚了两个小时", "writing two hours late"], ["基本按时", "roughly on time"], ["这是信", "fidelity means"],
     ["结论", "conclusion"], ["需要谁来决定", "the decision needed"], ["细节", "the detail"], ["这是达", "clarity means"]]);
-  const [concrete, onePoint, terms, beforeSend, outsider] = cues(s, [["具体怎样算达", "clarity has concrete checks"],
+  const [concrete, onePoint, terms, beforeSend, outsider] = cues(s, [["有具体的标准", "clarity has concrete checks"],
     ["一段只讲一个意思", "one point per paragraph"], ["重要的术语", "important terms"], ["发出之前", "before sending"], ["局外人", "a reader outside"]]);
   const restate = [cue(s, "结论", "conclusion", {last: true}), cue(s, "依据", "basis"), cue(s, "限度", "limits", {last: true}), cue(s, "下一步", "next action")];
   // Both editions name each part before what it holds, the Chinese by its number (一是风险, 二是影响, 三是控制影响,
@@ -8117,7 +8186,8 @@ scenes["25"] = function (s, t) {
   // own words and lights the part of the page it governs: one point to a paragraph, a term defined where it first
   // appears. English names the first check "One point to a paragraph", not its caption line's words, since each English
   // check is a caption line of its own. The list builds and stays
-  // until the question before sending.
+  // until the question before sending. The Chinese thought opens on 达, the word the thought before closes on, so the
+  // stage cuts on the clause after it that says there are concrete checks, and its head names them in those words.
   // In English that question continues the thought that lists the checks, so the checked page is named as the draft
   // before sending on those words and the list holds until the outside reader is named; in Chinese it begins its own
   // thought, which cuts to the draft on its first words.
@@ -8141,7 +8211,7 @@ scenes["25"] = function (s, t) {
     const hy3 = tops[0] - 110, headA = named(t, concrete) * gc;
     ring(px + 15, hy3, 15, {color: P.ink, alpha: headA, width: 2.5});
     dot(px + 15, hy3, 6, {color: P.ink, alpha: headA});
-    nameText(L("怎样算达", "Concrete checks"), px + 30 + NAME_GAP, hy3, {align: "left", alpha: headA});
+    nameText(L("具体的标准", "Concrete checks"), px + 30 + NAME_GAP, hy3, {align: "left", alpha: headA});
     const pt = hy3 + 46, pb = mids[1] + 60;
     box(px, pt, PW, pb - pt, {fill: P.row, stroke: P.line, alpha: gc, radius: 10});
     if (sendCut > beforeSend) nameText(L("发出之前", "Before sending"), px, pb + NAME_GAP, {align: "left", valign: "top", alpha: gc * named(t, beforeSend)});
@@ -8299,11 +8369,12 @@ scenes["26"] = function (s, t) {
   const retire = cue(s, "就撤掉", "retire a rule");
   // Chinese names the rule before its reasons and retires it last; English retires the rule first.
   const ruleAt = cue(s, "规则要是", "retire a rule");
-  // The reasons in spoken order: Chinese names the rule first and then its four reasons; both editions name the subject
-  // before the users, and the English first reason arrives with the clause that gives it, "that has lost its subject".
-  const reasons = en ? cues(s, [["", "has lost its subject"], ["", "users"], ["", "duplicates a source"], ["", "costs more"]])
+  // The reasons in spoken order: Chinese names the rule first and then its four reasons; both editions name what the
+  // rule governs before its users, and the English first reason arrives with the words that give it, "nothing left to
+  // govern".
+  const reasons = en ? cues(s, [["", "nothing left to govern"], ["", "no user"], ["", "duplicates a source"], ["", "costs more"]])
     : cues(s, [["失去适用对象", ""], ["没人用", ""], ["和已有的权威来源重复", ""], ["得不偿失", ""]]);
-  const reasonNames = en ? ["Lost its subject", "Lost its users", "Duplicates a source of truth", "Costs more than it returns"]
+  const reasonNames = en ? ["Nothing left to govern", "No user", "Duplicates a source of truth", "Costs more than it returns"]
     : ["失去适用对象", "没人用", "和已有的权威来源重复", "得不偿失"];
   const base = ramp(t, opening(s), .7);
   // Department practice is one seal at one place in stages 2 and 3, so it stands still across their cut.
@@ -8590,8 +8661,8 @@ scenes["27"] = function (s, t) {
   const signals = en ? cues(s, [["", "definitions drifting"], ["", "questions recurring"], ["", "people stepping"], ["", "evidence expiring"],
     ["", "ownership blurring"], ["", "intermittent failures"], ["", "slight delays"]])
     : cues(s, [["定义慢慢变了", ""], ["同样的问题", ""], ["临时靠人救火", ""], ["证据过期", ""], ["责任说不清", ""], ["偶尔出错", ""], ["略有延迟", ""]]);
-  const [anomaly, trend, pattern, impact, direction] = cues(s, [["一次异常", "one anomaly"], ["看成趋势", "not a trend"], ["先看它的模式", "check its pattern"],
-    ["影响", "impact"], ["方向", "direction"]]);
+  const [anomaly, trend, pattern, impact, direction] = cues(s, [["一次异常", "one anomaly"], ["看成趋势", "not a trend"], ["先看苗头的规律", "check the pattern"],
+    ["影响", "impact"], ["走向", "direction"]]);
   const [metric, weekly, signal] = cues(s, [["同一个指标", "the same metric"], ["每周都有人来问", "asks every week"], ["这就是一个苗头", "that is a signal"]]);
   const conds = cues(s, [["同类问题反复出现", "a problem recurs"], ["重要判断", "an important judgment rests"], ["交给智能体反复做", "the work is something agents"]]);
   const [material, leave] = cues(s, [["实质风险", "brings material risk"], ["留下能复用的预防措施", "leave reusable prevention"]]);
@@ -8670,7 +8741,7 @@ scenes["27"] = function (s, t) {
     line(mx - 10, Y0, mx + 10, Y0, {color: P.authority, alpha: im, width: 2.5});
     line(mx - 10, peak, mx + 10, peak, {color: P.authority, alpha: im, width: 2.5});
     path([[1150, Y0], [1660, Y0]], {color: P.evidence, alpha: seen(2), width: 5 + lit(2), draw: {t, at: direction - .1}});
-    railNames(en ? ["Pattern", "Impact", "Direction"] : ["模式", "影响", "方向"], [600, PX, 1405], Y0,
+    railNames(en ? ["Pattern", "Impact", "Direction"] : ["规律", "影响", "走向"], [600, PX, 1405], Y0,
       {alpha: i => two * listIn(t, checks, i), set: "checks"});
   }
   // 3. For example, the same metric: one week after another a question hangs below the line as someone asks again,
@@ -8698,22 +8769,26 @@ scenes["27"] = function (s, t) {
   }
   // 4. Watch for these conditions. Each is a row across the same work cycles, so each signal shows as what happens over
   // time: the same problem comes back cycle after cycle and reaches more people, a project and more cycles; important
-  // judgments all hang from one person, with nothing written down; and the same work goes to an Agent again and again. The conditions are a watch list: a card headed
-  // by the stage's name from its words; each condition's row arrives on the condition's first words, and the card and
-  // the work cycles across it lengthen to take each row as it arrives. Each event draws on its own words, and each
-  // condition's name arrives beside the row where it happens.
+  // judgments all hang from one person, with nothing written down; something done in every cycle is forgotten in one,
+  // and a material loss follows; and the same work goes to an Agent again and again. The conditions are a watch list: a
+  // card headed by the stage's name from its words; each condition's row arrives on the condition's first words, and
+  // the card and the work cycles across it lengthen to take each row as it arrives. Each event draws on its own words,
+  // and each condition's name arrives beside the row where it happens. The card stands centred as it grows: it stands
+  // half a row lower for each row still to come and rises by that half row as the card makes room for the next.
   const these = cue(s, "这些情况", "when any of these"), four = base * stageIn(t, watch) * stageOut(t, these);
   if (four > 0) {
     // The conditions' names stand outside the card, a name gap and more beyond its right edge (END + 30).
-    const R = [426, 576, 726], C = [580, 780, 980, 1180], START = 400, END = 1290, NX = END + 30 + NAME_GAP + 18, KX = START - 70, KY = R[0] - 136;
+    const R = [351, 501, 651, 801], C = [580, 780, 980, 1180], START = 400, END = 1290, NX = END + 30 + NAME_GAP + 18, KX = START - 70, KY = R[0] - 136;
     const on = (at, lead = .15) => ramp(t, at - lead, .4) * four;
-    const rowAts = [conds[0], conds[1], cue(s, "交给智能体", "something agents")];
+    const rowAts = [conds[0], conds[1], cue(s, "有些事", "forgetting something"), cue(s, "交给智能体", "something agents")];
     // The judgments' row stands on the words that name the few people it rests on, so its name, the unwritten
-    // knowledge, follows within half a second; the card makes room for it as the condition begins.
-    const fewAt = cue(s, "少数人", "few people"), lineAts = [conds[0], fewAt, rowAts[2]];
+    // knowledge, follows within half a second; the card makes room for it as the condition begins. The forgetting's row
+    // stands with its name on the words that say what forgetting can cause, its loss on its own words.
+    const fewAt = cue(s, "少数人", "few people"), causeAt = cue(s, "可能造成", "could cause"), lineAts = [conds[0], fewAt, causeAt, rowAts[3]];
+    ctx.save(); ctx.translate(0, building(t, rowAts, (R[1] - R[0]) / 2, .5));
     // The card lengthens over 0.7 s from half a second before each row's words, so its edge and the work cycles' ends,
     // which lengthen with it, move at under half the drawing pace, and it has passed the row before the row's line comes.
-    const extent = rowAts.reduce((y, at, k) => mix(y, R[k] + [100, 100, 64][k], ease((t - at + .5) / .7)), KY + 72);
+    const extent = rowAts.reduce((y, at, k) => mix(y, R[k] + [100, 100, 64, 64][k], ease((t - at + .5) / .7)), KY + 72);
     documentIcon(KX, KY, END + 30 - KX, extent - KY, {alpha: four, rows: 0});
     nameText(L("尤其留意这几种", "Conditions to watch"), KX + 30, KY + 36, {align: "left", alpha: four * named(t, watch)});
     R.forEach((y, k) => line(START + 30, y, END, y, {color: P.line, alpha: on(lineAts[k]), width: 2}));
@@ -8742,37 +8817,52 @@ scenes["27"] = function (s, t) {
     line(START + 30, R[1], C[2], R[1], {color: P.authority, alpha: on(fewAt, .1), width: 2.5});
     [0, 1, 2].forEach(k => diamond(C[k], R[1], 17, {color: P.authority, alpha: on(fewAt + .2 * k, k ? -.05 : .15), width: 2.5}));
     box(START - 17, R[1] + 40, 34, 44, {stroke: P.muted, alpha: on(unwritten), radius: 4, width: 2, dash: [5, 4]});
+    // Something done in every cycle, a ticked step, is forgotten in the third, an empty dashed outline, and a material
+    // loss spreads from the fourth on its words, as 22.2's widening harm does, in voice time.
+    [0, 1].forEach(k => {
+      const q = on(causeAt + .2 * k, k ? -.05 : .15);
+      box(C[k] - 15, R[2] - 15, 30, 30, {fill: P.row, stroke: P.ink, alpha: q, radius: 5, width: 2});
+      check(C[k], R[2] + 1, 16, {alpha: q, width: 2.5});
+    });
+    box(C[2] - 15, R[2] - 15, 30, 30, {stroke: P.muted, alpha: on(causeAt + .4, -.05), radius: 5, width: 2, dash: [5, 4]});
+    const lossAt = cue(s, "实质损失", "material loss"), lost = on(lossAt), spread = standard((voiceTime(t) - voiceTime(lossAt + .05)) / .8);
+    dot(C[3], R[2], 5, {color: P.unknown, alpha: lost});
+    [13, 22].forEach((r, i) => ring(C[3], R[2], mix(5, r, spread), {color: P.unknown, alpha: lost * restMark(P.unknown, 1 - i * .35), width: 2}));
     // The same work goes to an Agent again and again: one task in every cycle, in turn from the words that hand it over,
     // so the row is whole before the thought ends.
     const agents = cue(s, "交给智能体", "something agents");
-    agent(START, R[2], {alpha: on(agents), size: .9});
-    line(START + 30, R[2], END, R[2], {color: P.evidence, alpha: on(agents, .1) * .8, width: 2});
+    agent(START, R[3], {alpha: on(agents), size: .9});
+    line(START + 30, R[3], END, R[3], {color: P.evidence, alpha: on(agents, .1) * .8, width: 2});
     C.forEach((x, k) => {
       const q = ramp(t, agents + .2 + .12 * k, .3) * four;
-      box(x - 15, R[2] - 15, 30, 30, {fill: P.row, stroke: P.evidence, alpha: q, radius: 5, width: 2});
-      dot(x, R[2], 4.5, {color: P.evidence, alpha: q});
+      box(x - 15, R[3] - 15, 30, 30, {fill: P.row, stroke: P.evidence, alpha: q, radius: 5, width: 2});
+      dot(x, R[3], 4.5, {color: P.evidence, alpha: q});
     });
     // The names of the conditions build as one list in the column beyond the card, at the rows' pitch, each beside the
-    // row where its condition happens.
-    const nameAts = [conds[0], unwritten, agents];
-    const names = en ? ["A problem recurs", "Tacit knowledge", "Agents will repeat"] : ["同类问题反复出现", "没写下来的经验", "交给智能体反复做"];
+    // row where its condition happens; the forgetting's name is the loss it can cause, by its key words.
+    const nameAts = [conds[0], unwritten, causeAt, agents];
+    const names = en ? ["A problem recurs", "Tacit knowledge", "Material loss", "Agents will repeat"] : ["同类问题反复出现", "没写下来的经验", "实质损失", "交给智能体反复做"];
     R.forEach((y, i) => nameText(names[i], NX, y, {align: "left", width: 420,
       alpha: four * listIn(t, nameAts, i), set: "conditions"}));
+    ctx.restore();
   }
   // 5. These conditions, once they bring material risk: the drifting line rises from them toward a threshold well before
   // the failure at its end. A reusable safeguard is left where it crosses, and from there the line runs level again,
   // below the threshold, so the failure never comes. The stage opens on the words that name these conditions, with
-  // the three conditions standing at the line's start in small, under their name.
+  // the four conditions standing at the line's start in small, under their name.
   const kinds = cue(s, "预防措施可以是", "it can be"), five = base * stageIn(t, these) * stageOut(t, kinds);
   if (five > 0) {
     const SX = 1000, FX = 1660, held = soon(t, leave + .05, 1.2), before = cue(s, "还没出过事", "before anything fails");
     const bring = cue(s, "只要带来", "brings material risk"), named5 = ramp(t, these - .15, .4) * five;
-    // The conditions, in small: the returning problem, a judgment and an Agent.
+    // The conditions, in small and in spoken order: the returning problem, a judgment, the loss forgetting causes and an
+    // Agent.
     const ey = B - 46;
     problem(238, ey, 14, named5);
     diamond(284, ey, 13, {color: P.authority, alpha: named5, width: 2.5});
-    agent(330, ey, {alpha: named5, size: .55});
-    nameText(L("这些情况", "Any of these"), 284, B + 26, {valign: "top", alpha: named5});
+    dot(330, ey, 3, {color: P.unknown, alpha: named5});
+    [8, 13].forEach((r, i) => ring(330, ey, r, {color: P.unknown, alpha: named5 * restMark(P.unknown, 1 - i * .35), width: 2}));
+    agent(376, ey, {alpha: named5, size: .55});
+    nameText(L("这些情况", "Any of these"), 307, B + 26, {valign: "top", alpha: named5});
     // The drift climbs steadily toward the failure at the line's end and crosses the threshold of material risk at SX;
     // after the safeguard the line eases back under the threshold and runs level.
     const climb = x => 260 * ease(clamp((x - 320) / (FX - 360))), TY = B - climb(SX);
@@ -9183,9 +9273,9 @@ scenes["29"] = function (s, t) {
   const [within, closest] = cues(s, [["在边界之内", "within the stated boundaries"], ["离事实最近的负责人", "the responsible person closest"]]);
   const paths = cues(s, [["选方法", "the method"], ["工具", "tools"], ["实施路径", "and path"]]);
   const kinds = cues(s, [["数据出错", "a data error"], ["生产故障", "production failure"], ["越权违规", "permission or compliance"]]);
-  // Both editions open the incident with its condition, "in an emergency", a second before the first kind; the stage
-  // opens on those words.
-  const emergency = cue(s, "紧急情况下", "in an emergency");
+  // Both editions open the incident with its condition, 紧急情况下 and "it is an emergency when", a second before the
+  // first kind; the stage opens on its key words.
+  const emergency = cue(s, "紧急情况下", "an emergency");
   const [finder, contain, tell, ownerLeads] = cues(s, [["发现的人", "whoever finds it"], ["在自己权限内控制影响", "contains it within"], ["通知数据或生产负责人", "tells the data or production owner"],
     ["受影响工作的负责人", "the owner of the affected work"]]);
   const [urgency, uncertain, noAuthority] = cues(s, [["再紧急", "urgency does not"], ["不确定的结果", "an uncertain result"], ["权限也不会变大", "grant authority"], ["先控制影响", "contain first"]]);
@@ -9355,9 +9445,11 @@ scenes["29"] = function (s, t) {
     const closestY = my + 44 + NAME_GAP + labelSize(LABEL) / 2, D = closestY - my;
     nameText(L("离事实最近的负责人", "Closest to the facts"), px, closestY, {width: 330, alpha: five * named(t, closest)});
     const ys = [my - D, my, my + D], names = en ? ["Method", "Tools", "Path"] : ["方法", "工具", "实施路径"];
+    // Each way draws on at the stage's ink from the person, so its tip grows from nothing whenever its draw sets off and
+    // no drawn stretch inks in within a frame.
     paths.forEach((at, i) => {
       const q = ramp(t, at - .15, .4) * five, lit = speaking(t, paths, i);
-      link(px + 48, my, sx - 20, ys[i], {route: "hvh", mid: fx + 660, r: 18, alpha: five * ramp(t, at - .15, .2), draw: {t, at: at - .15}, end: false});
+      link(px + 48, my, sx - 20, ys[i], {route: "hvh", mid: fx + 660, r: 18, alpha: five, draw: {t, at: at - .15}, end: false});
       dot(sx, ys[i], 8 + 2 * lit, {color: P.evidence, alpha: q});
       nameText(names[i], sx + 13 + NAME_GAP, ys[i], {align: "left", alpha: five * listIn(t, paths, i), set: "paths"});
     });
@@ -9406,7 +9498,7 @@ scenes["29"] = function (s, t) {
     const fy = py - 15 * 1.2 * 2.15 - PAD, fh = NY6 + blockHeight(lines6) + row6 + PAD - fy;
     const left = left0 + shift, right = right0 + shift, FC = (left + right) / 2;
     {
-      const emergencyName = L("紧急情况下", "In an emergency"), ex = FC - measure(emergencyName) / 2, eq = named(t, emergency) * six;
+      const emergencyName = L("紧急情况下", "Emergency"), ex = FC - measure(emergencyName) / 2, eq = named(t, emergency) * six;
       const ey = fy - NAME_GAP - labelSize(LABEL) / 2 - labelSize(LABEL) * LEADING;
       clock(ex - NAME_GAP - 18, ey, 18, {hand: (voiceTime(t) * .6) % 1, color: P.unknown, alpha: eq});
       nameText(emergencyName, FC, ey, {alpha: eq});
