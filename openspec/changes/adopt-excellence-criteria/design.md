@@ -36,7 +36,7 @@ The floors are 18 dB in Chinese and 17 dB in English: below every narration the 
 
 ### 3. Rejected patterns are material findings
 
-The prompt lists nine patterns the owner rejected in earlier editions of these films, each with the dimension it fails: lists that slide or erase their items, ragged text, swallowed phrase tails, a hoarse voice, a colour cast or low contrast, a missing title card, a concept rendering that narrows its concept, machine-sounding phrasing and a runtime that is not a whole multiple of five minutes. A reviewer checks each one on the media and says what was checked; any occurrence is a material finding, which the verifier refuses.
+The prompt lists the patterns the owner rejected in earlier editions of these films, each with the dimension it fails. It began with nine: lists that slide or erase their items, ragged text, swallowed phrase tails, a hoarse voice, a colour cast or low contrast, a missing title card, a concept rendering that narrows its concept, machine-sounding phrasing and a runtime that is not a whole multiple of five minutes. Since 2026-11-07 it lists fourteen, adding a name said other than its declared form or a Chinese sentence that drops the number the other edition carries, a sentence that leaves a first-time listener wondering what or whom it means, a pause inside a phrase where the text has no mark, a mark that halts, pops, jumps, flickers or races outside a stage cut, and a player whose links open raw files or whose captions cannot be turned off. A reviewer checks each one on the media and says what was checked; any occurrence is a material finding, which the verifier refuses.
 
 ### 4. The published films are reviewed again
 
