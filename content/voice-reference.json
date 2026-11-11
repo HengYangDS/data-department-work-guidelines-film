@@ -74,14 +74,20 @@
           "seed": 147220,
           "text_sha256": "218a40c139ec280ddf1dc53ec3980f578275677ad0dceb1b4fe1410f7f551403"
         },
-        "3": {
-          "seed": 123463,
-          "text_sha256": "4a07062d784bba101d4846865966be53973895a9d047d6197a8ec17e07ec2335"
+        "4": {
+          "seed": 3639499,
+          "text_sha256": "09d07ef18c5eccf5f879fbfdce09eb321f7371663a888e429c3ad4f9664aba38",
+          "spoken_sha256": "09d07ef18c5eccf5f879fbfdce09eb321f7371663a888e429c3ad4f9664aba38"
         },
         "5": {
-          "seed": 1509288,
-          "text_sha256": "fb90033add8c6118a1682a5ae081bb2b9f99647add301cf111dbf4457a49518a",
-          "spoken_sha256": "fb90033add8c6118a1682a5ae081bb2b9f99647add301cf111dbf4457a49518a"
+          "seed": 3837474,
+          "text_sha256": "aaa7690b8ec4ce13b8d221c61d211a83ab8a27a3e9c13641a4dba043e712c01f",
+          "spoken_sha256": "aaa7690b8ec4ce13b8d221c61d211a83ab8a27a3e9c13641a4dba043e712c01f"
+        },
+        "3": {
+          "seed": 4542265,
+          "text_sha256": "323ad949b39bb0380e2650af3a1eb5f38965bfe929c443d1a48119aadeea8a85",
+          "spoken_sha256": "323ad949b39bb0380e2650af3a1eb5f38965bfe929c443d1a48119aadeea8a85"
         }
       }
     },
@@ -92,32 +98,44 @@
           "text_sha256": "192dc8603e772805ed7a22b4bdaca155013302b73e76704ae9a5142cea491fc4",
           "spoken_sha256": "192dc8603e772805ed7a22b4bdaca155013302b73e76704ae9a5142cea491fc4"
         },
-        "6": {
-          "seed": 519414,
-          "text_sha256": "6d27c6401af5b4e0f3fd71e61e541420a22b1fcbab5be5ae8eda4dd1d6315e71"
-        },
         "7": {
           "seed": 3298983,
           "text_sha256": "3b2258c79d5caa183350c82f9a5b6c8c89794d8e0fde961f206bf639fe8f189c",
           "spoken_sha256": "3b2258c79d5caa183350c82f9a5b6c8c89794d8e0fde961f206bf639fe8f189c"
+        },
+        "4": {
+          "seed": 3916665,
+          "text_sha256": "3f650ef63a0b887eec0f95c97b9fce8ac26dfd82f19bb041ca0b61ad879140e6",
+          "spoken_sha256": "3f650ef63a0b887eec0f95c97b9fce8ac26dfd82f19bb041ca0b61ad879140e6"
+        },
+        "6": {
+          "seed": 3869151,
+          "text_sha256": "70345d7e1e2a76579eb3e1c5dda5a4738fe4bf5c3dfa8fff8211d22380bca54d",
+          "spoken_sha256": "70345d7e1e2a76579eb3e1c5dda5a4738fe4bf5c3dfa8fff8211d22380bca54d"
         }
       }
     },
     "03": {
       "groups": {
         "1": {
-          "seed": 210574,
-          "text_sha256": "29c57ec2ed158b8a8be2870148da14d1987a65110dcdda68f057a44628473970"
+          "seed": 3916666,
+          "text_sha256": "d43f9dd8ea8509008686426b77ceab4ba7e6e15e0b41dc3cf8e9177ba3fef914",
+          "spoken_sha256": "d43f9dd8ea8509008686426b77ceab4ba7e6e15e0b41dc3cf8e9177ba3fef914"
         },
         "5": {
-          "seed": 3243551,
-          "text_sha256": "758f97105147220bce519ec8c295c3b9768644b93dfcd6273089d6d946995be8",
-          "spoken_sha256": "758f97105147220bce519ec8c295c3b9768644b93dfcd6273089d6d946995be8"
+          "seed": 3829557,
+          "text_sha256": "f8ae0f03694370e3df2d7fac6338e9d47cb8a7b2e45385d62c99e679624e42da",
+          "spoken_sha256": "f8ae0f03694370e3df2d7fac6338e9d47cb8a7b2e45385d62c99e679624e42da"
         },
         "7": {
           "seed": 3520716,
           "text_sha256": "4e8a7b9ae07c4fcc9446b4fafc3999552ffcff54b2d465a3b24de31a2e477af2",
           "spoken_sha256": "4e8a7b9ae07c4fcc9446b4fafc3999552ffcff54b2d465a3b24de31a2e477af2"
+        },
+        "6": {
+          "seed": 4455158,
+          "text_sha256": "21383fb16a06a1ee40265385e0f0975b0aa4b3453ebf48c5bf94e81a0e623eea",
+          "spoken_sha256": "21383fb16a06a1ee40265385e0f0975b0aa4b3453ebf48c5bf94e81a0e623eea"
         }
       }
     },
@@ -127,23 +145,29 @@
           "seed": 392713,
           "text_sha256": "b198e8022ee4fc3c227feb8551ee51461650cd68aeba9b344bdb29aae01a512b"
         },
-        "1": {
-          "seed": 1350912,
-          "text_sha256": "310657f7dd770cc145ca650906139afa62b01b021e67cd4f2344dbd3bbcdd415",
-          "spoken_sha256": "310657f7dd770cc145ca650906139afa62b01b021e67cd4f2344dbd3bbcdd415"
-        },
         "5": {
           "seed": 1335074,
           "text_sha256": "6ce4414e28fb42ec0b0b3a63bb147af8bf7de1e69ebfba7f12c98eb46b26b59a",
           "spoken_sha256": "6ce4414e28fb42ec0b0b3a63bb147af8bf7de1e69ebfba7f12c98eb46b26b59a"
+        },
+        "1": {
+          "seed": 3908749,
+          "text_sha256": "2d2fdd710eb5c707f8c2ebc947cbf0b713cfd00e1de8cae18617c16fa2e85938",
+          "spoken_sha256": "2d2fdd710eb5c707f8c2ebc947cbf0b713cfd00e1de8cae18617c16fa2e85938"
         }
       }
     },
     "06": {
       "groups": {
         "1": {
-          "seed": 99711,
-          "text_sha256": "22545ef25583972ded7ed007d48f1da3c46fb2c55905e7c9c50f96d59e10adf0"
+          "seed": 4922382,
+          "text_sha256": "22545ef25583972ded7ed007d48f1da3c46fb2c55905e7c9c50f96d59e10adf0",
+          "spoken_sha256": "22545ef25583972ded7ed007d48f1da3c46fb2c55905e7c9c50f96d59e10adf0"
+        },
+        "2": {
+          "seed": 1382589,
+          "text_sha256": "2c3533873a48682f6c6226e77975605356a92543c730485210499859808ed425",
+          "spoken_sha256": "2c3533873a48682f6c6226e77975605356a92543c730485210499859808ed425"
         },
         "3": {
           "seed": 3283149,
@@ -151,62 +175,62 @@
           "spoken_sha256": "6204daee8cc46de22c971c383750a2e6e8909a7619f65ee5b65688e414422277"
         },
         "4": {
-          "seed": 353119,
-          "text_sha256": "1b66fa345a16f5d873ef936093ef0114b2cbaa75441a91c2b039e8ffbf29bcf2"
+          "seed": 3892912,
+          "text_sha256": "fce9590692f1779776888d3a2949bc5b6e430ebd994d85cb6720d8ec02813512",
+          "spoken_sha256": "fce9590692f1779776888d3a2949bc5b6e430ebd994d85cb6720d8ec02813512"
         },
         "5": {
-          "seed": 329362,
-          "text_sha256": "82d01ec8208e9a337c84988fbe8318f01d69903220983382ef9c52544effa22b"
-        },
-        "2": {
-          "seed": 1382589,
-          "text_sha256": "2c3533873a48682f6c6226e77975605356a92543c730485210499859808ed425",
-          "spoken_sha256": "2c3533873a48682f6c6226e77975605356a92543c730485210499859808ed425"
+          "seed": 3877074,
+          "text_sha256": "85a39c1c364dd96e80c3b42ea82d7edd11fb70872ff8a6cbf2d39f892e73799d",
+          "spoken_sha256": "85a39c1c364dd96e80c3b42ea82d7edd11fb70872ff8a6cbf2d39f892e73799d"
         }
       }
     },
     "08": {
       "groups": {
         "1": {
-          "seed": 91794,
-          "text_sha256": "c1d73f1149db650c8c082030e43140c5ef4f0b39bda21ef3161fa2d120d54b48"
-        },
-        "3": {
-          "seed": 804504,
-          "text_sha256": "1c84517e7c189633d3afa0dd750dc01f5b264faa5c33313c7ca8950f4db13c13"
-        },
-        "5": {
-          "seed": 875775,
-          "text_sha256": "7216567d6f3e9f7c00155d0b72054a70daa1da1804341f83c607ef88d4d92699"
+          "seed": 3599911,
+          "text_sha256": "1b7b3ae19c913f2422fc73a34339fb2583974abaf1c1752e276874aa2db42f84",
+          "spoken_sha256": "1b7b3ae19c913f2422fc73a34339fb2583974abaf1c1752e276874aa2db42f84"
         },
         "2": {
-          "seed": 1984435,
-          "text_sha256": "f2fdc9cacc936f780fca06b1bec3570d77bc72fd4af547fd311704a74b8e5b4b",
-          "spoken_sha256": "f2fdc9cacc936f780fca06b1bec3570d77bc72fd4af547fd311704a74b8e5b4b"
+          "seed": 3813724,
+          "text_sha256": "54831417c5ff1e451d05402978f204bfd87d1acefbf7d6c133ecdccc251da660",
+          "spoken_sha256": "54831417c5ff1e451d05402978f204bfd87d1acefbf7d6c133ecdccc251da660"
+        },
+        "3": {
+          "seed": 3908752,
+          "text_sha256": "fb0f726d3f5b231777dfa4a73d66a84f90ed43a81c41e772463858ae85749e32",
+          "spoken_sha256": "fb0f726d3f5b231777dfa4a73d66a84f90ed43a81c41e772463858ae85749e32"
+        },
+        "5": {
+          "seed": 4550191,
+          "text_sha256": "8db18d47a10337c86e960c5e6f0ebc5af3a157bd07c262d10a740ac0179ada43",
+          "spoken_sha256": "8db18d47a10337c86e960c5e6f0ebc5af3a157bd07c262d10a740ac0179ada43"
         }
       }
     },
     "09": {
       "groups": {
-        "1": {
-          "seed": 1303402,
-          "text_sha256": "dee2393edb46eb7e87f6388a9105e017f919f0dddcd1b0f364a156e054608fa4",
-          "spoken_sha256": "dee2393edb46eb7e87f6388a9105e017f919f0dddcd1b0f364a156e054608fa4"
-        },
         "2": {
           "seed": 970804,
           "text_sha256": "d3bc60e9c7043a6d8264b2c93d1732f04a9a8b390ddeb25c5b11ea4df19f815f",
           "spoken_sha256": "d3bc60e9c7043a6d8264b2c93d1732f04a9a8b390ddeb25c5b11ea4df19f815f"
         },
         "3": {
-          "seed": 978723,
-          "text_sha256": "3a1d8da3251b3c9559d8827e8da4f311916f8c4a718f14f946b377ae87a79d2e",
-          "spoken_sha256": "3a1d8da3251b3c9559d8827e8da4f311916f8c4a718f14f946b377ae87a79d2e"
+          "seed": 3829563,
+          "text_sha256": "a9e021c7fb3511dae0a0a9323a80c5d5e66db62b76dc8b67f56046eba9de5b10",
+          "spoken_sha256": "a9e021c7fb3511dae0a0a9323a80c5d5e66db62b76dc8b67f56046eba9de5b10"
         },
         "4": {
-          "seed": 3180205,
-          "text_sha256": "3cdce4b36c8ffbc0ea3cb1dc281ada9c401f05114fff85eb21409649b7c245f1",
-          "spoken_sha256": "3cdce4b36c8ffbc0ea3cb1dc281ada9c401f05114fff85eb21409649b7c245f1"
+          "seed": 3869158,
+          "text_sha256": "9c73d0afaad8e234386cb4d394ab3f78e7a3f70902b1b05e8f16e1cb78b8fcd8",
+          "spoken_sha256": "9c73d0afaad8e234386cb4d394ab3f78e7a3f70902b1b05e8f16e1cb78b8fcd8"
+        },
+        "1": {
+          "seed": 4510597,
+          "text_sha256": "11d7ad1632979d454ebe457804fdf6d1e808cc38d6641024bc68db470357d495",
+          "spoken_sha256": "11d7ad1632979d454ebe457804fdf6d1e808cc38d6641024bc68db470357d495"
         }
       }
     },
@@ -217,40 +241,66 @@
           "text_sha256": "7e126f028e818abc02d3e3ee409ac4ed5a5dce38fb75f4501d71591b235fa5a7"
         },
         "2": {
-          "seed": 384799,
-          "text_sha256": "74c8c44d8a4ebdda25724bab2dbd99aedb63837702caad15ae40189e4703a053"
+          "seed": 3900835,
+          "text_sha256": "d3a25dee5074a7eb6e5d4f903fbbc603654b592654eacfeafc8f8543504ea34d",
+          "spoken_sha256": "d3a25dee5074a7eb6e5d4f903fbbc603654b592654eacfeafc8f8543504ea34d"
+        },
+        "3": {
+          "seed": 1398431,
+          "text_sha256": "a8f920983bdaec767399f07c613c48878d203c87ad14ab743a2ae42f15d67e1e",
+          "spoken_sha256": "a8f920983bdaec767399f07c613c48878d203c87ad14ab743a2ae42f15d67e1e"
         },
         "4": {
           "seed": 3188125,
           "text_sha256": "aae1e16ee97766ce7a119cfdfb27dcbf8fa61eb6b3953968fe9bb1acb7772eb2",
           "spoken_sha256": "aae1e16ee97766ce7a119cfdfb27dcbf8fa61eb6b3953968fe9bb1acb7772eb2"
         },
-        "3": {
-          "seed": 1398431,
-          "text_sha256": "a8f920983bdaec767399f07c613c48878d203c87ad14ab743a2ae42f15d67e1e",
-          "spoken_sha256": "a8f920983bdaec767399f07c613c48878d203c87ad14ab743a2ae42f15d67e1e"
+        "5": {
+          "seed": 4526436,
+          "text_sha256": "c1dab47ed0c9e02a1350c692e41767af4bfa5dabd7a0e4981a8703683d1cbe76",
+          "spoken_sha256": "c1dab47ed0c9e02a1350c692e41767af4bfa5dabd7a0e4981a8703683d1cbe76"
         }
       }
     },
     "13": {
       "groups": {
+        "1": {
+          "seed": 3900838,
+          "text_sha256": "aec7f7165615a62f49d56d62634b502e975dddf76c97ef48f02a6064422cea3c",
+          "spoken_sha256": "aec7f7165615a62f49d56d62634b502e975dddf76c97ef48f02a6064422cea3c"
+        },
         "2": {
-          "seed": 3298994,
-          "text_sha256": "b3de8a57eac56e4e2bc109be295426638525cea72a4d1dd779dedffaaaa4cb6d",
-          "spoken_sha256": "b3de8a57eac56e4e2bc109be295426638525cea72a4d1dd779dedffaaaa4cb6d"
+          "seed": 3845405,
+          "text_sha256": "fed1b84a482bd54db1adfc4384eb1b11e831f7fec147d6dd81b0e32d62f23759",
+          "spoken_sha256": "fed1b84a482bd54db1adfc4384eb1b11e831f7fec147d6dd81b0e32d62f23759"
+        },
+        "6": {
+          "seed": 3829567,
+          "text_sha256": "de3da1dc6241cc34890abf0936d5e5bbc140a913e33d8b6b21f7b6fba8293f6c",
+          "spoken_sha256": "de3da1dc6241cc34890abf0936d5e5bbc140a913e33d8b6b21f7b6fba8293f6c"
         },
         "4": {
-          "seed": 3227723,
-          "text_sha256": "2a850dba6acec45db87d3bc8ff73e5ffd51e18b14b0a5fe966faf321f3a838e1",
-          "spoken_sha256": "2a850dba6acec45db87d3bc8ff73e5ffd51e18b14b0a5fe966faf321f3a838e1"
+          "seed": 4478925,
+          "text_sha256": "0b56615ea513fcdefce450f4ae987bc527608bd13bab777c2f51869b30bec4a0",
+          "spoken_sha256": "0b56615ea513fcdefce450f4ae987bc527608bd13bab777c2f51869b30bec4a0"
         }
       }
     },
     "17": {
       "groups": {
+        "2": {
+          "seed": 3853328,
+          "text_sha256": "a6ec978fe7d4c7b570b69b809cbb13aaea883b6ba06ec2f64b2f82cc6c897224",
+          "spoken_sha256": "a6ec978fe7d4c7b570b69b809cbb13aaea883b6ba06ec2f64b2f82cc6c897224"
+        },
         "3": {
           "seed": 361049,
           "text_sha256": "b35bbd67069c7265894f85b69be4195eb28aa58db071f4219c5ff6bbad75b0ea"
+        },
+        "5": {
+          "seed": 3251484,
+          "text_sha256": "23c992f807dbf6de566bef65b9539c4e003a0e4c34dd89c14bf1d2584ffd3ec5",
+          "spoken_sha256": "23c992f807dbf6de566bef65b9539c4e003a0e4c34dd89c14bf1d2584ffd3ec5"
         },
         "6": {
           "seed": 1319248,
@@ -258,53 +308,57 @@
           "spoken_sha256": "1ef2c851022308462e6145a8b46186bae43a853a89978bca1e6784e0cbe6f21e"
         },
         "1": {
-          "seed": 3275241,
-          "text_sha256": "2daf2ebc88d7ffc9d2779cf70c5e37eb650eb60c43a4c54a471af4d27439c5e5",
-          "spoken_sha256": "2daf2ebc88d7ffc9d2779cf70c5e37eb650eb60c43a4c54a471af4d27439c5e5"
-        },
-        "2": {
-          "seed": 3203970,
-          "text_sha256": "0741165904222063cca418cee8ed42456e5a7785a6b1aef82f28cb8b7dd95e96",
-          "spoken_sha256": "0741165904222063cca418cee8ed42456e5a7785a6b1aef82f28cb8b7dd95e96"
-        },
-        "5": {
-          "seed": 3251484,
-          "text_sha256": "23c992f807dbf6de566bef65b9539c4e003a0e4c34dd89c14bf1d2584ffd3ec5",
-          "spoken_sha256": "23c992f807dbf6de566bef65b9539c4e003a0e4c34dd89c14bf1d2584ffd3ec5"
+          "seed": 4534362,
+          "text_sha256": "f5dabfda8e520bad2cbac655fcf4bf282bd194eec69ee0454d57579f7aa64e21",
+          "spoken_sha256": "f5dabfda8e520bad2cbac655fcf4bf282bd194eec69ee0454d57579f7aa64e21"
         }
       }
     },
     "18": {
-      "groups": {}
+      "groups": {
+        "3": {
+          "seed": 3837491,
+          "text_sha256": "1945424789c61fd1503f79021d9ed131b1c4594a4d8a474f49a33c6efa8b5aa5",
+          "spoken_sha256": "1945424789c61fd1503f79021d9ed131b1c4594a4d8a474f49a33c6efa8b5aa5"
+        },
+        "2": {
+          "seed": 4439335,
+          "text_sha256": "0a83c765c118d6338189bdd5b9606fbbeebfe9f64b15310092db74775cc50854",
+          "spoken_sha256": "0a83c765c118d6338189bdd5b9606fbbeebfe9f64b15310092db74775cc50854"
+        },
+        "4": {
+          "seed": 4463092,
+          "text_sha256": "497e858fe4fe53a5c90afd4cd147eed87ded48fcee4b65fa0e48efad72ff188e",
+          "spoken_sha256": "497e858fe4fe53a5c90afd4cd147eed87ded48fcee4b65fa0e48efad72ff188e"
+        }
+      }
     },
     "19": {
       "groups": {
+        "1": {
+          "seed": 3861249,
+          "text_sha256": "5b3881fb4ac2b2802f22adf5b5cf2f23925a3e9ec0604f669b80d803d150bf85",
+          "spoken_sha256": "5b3881fb4ac2b2802f22adf5b5cf2f23925a3e9ec0604f669b80d803d150bf85"
+        },
         "3": {
-          "seed": 91805,
-          "text_sha256": "fd34b4b980a5a8a3d865daf8d91e87b8c22d1dbabf89adfb3f2e402260de0425"
+          "seed": 3805816,
+          "text_sha256": "9755045d491edaf0f1d6a053ae73c06c79dfee7ae2a5ef290f04a5fd80439fdb",
+          "spoken_sha256": "9755045d491edaf0f1d6a053ae73c06c79dfee7ae2a5ef290f04a5fd80439fdb"
         },
         "5": {
-          "seed": 812434,
-          "text_sha256": "60bd3f669cf4313f67cef250ea6c403d598bab62cce4d39e990aa9994b58641e"
+          "seed": 3829573,
+          "text_sha256": "6fb50aff24a8fa60d86ab901d2a0b59d6a3351bf2fd9e184c67286968c8713fc",
+          "spoken_sha256": "6fb50aff24a8fa60d86ab901d2a0b59d6a3351bf2fd9e184c67286968c8713fc"
         },
         "7": {
-          "seed": 812434,
-          "text_sha256": "8247c4c0c8fe63999122cacbf5e678d8153e4adc57c45d7df53cf2ce4e4c06a6",
-          "spoken_sha256": "8247c4c0c8fe63999122cacbf5e678d8153e4adc57c45d7df53cf2ce4e4c06a6"
-        },
-        "1": {
-          "seed": 986652,
-          "text_sha256": "00befb317f4ac6e80ba0945484a1d9f9640d7df06055dec906ae6dd1eab4002e",
-          "spoken_sha256": "00befb317f4ac6e80ba0945484a1d9f9640d7df06055dec906ae6dd1eab4002e"
+          "seed": 3845411,
+          "text_sha256": "8abd7606959bf2d6585af522959257daf606bf54bf57c3c3d3002300a524f8fc",
+          "spoken_sha256": "8abd7606959bf2d6585af522959257daf606bf54bf57c3c3d3002300a524f8fc"
         }
       }
     },
     "21": {
       "groups": {
-        "3": {
-          "seed": 804517,
-          "text_sha256": "7bc74a187b85eac0f78d713b4ea7d36456b6f4687a964d622612475a464820a7"
-        },
         "1": {
           "seed": 1374685,
           "text_sha256": "faa5ce18b59b2357ffdcc80c129cd17e2db5d39ad5a17f7c952a2e30de068cd0",
@@ -314,32 +368,43 @@
           "seed": 3188136,
           "text_sha256": "72f23f3d134d64dbfd548870cd0af9be2385315d147f86f465000d9bf5d42343",
           "spoken_sha256": "72f23f3d134d64dbfd548870cd0af9be2385315d147f86f465000d9bf5d42343"
+        },
+        "3": {
+          "seed": 804517,
+          "text_sha256": "7bc74a187b85eac0f78d713b4ea7d36456b6f4687a964d622612475a464820a7"
+        },
+        "5": {
+          "seed": 3829575,
+          "text_sha256": "1e2955335bc96b5d50f1917af5fce30fcb3b022c683cd55d313415f203706038",
+          "spoken_sha256": "1e2955335bc96b5d50f1917af5fce30fcb3b022c683cd55d313415f203706038"
+        },
+        "4": {
+          "seed": 4534366,
+          "text_sha256": "43bdce13866d0773f5612167683d02c90f94bebfcf3ef8584aed4150f0a17281",
+          "spoken_sha256": "43bdce13866d0773f5612167683d02c90f94bebfcf3ef8584aed4150f0a17281"
         }
       }
     },
     "22": {
       "groups": {
-        "2": {
-          "seed": 384811,
-          "text_sha256": "811c1020fc99d15eb1d918d9bd25b0514461f9e0f39ed582078ba732a318cc7c"
-        },
-        "3": {
-          "seed": 2126991,
-          "text_sha256": "437a225f67ad9da7820d2ed8e16f5c159bcbaa38ec273129ce42c57ecc880b95",
-          "spoken_sha256": "437a225f67ad9da7820d2ed8e16f5c159bcbaa38ec273129ce42c57ecc880b95"
-        },
-        "4": {
-          "seed": 923303,
-          "text_sha256": "e4ad0178c65ac05fc2ad05a5971cdefc1cd4c0df3964fa27f5e80c6f91c6498c",
-          "run_on": {
-            "spoken_text": "最后写明接下来谁接手、做什么、什么时候做完，而不是一句“后续跟进”。",
-            "cut_sample": 290640
-          }
-        },
         "1": {
           "seed": 3235651,
           "text_sha256": "9aa5019e27c7229c388ac4fc0a2e263ddfd8f34093a8b2b9a30f2287e7f86ce3",
           "spoken_sha256": "9aa5019e27c7229c388ac4fc0a2e263ddfd8f34093a8b2b9a30f2287e7f86ce3"
+        },
+        "2": {
+          "seed": 384811,
+          "text_sha256": "811c1020fc99d15eb1d918d9bd25b0514461f9e0f39ed582078ba732a318cc7c"
+        },
+        "4": {
+          "seed": 3916685,
+          "text_sha256": "9476371c79b332277cb92dc0665973e17d55480ed8797886953ddd0a22a358dc",
+          "spoken_sha256": "9476371c79b332277cb92dc0665973e17d55480ed8797886953ddd0a22a358dc"
+        },
+        "3": {
+          "seed": 4526448,
+          "text_sha256": "48365101ed30c5dbcbed80b1705101e875044eff9a07ff084fc58c823efcfefa",
+          "spoken_sha256": "48365101ed30c5dbcbed80b1705101e875044eff9a07ff084fc58c823efcfefa"
         }
       }
     },
@@ -349,10 +414,6 @@
           "seed": 361055,
           "text_sha256": "65f8f9dd6f1526f5973727d7f38e3c1e091be90762cf9ec662c9bf9984f56db7"
         },
-        "2": {
-          "seed": 91809,
-          "text_sha256": "01a20f401326ee82f55d09783f3f6ae3c98e08e4e25751b799d344bceb1d70af"
-        },
         "4": {
           "seed": 368974,
           "text_sha256": "e4291905b02cfc5c387d794deed132b025925364f78961831e5b24b360e0c46f"
@@ -361,6 +422,16 @@
           "seed": 1366768,
           "text_sha256": "5403c3c193f584d4c814e2a184c780b0e98c8685a610c2c98bcfac8c0da29d81",
           "spoken_sha256": "5403c3c193f584d4c814e2a184c780b0e98c8685a610c2c98bcfac8c0da29d81"
+        },
+        "2": {
+          "seed": 3916686,
+          "text_sha256": "0dc70c9debe0070254bea1e7723283fd5246529b517740787e7900239c3a724c",
+          "spoken_sha256": "0dc70c9debe0070254bea1e7723283fd5246529b517740787e7900239c3a724c"
+        },
+        "3": {
+          "seed": 3908767,
+          "text_sha256": "f6a362eec62643474264c5e0a63e62879eab9d332f1b325434b10a3c8e991cb9",
+          "spoken_sha256": "f6a362eec62643474264c5e0a63e62879eab9d332f1b325434b10a3c8e991cb9"
         }
       }
     },
@@ -371,18 +442,19 @@
           "text_sha256": "be016f8edaff6d2455ab46ee5da56a7931c7c3e02e207b609670d86475f10526",
           "spoken_sha256": "be016f8edaff6d2455ab46ee5da56a7931c7c3e02e207b609670d86475f10526"
         },
-        "3": {
-          "seed": 163081,
-          "text_sha256": "69049f5185efae81aa0eee5ba93fb9cef8bcff139c8f2f0f6b35dd1a834f1e01",
-          "run_on": {
-            "spoken_text": "与其说“应该没问题”，不如说哪些核验通过了，还剩什么风险。与其说“智能体分析过了”，不如说它给出了哪些事实，你核实了什么，结论能说到哪里。",
-            "cut_sample": 173040
-          }
-        },
         "4": {
-          "seed": 3188139,
-          "text_sha256": "09a140b8d7e78d7772e9c492d3e56a5de6d0932f91a93ee5a2fc58a01ce354d5",
-          "spoken_sha256": "09a140b8d7e78d7772e9c492d3e56a5de6d0932f91a93ee5a2fc58a01ce354d5"
+          "seed": 3837497,
+          "text_sha256": "8f6e0e96397c0a4ba58ca435735f0564d8b2b48a96284b2a38b874c3da32ff24",
+          "spoken_sha256": "8f6e0e96397c0a4ba58ca435735f0564d8b2b48a96284b2a38b874c3da32ff24"
+        },
+        "3": {
+          "seed": 4874886,
+          "text_sha256": "347f2e457f8cb23b852577933437ddf64516f226779fbb0661ed9e081919c610",
+          "spoken_sha256": "347f2e457f8cb23b852577933437ddf64516f226779fbb0661ed9e081919c610",
+          "run_on": {
+            "spoken_text": "不说“智能体分析过了”，要说它给出了哪些事实，你核实了什么，结论能说到哪里。",
+            "cut_sample": 219120
+          }
         }
       }
     },
@@ -393,50 +465,89 @@
           "text_sha256": "1f20b692752b70bbb4e9a0312f8c508f7dfccf1e8f9da9d5159374a4ba141b0b",
           "spoken_sha256": "1f20b692752b70bbb4e9a0312f8c508f7dfccf1e8f9da9d5159374a4ba141b0b"
         },
+        "4": {
+          "seed": 3869174,
+          "text_sha256": "c7bb0a8e15b9ed5d5714249aa991a78b80c9b1f7baff28592fb864d1bcf5ab1c",
+          "spoken_sha256": "c7bb0a8e15b9ed5d5714249aa991a78b80c9b1f7baff28592fb864d1bcf5ab1c"
+        },
         "5": {
           "seed": 171001,
           "text_sha256": "437cf78be87fe58efcb1f2b48da0d999960b2a778b67334f47d0b0ebe9fdf81e"
-        },
-        "7": {
-          "seed": 115568,
-          "text_sha256": "76c1605946e749443b1cdd30ecbd68602a6101722ff27f270f24c706b9af59bf"
         },
         "6": {
           "seed": 3180221,
           "text_sha256": "84411faa58947dfb67d4a6fd58bcaff7f0a42996f339565f3bf2754dbf0641b0",
           "spoken_sha256": "84411faa58947dfb67d4a6fd58bcaff7f0a42996f339565f3bf2754dbf0641b0"
         },
+        "7": {
+          "seed": 3924607,
+          "text_sha256": "f2c8319e967fabfeed50e2a7b3eee7798d5679f5cb75d5aaff4b0dee5c224362",
+          "spoken_sha256": "f2c8319e967fabfeed50e2a7b3eee7798d5679f5cb75d5aaff4b0dee5c224362"
+        },
         "8": {
           "seed": 3188140,
           "text_sha256": "e9e4cc254357cbd92ddcc60d4779040a5103ce74b21fa94ef063ac6a80f360b4",
           "spoken_sha256": "e9e4cc254357cbd92ddcc60d4779040a5103ce74b21fa94ef063ac6a80f360b4"
+        },
+        "2": {
+          "seed": 4439342,
+          "text_sha256": "e295f1a64e3f29c13cc8312fa2922204720e809099e18727a9198b00294106d7",
+          "spoken_sha256": "e295f1a64e3f29c13cc8312fa2922204720e809099e18727a9198b00294106d7"
         }
       }
     },
     "26": {
       "groups": {
+        "1": {
+          "seed": 3821661,
+          "text_sha256": "f4762cb3078ddca6d7cc70d5f42283af508a06eee3e9facb4df3f8151595d851",
+          "spoken_sha256": "f4762cb3078ddca6d7cc70d5f42283af508a06eee3e9facb4df3f8151595d851"
+        },
+        "2": {
+          "seed": 3829580,
+          "text_sha256": "cfad851c0033bd8a8d7e2888ce721b5ea05ec94ef69dafbea26200ed6c7ef532",
+          "spoken_sha256": "cfad851c0033bd8a8d7e2888ce721b5ea05ec94ef69dafbea26200ed6c7ef532"
+        },
         "3": {
-          "seed": 820360,
-          "text_sha256": "c978427556b5ae1e7d7026aea9c6eeb9930d7cab97f7002e3242c782103219cd"
+          "seed": 3916689,
+          "text_sha256": "6039d4cd83d23391b3ac8ff27107933afb3d6f6f3ffbb176d5e1e0e548939d0b",
+          "spoken_sha256": "6039d4cd83d23391b3ac8ff27107933afb3d6f6f3ffbb176d5e1e0e548939d0b"
+        },
+        "4": {
+          "seed": 3892932,
+          "text_sha256": "830d3787e6c7ab31054ac60d88b2e1d36db739a4c770637c46d9e5e7fa06eb41",
+          "spoken_sha256": "830d3787e6c7ab31054ac60d88b2e1d36db739a4c770637c46d9e5e7fa06eb41"
+        },
+        "6": {
+          "seed": 4526452,
+          "text_sha256": "d6c120279d5a7f8c578141937489b114033d249aa871a0d0e7ccf360083e6982",
+          "spoken_sha256": "d6c120279d5a7f8c578141937489b114033d249aa871a0d0e7ccf360083e6982"
         }
       }
     },
     "28": {
       "groups": {
+        "1": {
+          "seed": 4447264,
+          "text_sha256": "60fedc757f723b0e55a60322ee29845031c7f2d97d39cb47f3675e0d752fe4aa",
+          "spoken_sha256": "60fedc757f723b0e55a60322ee29845031c7f2d97d39cb47f3675e0d752fe4aa"
+        },
         "4": {
-          "seed": 392736,
-          "text_sha256": "83e1b0592bc828f0130cc369d722c348a79a119cf6d51a14c109194d6a5896f0"
+          "seed": 4471021,
+          "text_sha256": "6e1505c64cc6f564c3537732d939b53c7400a7f2f093fb989f301f14bd38259b",
+          "spoken_sha256": "6e1505c64cc6f564c3537732d939b53c7400a7f2f093fb989f301f14bd38259b"
         }
       }
     },
     "29": {
       "groups": {
         "2": {
-          "seed": 155167,
-          "text_sha256": "98bf7d8e3c05f3570975a7752928c2f05cb39fe7c30381f7ff7cbbebe4579d3c",
+          "seed": 3694960,
+          "text_sha256": "17842c0174f3aab93f9ca4fb0ea9ef314bb52b92d8669733725c839e8d6f50ba",
+          "spoken_sha256": "17842c0174f3aab93f9ca4fb0ea9ef314bb52b92d8669733725c839e8d6f50ba",
           "run_on": {
             "spoken_text": "管理者用真实的工作示范怎样判断，不拿这份指南事后挑错、走过场，或者做微观管理。",
-            "cut_sample": 169680
+            "cut_sample": 212160
           }
         },
         "5": {
@@ -452,9 +563,9 @@
           "text_sha256": "f4448f2cb67e75516e790554c8189b21280539adc0612db1cf927f869a96da77"
         },
         "8": {
-          "seed": 1287584,
-          "text_sha256": "0280d46afea65b2caf9c6fe4ef6cee47e36c77e8d16258a08018d016b40e41fd",
-          "spoken_sha256": "0280d46afea65b2caf9c6fe4ef6cee47e36c77e8d16258a08018d016b40e41fd"
+          "seed": 3908773,
+          "text_sha256": "b7203514b7579b34aa9f2cb6ed7d70fbfc73b2d1d370f14327afdb5f60b789fe",
+          "spoken_sha256": "b7203514b7579b34aa9f2cb6ed7d70fbfc73b2d1d370f14327afdb5f60b789fe"
         }
       }
     },
@@ -476,45 +587,73 @@
           "seed": 115573,
           "text_sha256": "b87a0c6c54b311d38fc61f48176cf429465315fec1a4e2354c1e04432c640b1d"
         },
+        "2": {
+          "seed": 3805827,
+          "text_sha256": "d2215f0f0e5604a3de3357a24b81df71cf28d6a2b45e745e56ccd753a9105998",
+          "spoken_sha256": "d2215f0f0e5604a3de3357a24b81df71cf28d6a2b45e745e56ccd753a9105998"
+        },
         "6": {
-          "seed": 99735,
-          "text_sha256": "ade49b3a7ab8e51cd139984f9942b184d63fbb6e8aa6779d952b6540456a614e"
+          "seed": 3885017,
+          "text_sha256": "a79cb8ec3a2f10dac19f6826aaab87a102256640ce1920af0c557034717746bb",
+          "spoken_sha256": "a79cb8ec3a2f10dac19f6826aaab87a102256640ce1920af0c557034717746bb"
+        },
+        "7": {
+          "seed": 3877098,
+          "text_sha256": "2cbae73df29dfde7661b15324190ef33de796a8b3d51bc32f3d12c6ce17bbe44",
+          "spoken_sha256": "2cbae73df29dfde7661b15324190ef33de796a8b3d51bc32f3d12c6ce17bbe44"
         }
       }
     },
     "14": {
       "groups": {
-        "1": {
-          "seed": 812429,
-          "text_sha256": "618cfd13b3a88e79681813481f686cb314c54d58ddea880cfebfef4a7aad2675"
-        },
         "3": {
           "seed": 3283157,
           "text_sha256": "d85d65f9a985ca8f4f8e800102a0f377102bda70382c8f25aeceac4dece6876d",
           "spoken_sha256": "d85d65f9a985ca8f4f8e800102a0f377102bda70382c8f25aeceac4dece6876d"
         },
+        "1": {
+          "seed": 4558116,
+          "text_sha256": "618cfd13b3a88e79681813481f686cb314c54d58ddea880cfebfef4a7aad2675",
+          "spoken_sha256": "618cfd13b3a88e79681813481f686cb314c54d58ddea880cfebfef4a7aad2675"
+        },
         "4": {
-          "seed": 3251481,
-          "text_sha256": "3dfd471749be6ca782cb301c99524eb1300ac49a9196afce18acdd10ae73ae4c",
-          "spoken_sha256": "3dfd471749be6ca782cb301c99524eb1300ac49a9196afce18acdd10ae73ae4c"
+          "seed": 4550197,
+          "text_sha256": "6289c5bec0a09ede7dee7f56b5b1fe97fbdb5a7274e3538b8c0e7e0e1e7d9408",
+          "spoken_sha256": "6289c5bec0a09ede7dee7f56b5b1fe97fbdb5a7274e3538b8c0e7e0e1e7d9408"
         }
       }
     },
     "04": {
       "groups": {
-        "6": {
-          "seed": 820338,
-          "text_sha256": "a45c681573bc0f5685cc038059a2ad5c7392b01e73ca57866e95ce13cd8d507c"
-        },
         "2": {
           "seed": 3291066,
           "text_sha256": "498b903dfe6bb18a320db02eeeea4ae6e3da76b1a9b047268dd74b8de2071e66",
           "spoken_sha256": "498b903dfe6bb18a320db02eeeea4ae6e3da76b1a9b047268dd74b8de2071e66"
         },
+        "3": {
+          "seed": 3884991,
+          "text_sha256": "1f522474e3c46b8a98e2293fad43a0921625a443a10c03460d66fc70f7d773a6",
+          "spoken_sha256": "1f522474e3c46b8a98e2293fad43a0921625a443a10c03460d66fc70f7d773a6"
+        },
+        "4": {
+          "seed": 3821639,
+          "text_sha256": "b01f55427fe65464589e6ebd9fccfbe5c14e4c57c591071bdc87ada26c034ef4",
+          "spoken_sha256": "b01f55427fe65464589e6ebd9fccfbe5c14e4c57c591071bdc87ada26c034ef4"
+        },
+        "5": {
+          "seed": 3821639,
+          "text_sha256": "9f7f4875ae6739802cb3cd5771b222c7e5425079729b66bd5304db80970c5101",
+          "spoken_sha256": "9f7f4875ae6739802cb3cd5771b222c7e5425079729b66bd5304db80970c5101"
+        },
+        "6": {
+          "seed": 3908748,
+          "text_sha256": "f00068b3fd8bd5fb85db1da74f9c252d532cb93a8a661851896e10aa0e05eb3c",
+          "spoken_sha256": "f00068b3fd8bd5fb85db1da74f9c252d532cb93a8a661851896e10aa0e05eb3c"
+        },
         "7": {
-          "seed": 3291066,
-          "text_sha256": "952795fa95d6b7766e8bd889ff79ae074422fb320bd87b570e66dd4786492d88",
-          "spoken_sha256": "952795fa95d6b7766e8bd889ff79ae074422fb320bd87b570e66dd4786492d88"
+          "seed": 4447240,
+          "text_sha256": "5d07d3f6d5392d5f717f0abf00fdd8a7ff35657fd55c7ce5d3cc7b88fd4af0b6",
+          "spoken_sha256": "5d07d3f6d5392d5f717f0abf00fdd8a7ff35657fd55c7ce5d3cc7b88fd4af0b6"
         }
       }
     },
@@ -524,14 +663,29 @@
           "seed": 123473,
           "text_sha256": "dc28b143049e87749b247c9db22cea99e58747e60312b885b21334e628e3929e"
         },
+        "2": {
+          "seed": 3211883,
+          "text_sha256": "f4a9fe43e000dc973346e75b3ec05010b54cb90f097086dc8ddd884ec2766d8a",
+          "spoken_sha256": "f4a9fe43e000dc973346e75b3ec05010b54cb90f097086dc8ddd884ec2766d8a"
+        },
+        "4": {
+          "seed": 3869160,
+          "text_sha256": "6198eea411f17c783738b8f07c310307927a0c971e904eb056a68eb467dd99c1",
+          "spoken_sha256": "6198eea411f17c783738b8f07c310307927a0c971e904eb056a68eb467dd99c1"
+        },
+        "5": {
+          "seed": 3892917,
+          "text_sha256": "2a49db3a9dbc225aa3a07d9c1bdcfb7b9bd8cb40882f7357e7e50a6ed03c8d43",
+          "spoken_sha256": "2a49db3a9dbc225aa3a07d9c1bdcfb7b9bd8cb40882f7357e7e50a6ed03c8d43"
+        },
         "6": {
           "seed": 361043,
           "text_sha256": "cfe3a0c8780a4087293f64ffdb2427a6090a603f3bde7f6428ec065d4af497a7"
         },
         "7": {
-          "seed": 1287566,
-          "text_sha256": "d096a842e8fecd7da93fa55f8148c84e375cacb34568d3e4bd432bd3f1ea5584",
-          "spoken_sha256": "d096a842e8fecd7da93fa55f8148c84e375cacb34568d3e4bd432bd3f1ea5584"
+          "seed": 3837484,
+          "text_sha256": "93514da15e0f3e41c6836684931758169cd84ad7486509797e74a0e88964564e",
+          "spoken_sha256": "93514da15e0f3e41c6836684931758169cd84ad7486509797e74a0e88964564e"
         },
         "8": {
           "seed": 804507,
@@ -541,46 +695,58 @@
           "seed": 376881,
           "text_sha256": "03ae1216b66aa66e4d47bdbd83db19c70d2f708846ad3109b14de7acb68446e1"
         },
-        "2": {
-          "seed": 3211883,
-          "text_sha256": "f4a9fe43e000dc973346e75b3ec05010b54cb90f097086dc8ddd884ec2766d8a",
-          "spoken_sha256": "f4a9fe43e000dc973346e75b3ec05010b54cb90f097086dc8ddd884ec2766d8a"
-        },
-        "4": {
-          "seed": 3298992,
-          "text_sha256": "f207bc3ef4cace696e70523ed843826037ebd841545c3ec572dd274f7bb5702d",
-          "spoken_sha256": "f207bc3ef4cace696e70523ed843826037ebd841545c3ec572dd274f7bb5702d"
+        "3": {
+          "seed": 4518518,
+          "text_sha256": "bfd941ab6eeaac72f5524cc16a27c45f5b95c9b5bd169ac74da62714d8bc60ef",
+          "spoken_sha256": "bfd941ab6eeaac72f5524cc16a27c45f5b95c9b5bd169ac74da62714d8bc60ef"
         }
       }
     },
     "16": {
       "groups": {
         "3": {
-          "seed": 804512,
-          "text_sha256": "07af88c61ab21386648945933334d31acadec37e01f6601663ed1c8870583848"
+          "seed": 3805813,
+          "text_sha256": "a36cf20a8ca0c3259d82afc8de408e6f2ea1c891443774a552194d86a7c0ef2e",
+          "spoken_sha256": "a36cf20a8ca0c3259d82afc8de408e6f2ea1c891443774a552194d86a7c0ef2e"
+        },
+        "4": {
+          "seed": 3837489,
+          "text_sha256": "5a5e5b947406fdef55264a486670bfa7b0a34fdf17b8b521758f736eb2dac4b4",
+          "spoken_sha256": "5a5e5b947406fdef55264a486670bfa7b0a34fdf17b8b521758f736eb2dac4b4"
         }
       }
     },
     "27": {
       "groups": {
         "1": {
-          "seed": 804523,
-          "text_sha256": "5117242de6bcf5058c590bb53fcc050208b803a6a754712c0f3af3daaef078f7"
+          "seed": 3599930,
+          "text_sha256": "95670e648cd99e4f32ddcd51966aa795a21ca998c9945bbd092d6ecebbb64336",
+          "spoken_sha256": "95670e648cd99e4f32ddcd51966aa795a21ca998c9945bbd092d6ecebbb64336"
+        },
+        "2": {
+          "seed": 3908771,
+          "text_sha256": "3223e19651e3d2ba294d8138b65e5f9a75ece3f661dfe3b0bd7486cd77864bcc",
+          "spoken_sha256": "3223e19651e3d2ba294d8138b65e5f9a75ece3f661dfe3b0bd7486cd77864bcc"
+        },
+        "3": {
+          "seed": 3916690,
+          "text_sha256": "ce06337a87d68ce0c305a5ae62a0015e6e13afcfa477d31a9777ad417e679bc6",
+          "spoken_sha256": "ce06337a87d68ce0c305a5ae62a0015e6e13afcfa477d31a9777ad417e679bc6"
         },
         "5": {
           "seed": 1279663,
           "text_sha256": "11c8da3d9c8dbdcfba8d8d632ea1be12863b941d18dfe45256db496b035adc58",
           "spoken_sha256": "11c8da3d9c8dbdcfba8d8d632ea1be12863b941d18dfe45256db496b035adc58"
         },
-        "2": {
-          "seed": 3299008,
-          "text_sha256": "961e7b19eac14251fe721e7cbf38bc493ed73903ae3e7551b85e9d48019087f4",
-          "spoken_sha256": "961e7b19eac14251fe721e7cbf38bc493ed73903ae3e7551b85e9d48019087f4"
+        "6": {
+          "seed": 3869176,
+          "text_sha256": "5c4f6ad11ad80dddc009ef96d2e11c72ed671f8da64c4aea050b259b970bd876",
+          "spoken_sha256": "5c4f6ad11ad80dddc009ef96d2e11c72ed671f8da64c4aea050b259b970bd876"
         },
         "4": {
-          "seed": 3243575,
-          "text_sha256": "a354819258da9eb9bb86579904819e0c4245479748c82e49caa8dfde14d3887e",
-          "spoken_sha256": "a354819258da9eb9bb86579904819e0c4245479748c82e49caa8dfde14d3887e"
+          "seed": 4542291,
+          "text_sha256": "941a13c10f40a2c0078997eb27bc9cca2af14a35e5905a097d127109729a8765",
+          "spoken_sha256": "941a13c10f40a2c0078997eb27bc9cca2af14a35e5905a097d127109729a8765"
         }
       }
     },
@@ -603,43 +769,44 @@
           "seed": 91793,
           "text_sha256": "b2c211e60c4c595006dedcd49ed72cc072777eaf3c8484a5c8ede87804bbc835"
         },
-        "6": {
-          "seed": 329363,
-          "text_sha256": "4612db89d809236573f108a34968d56821893da3b899e50d53de2efed897a814"
-        },
         "8": {
           "seed": 1944839,
           "text_sha256": "709d6f33fb96c005939e77bc8b4cd855a7a5c391c5755d76c3b15bb676665137",
           "spoken_sha256": "709d6f33fb96c005939e77bc8b4cd855a7a5c391c5755d76c3b15bb676665137"
         },
         "4": {
-          "seed": 1398428,
-          "text_sha256": "5e1b63049ee7aa61c870f462f3971a1853000d414ac0f1c8ea6afffec4e0c400",
-          "spoken_sha256": "5e1b63049ee7aa61c870f462f3971a1853000d414ac0f1c8ea6afffec4e0c400"
+          "seed": 3869156,
+          "text_sha256": "d9ac90ea60805255e990ed43410b167cb7eec9032949e9cfc570aa1eb04c05ef",
+          "spoken_sha256": "d9ac90ea60805255e990ed43410b167cb7eec9032949e9cfc570aa1eb04c05ef"
+        },
+        "6": {
+          "seed": 3805804,
+          "text_sha256": "f450f3e67d754f1f76b6e5f333a4f86d7b353c8e706654fc3ad61159581fe14a",
+          "spoken_sha256": "f450f3e67d754f1f76b6e5f333a4f86d7b353c8e706654fc3ad61159581fe14a"
         }
       }
     },
     "12": {
       "groups": {
-        "1": {
-          "seed": 3267317,
-          "text_sha256": "ea6e44956efa948e213e999488852c69732c0bc87bfb8eab2fe0ce3d56c86f2e",
-          "spoken_sha256": "ea6e44956efa948e213e999488852c69732c0bc87bfb8eab2fe0ce3d56c86f2e"
-        },
-        "2": {
-          "seed": 3298993,
-          "text_sha256": "d1fc970d8facf84c7ba1e6700f77ab311bf34dc8be572572e946a84be09a4065",
-          "spoken_sha256": "d1fc970d8facf84c7ba1e6700f77ab311bf34dc8be572572e946a84be09a4065"
-        },
         "3": {
-          "seed": 3267317,
-          "text_sha256": "0e209608cae51b82d4f85449dca6e70fc38bd8847e150be4075a5ea3d6a2224a",
-          "spoken_sha256": "0e209608cae51b82d4f85449dca6e70fc38bd8847e150be4075a5ea3d6a2224a"
+          "seed": 3892918,
+          "text_sha256": "02e7af2fa030afbd27f1d3087c0e0af4f4f9cff4118d2a2f089b8c040dceb59e",
+          "spoken_sha256": "02e7af2fa030afbd27f1d3087c0e0af4f4f9cff4118d2a2f089b8c040dceb59e"
         },
         "4": {
           "seed": 3259398,
           "text_sha256": "4f93bbd574d7f9e7aca0ed8219e19552d9ba31b5ce28fa95209a96dbab03dd63",
           "spoken_sha256": "4f93bbd574d7f9e7aca0ed8219e19552d9ba31b5ce28fa95209a96dbab03dd63"
+        },
+        "1": {
+          "seed": 4494762,
+          "text_sha256": "35d79101a2f9f4a141c7eb656b793dc414faec34a0a1e1af8a0b0d72f15f2096",
+          "spoken_sha256": "35d79101a2f9f4a141c7eb656b793dc414faec34a0a1e1af8a0b0d72f15f2096"
+        },
+        "2": {
+          "seed": 4542276,
+          "text_sha256": "745a2c1e70b668c3685052b3dca2a80ae2a0ff36ae2dd540dc4cee31b158e877",
+          "spoken_sha256": "745a2c1e70b668c3685052b3dca2a80ae2a0ff36ae2dd540dc4cee31b158e877"
         }
       }
     },
@@ -657,6 +824,16 @@
         "5": {
           "seed": 91801,
           "text_sha256": "c6a8ff55859e314a2c1db0e02f0e75630a83fe45080f7d4c64ff2a288d3bea95"
+        },
+        "2": {
+          "seed": 3916678,
+          "text_sha256": "7c6db82766e240dc534ca4764184fba941ec60af7b7f17bbb56411ab6e57fcdd",
+          "spoken_sha256": "7c6db82766e240dc534ca4764184fba941ec60af7b7f17bbb56411ab6e57fcdd"
+        },
+        "4": {
+          "seed": 3845407,
+          "text_sha256": "bd9f7217bff978ca25ef53ec284ab57ee40152147733f3768bd191ef483982a4",
+          "spoken_sha256": "bd9f7217bff978ca25ef53ec284ab57ee40152147733f3768bd191ef483982a4"
         }
       }
     },
@@ -667,8 +844,14 @@
           "text_sha256": "4f2d1c99130e90172695dde9b9145e348b7e12ac947618a927b4f98c64e7fe43"
         },
         "1": {
-          "seed": 543189,
-          "text_sha256": "3dade07118e213c2a271212eb77c7a21e6ca0ed2824592b2dd37032780e3ce84"
+          "seed": 3837493,
+          "text_sha256": "b2eb04ba7d9f59855af53c4b2aca81a31c2e01d7b2b3429ec1c3af3b7e9683a2",
+          "spoken_sha256": "b2eb04ba7d9f59855af53c4b2aca81a31c2e01d7b2b3429ec1c3af3b7e9683a2"
+        },
+        "2": {
+          "seed": 3853331,
+          "text_sha256": "b4532f0138680b9b3a4534b45faf8650190c98ff6f0782404e939635a59603d0",
+          "spoken_sha256": "b4532f0138680b9b3a4534b45faf8650190c98ff6f0782404e939635a59603d0"
         }
       }
     }

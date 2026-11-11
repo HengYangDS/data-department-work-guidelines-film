@@ -168,12 +168,6 @@
             "target_reading": "piān chā"
           },
           {
-            "term": "做得",
-            "kind": "contextual-mandarin-word",
-            "target_reading": "zuò de",
-            "dictionary_disagreement": "得 is the complement particle de after a verb; the dictionary reads 得 alone as dé."
-          },
-          {
             "term": "充分",
             "kind": "contextual-mandarin-word",
             "target_reading": "chōng fèn"
@@ -615,11 +609,6 @@
             "target_reading": "bì yào tiáo jiàn"
           },
           {
-            "term": "快要",
-            "kind": "contextual-mandarin-word",
-            "target_reading": "kuài yào"
-          },
-          {
             "term": "总结",
             "kind": "contextual-mandarin-word",
             "target_reading": "zǒng jié"
@@ -711,11 +700,6 @@
             "term": "数据",
             "kind": "contextual-mandarin-word",
             "target_reading": "shù jù"
-          },
-          {
-            "term": "数据库",
-            "kind": "contextual-mandarin-word",
-            "target_reading": "shù jù kù"
           },
           {
             "term": "方便",
@@ -1048,11 +1032,6 @@
             "target_reading": "jì huà"
           },
           {
-            "term": "话说",
-            "kind": "contextual-mandarin-word",
-            "target_reading": "huà shuō"
-          },
-          {
             "term": "该尽",
             "kind": "contextual-mandarin-word",
             "target_reading": "gāi jìn",
@@ -1067,11 +1046,6 @@
             "term": "说不清",
             "kind": "contextual-mandarin-word",
             "target_reading": "shuō bù qīng"
-          },
-          {
-            "term": "说好",
-            "kind": "contextual-mandarin-word",
-            "target_reading": "shuō hǎo"
           },
           {
             "term": "说得",
@@ -1259,6 +1233,38 @@
             "term": "三种",
             "kind": "contextual-mandarin-word",
             "target_reading": "sān zhǒng"
+          },
+          {
+            "term": "体系",
+            "kind": "contextual-mandarin-word",
+            "target_reading": "tǐ xì"
+          },
+          {
+            "term": "只给",
+            "kind": "contextual-mandarin-word",
+            "target_reading": "zhǐ gěi"
+          },
+          {
+            "term": "周期长",
+            "kind": "contextual-mandarin-word",
+            "target_reading": "zhōu qī cháng",
+            "dictionary_disagreement": "周期长 means a long cycle, cháng; the dictionary reads 长 as zhǎng here."
+          },
+          {
+            "term": "更好地",
+            "kind": "contextual-mandarin-word",
+            "target_reading": "gèng hǎo de",
+            "dictionary_disagreement": "地 is the adverbial particle de after 更好; the dictionary reads 地 alone as dì."
+          },
+          {
+            "term": "模板",
+            "kind": "contextual-mandarin-word",
+            "target_reading": "mú bǎn"
+          },
+          {
+            "term": "角度",
+            "kind": "contextual-mandarin-word",
+            "target_reading": "jiǎo dù"
           }
         ],
         "sandhi": "Natural Mandarin connected-speech tone sandhi and weak grammatical syllables; never force isolated citation tones.",

@@ -74,17 +74,16 @@ fonts = [
 # Wrapped labels kept against the wrapping rules, each a deliberate phrase break.
 [[picture.wrapping.exceptions]]
 edition = "en"
-lines = ["Examine", "the reasoning"]
-reason = "28.1's middle action stands verb over object; on one line it would stand about 6 px from the next station's name, the widest of the row."
-
-[[picture.wrapping.exceptions]]
-edition = "en"
 lines = [
-  "Production, funds, sensitive data,",
-  "security or compliance, deletion or overwrite,",
-  "external commitments or irreversible consequences",
+  "Production,",
+  "funds,",
+  "sensitive data,",
+  "security or compliance,",
+  "deletion or overwrite,",
+  "external commitments",
+  "or irreversible consequences",
 ]
-reason = "04.7's high-risk work breaks only between its conditions, so 'security or compliance' and 'deletion or overwrite' each stay whole; no break of the seven keeps an even block in the work column, and set as a list the ladder would show eighteen names."
+reason = "04.7's high-risk work is read as a list, one condition to a line as each is said, so its lines end where its conditions end and the block is not even; set as seven names the ladder would show eighteen, over the twelve a frame may hold."
 
 # The colours of each edition's player page: its ground, text, quieter text, rules and borders,
 # and the accent of a chosen or focused control.
