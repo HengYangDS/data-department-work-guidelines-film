@@ -62,8 +62,11 @@ caption_terms = [
 ]
 
 # The fonts the picture stages below fonts/, in this order: Noto Sans CJK SC for any text with a
-# Chinese character, and IBM Plex Sans for Latin-only text.
+# Chinese character, and IBM Plex Sans for Latin-only text. Each frame is drawn in Chrome's
+# software rasterizer, since its GPU rasterizer drew random one-frame faults into the glyphs of
+# the Chinese pictures (design § 16).
 [picture]
+capture = "software"
 fonts = [
   "assets/fonts/NotoSansCJKsc-Regular.otf",
   "assets/fonts/NotoSansCJKsc-Bold.otf",
