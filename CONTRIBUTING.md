@@ -39,7 +39,7 @@ Every change is an OpenSpec Change, worked in its own ETHOS Work Lane:
 4. Adopt the complete bilingual text of a script change before any narration, qualify the new recordings before the picture follows them, and rebuild, review and accept the films before release. A change to a script, cast or the composition reopens the independent review; a rebuild inherits the published films' review only by meeting the reproduction standard in [`openspec/specs/film-reproduction`](openspec/specs/film-reproduction).
 5. When the tasks are done, archive the Change, prove the archived head once, then land it and close out as `ethos status` directs.
 
-Generated output belongs under the ignored `build/`; the tracked tree holds sources only, and the films are published as release assets.
+The picture's source is the modules under `picture/film/`; `npm run compose` bundles them into `picture/film.js`, which the engine reads. Edit the modules, never the bundle. Generated output belongs under the ignored `build/`; the tracked tree holds sources only, and the films are published as release assets.
 
 ## Verify a change
 

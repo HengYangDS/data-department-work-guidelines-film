@@ -1,13 +1,16 @@
-/** Exercise this film's composition, picture/film.js, on the installed engine's headless runtime: every authored scene
- * against both scripts, speech over a picture, each paint traced to its scene, the camera, the label breaks and the
- * pinned timeline engine. The engine's own tools are tested in filmkit. */
+/** Exercise this film's composition, picture/film.js, on the installed engine's headless runtime: film.js as staging
+ * inlines it, the tracked bundle of the modules under picture/film/. Every authored scene against both scripts, speech
+ * over a picture, each paint traced to its scene, the camera, the label breaks and the pinned timeline engine. The
+ * engine's own tools are tested in filmkit. */
 import test from "node:test";
 import assert from "node:assert/strict";
 import vm from "node:vm";
 import { readFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 
+import { bundle } from "../../picture/bundle.mjs";
 import { engineModule } from "../engine.mjs";
+import { authoredTimeline, emptySpeech, scenesThatPaint } from "./page.mjs";
 
 const { canvasStandIn, openComposition } = await import(
   engineModule("picture/headless-composition.mjs")
@@ -17,61 +20,15 @@ const { canvasStandIn, openComposition } = await import(
 const ENGINE = fileURLToPath(new URL("../../node_modules/gsap/dist/gsap.min.js", import.meta.url));
 const COMPOSITION = fileURLToPath(new URL("../../picture/film.js", import.meta.url));
 
-async function authoredTimeline(code) {
-  const script = JSON.parse(
-    await readFile(
-      new URL(
-        code === "zh" ? "../../content/film-script.json" : "../../content/en/film-script.json",
-        import.meta.url,
-      ),
-      "utf8",
-    ),
-  );
-  let cursor = 3;
-  const segments = script.segments.map((segment, index) => {
-    if (index) cursor += script.segments[index - 1].chapter === segment.chapter ? 1.8 : 3.6;
-    const tokens =
-      code === "zh"
-        ? segment.text.match(/[\p{Script=Han}]|[A-Za-z0-9][A-Za-z0-9'’.-]*/gu)
-        : segment.text.split(/\s+/).filter(Boolean);
-    const voiceStart = cursor;
-    const words = tokens.map((text) => {
-      const word = { text, start: cursor, end: cursor + 0.18 };
-      cursor += 0.2;
-      return word;
-    });
-    return { ...segment, voice_start: voiceStart, voice_end: cursor, words };
-  });
-  segments.forEach((segment, index) => {
-    segment.start = index
-      ? segment.voice_start - 0.6 * (segment.voice_start - segments[index - 1].voice_end)
-      : 0;
-  });
-  const duration = cursor + 6;
-  segments.forEach((segment, index) => {
-    segment.end = segments[index + 1]?.start ?? duration - script.credits_duration;
-  });
-  return { ...script, segments, captions: [], duration, edition: code, render_offset: 0 };
-}
+test("picture/film.js is exactly the bundle of the modules under picture/film/", async () => {
+  assert.equal(await readFile(COMPOSITION, "utf8"), await bundle());
+});
 
 for (const code of ["zh", "en"]) {
   test(`${code} composition paints every authored scene from its own spoken cues`, async () => {
     const film = await authoredTimeline(code);
     const composition = openComposition(film);
-    const painted = new Set();
-    for (const segment of film.segments) {
-      for (const q of [0.15, 0.5, 0.85, 1]) {
-        const { texts } = composition.render(
-          segment.voice_start + q * (segment.voice_end - segment.voice_start),
-        );
-        for (const v of texts) if (v.scene) painted.add(v.scene);
-        assert.ok(
-          texts.every((v) => v.bounds.every(Number.isFinite)),
-          segment.id,
-        );
-      }
-    }
-    assert.equal(painted.size, film.segments.length);
+    assert.equal(scenesThatPaint(composition, film).size, film.segments.length);
     assert.ok(composition.render(film.duration - 1).texts.some((v) => v.text === "Yang HENG"));
   });
 }
@@ -79,35 +36,7 @@ for (const code of ["zh", "en"]) {
 for (const code of ["zh", "en"]) {
   test(`${code} speech never plays over an empty picture`, async () => {
     const film = await authoredTimeline(code);
-    // A firm stroke or fill counts for the scene that paints it, as the film publishes while it draws, so the film's
-    // own cuts and camera apply: no scene function is replaced.
-    let marks = 0;
-    const composition = openComposition(film),
-      count = (paint) => {
-        if (paint.scene && paint.kind !== "text" && paint.alpha > 0.35) marks++;
-      };
-    const runs = [];
-    for (const segment of film.segments) {
-      let run = null;
-      for (let t = segment.voice_start; t < segment.voice_end; t += 0.1) {
-        marks = 0;
-        const { texts } = composition.render(t, count);
-        const empty = !marks && !texts.some((v) => v.scene && v.alpha > 0.35);
-        if (empty) run ??= { segment: segment.id, start: t, end: t };
-        if (empty) run.end = t + 0.1;
-        if (!empty && run) {
-          runs.push(run);
-          run = null;
-        }
-      }
-      if (run) runs.push(run);
-    }
-    assert.deepEqual(
-      runs
-        .filter((run) => run.end - run.start > 0.5)
-        .map((run) => `${run.segment}@${run.start.toFixed(1)}`),
-      [],
-    );
+    assert.deepEqual(emptySpeech(openComposition(film), film), []);
   });
 }
 
@@ -124,13 +53,14 @@ test("every paint of a scene is traced to its line of film.js, however deep its 
   const lines = (await readFile(COMPOSITION, "utf8")).split("\n");
   const traced = origins.filter(([scene]) => scene).map(([, origin]) => origin);
   assert.ok(traced.length > 0 && traced.every(Boolean));
-  // A scene's own code is its body in film.js; since filmkit 0.12.0 a paint no scene drew takes the innermost line of
-  // film.js that drew it, which lies outside every scene's body.
+  // A scene's own code is its body or a module the bundle places below picture/film/scenes/; since
+  // filmkit 0.12.0 a paint no scene drew takes the innermost line of film.js that drew it.
   const sceneCode = (origin) => {
     const line = Number(/^film\.js:(\d+)$/.exec(origin)[1]),
       above = lines.slice(0, line);
     const opened = above.findLastIndex((v) => /^scenes\["\d+"\] = function/.test(v));
-    return opened >= 0 && opened > above.slice(0, -1).lastIndexOf("};");
+    const inBody = opened >= 0 && opened > above.slice(0, -1).lastIndexOf("};");
+    return inBody || /(^|\/)scenes\/[^/]+\//.test(composition.module(origin) ?? "");
   };
   for (const origin of traced.filter(Boolean)) assert.ok(sceneCode(origin), origin);
   // The caption and the running head are painted outside every scene.
