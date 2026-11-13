@@ -922,12 +922,6 @@
             "target_reading": "jiū zhèng"
           },
           {
-            "term": "经得",
-            "kind": "contextual-mandarin-word",
-            "target_reading": "jīng de",
-            "dictionary_disagreement": "得 is the complement particle de in 经得起; the dictionary reads 得 alone as dé."
-          },
-          {
             "term": "结构",
             "kind": "contextual-mandarin-word",
             "target_reading": "jié gòu"
@@ -1265,6 +1259,11 @@
             "term": "角度",
             "kind": "contextual-mandarin-word",
             "target_reading": "jiǎo dù"
+          },
+          {
+            "term": "常识",
+            "kind": "contextual-mandarin-word",
+            "target_reading": "cháng shí"
           }
         ],
         "sandhi": "Natural Mandarin connected-speech tone sandhi and weak grammatical syllables; never force isolated citation tones.",

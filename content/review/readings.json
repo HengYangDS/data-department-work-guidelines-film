@@ -18,65 +18,93 @@
       "noun": {
         "phones": "K AA1 N F L IH0 K T",
         "primary": 1,
-        "weak": [2]
+        "weak": [
+          2
+        ]
       },
       "verb": {
         "phones": "K AH0 N F L IH1 K T",
         "primary": 2,
-        "weak": [1]
+        "weak": [
+          1
+        ]
       }
     },
     "conflicts": {
       "noun": {
         "phones": "K AA1 N F L IH0 K T S",
         "primary": 1,
-        "weak": [2]
+        "weak": [
+          2
+        ]
       }
     },
     "contracts": {
       "noun": {
         "phones": "K AA1 N T R AE2 K T S",
         "primary": 1,
-        "secondary": [2]
+        "secondary": [
+          2
+        ]
       }
     },
     "coordinates": {
       "verb": {
         "phones": "K OW0 AO1 R D AH0 N EY2 T S",
         "primary": 2,
-        "secondary": [4],
-        "weak": [1, 3]
+        "secondary": [
+          4
+        ],
+        "weak": [
+          1,
+          3
+        ]
       }
     },
     "delegate": {
       "verb": {
         "phones": "D EH1 L AH0 G EY2 T",
         "primary": 1,
-        "secondary": [3],
-        "weak": [2]
+        "secondary": [
+          3
+        ],
+        "weak": [
+          2
+        ]
       }
     },
     "delegated": {
       "verb": {
         "phones": "D EH1 L AH0 G EY2 T IH0 D",
         "primary": 1,
-        "secondary": [3],
-        "weak": [2, 4]
+        "secondary": [
+          3
+        ],
+        "weak": [
+          2,
+          4
+        ]
       }
     },
     "digest": {
       "noun": {
         "phones": "D AY1 JH EH0 S T",
         "primary": 1,
-        "weak": [2]
+        "weak": [
+          2
+        ]
       }
     },
     "duplicates": {
       "verb": {
         "phones": "D UW1 P L AH0 K EY2 T S",
         "primary": 1,
-        "secondary": [3],
-        "weak": [2]
+        "secondary": [
+          3
+        ],
+        "weak": [
+          2
+        ]
       }
     },
     "lead": {
@@ -103,40 +131,52 @@
       "verb": {
         "phones": "P ER0 M IH1 T",
         "primary": 2,
-        "weak": [1]
+        "weak": [
+          1
+        ]
       }
     },
     "permits": {
       "verb": {
         "phones": "P ER0 M IH1 T S",
         "primary": 2,
-        "weak": [1]
+        "weak": [
+          1
+        ]
       }
     },
     "present": {
       "adjective": {
         "phones": "P R EH1 Z AH0 N T",
         "primary": 1,
-        "weak": [2]
+        "weak": [
+          2
+        ]
       },
       "verb": {
         "phones": "P R IY0 Z EH1 N T",
         "primary": 2,
-        "weak": [1]
+        "weak": [
+          1
+        ]
       }
     },
     "proceeds": {
       "verb": {
         "phones": "P R AH0 S IY1 D Z",
         "primary": 2,
-        "weak": [1]
+        "weak": [
+          1
+        ]
       }
     },
     "produce": {
       "verb": {
         "phones": "P R AH0 D UW1 S",
         "primary": 2,
-        "weak": [1]
+        "weak": [
+          1
+        ]
       }
     },
     "read": {
@@ -155,79 +195,107 @@
       "verb": {
         "phones": "R AH0 K AO1 R D IH0 NG",
         "primary": 2,
-        "weak": [1, 3]
+        "weak": [
+          1,
+          3
+        ]
       }
     },
     "rerun": {
       "noun": {
         "phones": "R IY1 R AH2 N",
         "primary": 1,
-        "secondary": [2]
+        "secondary": [
+          2
+        ]
       },
       "verb": {
         "phones": "R IY2 R AH1 N",
         "primary": 2,
-        "secondary": [1]
+        "secondary": [
+          1
+        ]
       }
     },
     "resume": {
       "verb": {
         "phones": "R IH0 Z UW1 M",
         "primary": 2,
-        "weak": [1]
+        "weak": [
+          1
+        ]
       }
     },
     "separate": {
       "adjective": {
         "phones": "S EH1 P ER0 IH0 T",
         "primary": 1,
-        "weak": [2, 3]
+        "weak": [
+          2,
+          3
+        ]
       }
     },
     "separates": {
       "verb": {
         "phones": "S EH1 P ER0 EY2 T S",
         "primary": 1,
-        "secondary": [3],
-        "weak": [2]
+        "secondary": [
+          3
+        ],
+        "weak": [
+          2
+        ]
       }
     },
     "subject": {
       "noun": {
         "phones": "S AH1 B JH IH0 K T",
         "primary": 1,
-        "weak": [2]
+        "weak": [
+          2
+        ]
       }
     },
     "transfers": {
       "noun": {
         "phones": "T R AE1 N S F ER0 Z",
         "primary": 1,
-        "weak": [2]
+        "weak": [
+          2
+        ]
       },
       "verb": {
         "phones": "T R AE0 N S F ER1 Z",
         "primary": 2,
-        "weak": [1]
+        "weak": [
+          1
+        ]
       }
     },
     "update": {
       "noun": {
         "phones": "AH1 P D EY2 T",
         "primary": 1,
-        "secondary": [2]
+        "secondary": [
+          2
+        ]
       }
     },
     "updates": {
       "noun": {
         "phones": "AH1 P D EY2 T S",
         "primary": 1,
-        "secondary": [2]
+        "secondary": [
+          2
+        ]
       },
       "verb": {
         "phones": "AH0 P D EY1 T S",
         "primary": 2,
-        "weak": [1]
+        "weak": [
+          1
+        ]
       }
     }
   },
@@ -236,7 +304,9 @@
       "verb": {
         "phones": "Y UW1 Z IH0 Z",
         "primary": 1,
-        "weak": [2]
+        "weak": [
+          2
+        ]
       }
     }
   },
@@ -274,7 +344,7 @@
     "lead": {
       "11:1104": "noun",
       "13:854": "noun",
-      "14:646": "noun",
+      "14:595": "noun",
       "20:35": "noun"
     },
     "leads": {
@@ -282,7 +352,7 @@
       "23:236": "verb"
     },
     "permits": {
-      "12:832": "verb",
+      "12:828": "verb",
       "20:113": "verb"
     },
     "present": {
@@ -294,31 +364,32 @@
       "19:928": "verb"
     },
     "produce": {
-      "15:259": "verb",
+      "15:203": "verb",
       "24:16": "verb"
     },
     "project": {
-      "27:471": "noun"
+      "27:476": "noun"
     },
     "read": {
       "19:554": "present",
-      "21:722": "present"
+      "21:769": "present"
     },
     "reads": {
       "18:566": "present",
-      "21:583": "present"
+      "21:630": "present"
     },
     "record": {
       "03:1231": "noun",
       "04:1048": "noun",
-      "15:597": "verb",
-      "15:649": "noun",
-      "21:978": "noun",
-      "27:801": "noun",
-      "29:1208": "noun"
+      "15:541": "verb",
+      "15:593": "noun",
+      "21:1025": "noun",
+      "27:806": "noun",
+      "29:1212": "noun",
+      "29:1220": "verb"
     },
     "recording": {
-      "29:1139": "verb"
+      "29:1143": "verb"
     },
     "records": {
       "03:623": "noun",
@@ -329,7 +400,7 @@
     "rerun": {
       "11:634": "verb",
       "11:994": "verb",
-      "14:697": "verb"
+      "14:646": "verb"
     },
     "resume": {
       "22:879": "verb"
@@ -348,10 +419,10 @@
       "05:313": "noun",
       "05:535": "noun",
       "06:539": "noun",
-      "14:624": "noun",
-      "15:190": "noun",
+      "14:573": "noun",
+      "15:134": "noun",
       "16:322": "noun",
-      "17:428": "noun",
+      "17:412": "noun",
       "18:179": "noun"
     },
     "transfers": {
@@ -374,12 +445,12 @@
       "12:385": "noun",
       "12:508": "noun",
       "12:561": "noun",
-      "12:685": "noun",
-      "12:817": "noun",
-      "12:852": "noun",
-      "12:912": "noun",
+      "12:681": "noun",
+      "12:813": "noun",
+      "12:848": "noun",
+      "12:908": "noun",
       "13:1041": "noun",
-      "14:1046": "noun",
+      "14:991": "noun",
       "16:473": "noun",
       "16:487": "noun",
       "25:834": "noun",
@@ -389,7 +460,7 @@
     },
     "uses": {
       "18:541": "verb",
-      "29:1389": "noun"
+      "29:1400": "noun"
     }
   }
 }
