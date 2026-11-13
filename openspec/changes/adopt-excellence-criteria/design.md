@@ -169,6 +169,14 @@ On filmkit 0.21.0 the gates on the n9 timelines first refused four findings (`ga
 
 The film moves to filmkit 0.21.0 (`pyproject.toml`, `uv.lock`). With it the player pages open every film and cover link in a new tab and Spotlight reads each keyword whole (Z38-7, Z38-8, EN38-17); the packaged edition is checked for both before its review. The software capture of §16 stays.
 
+### 19. The static gate and the release build
+
+On 2026-11-13 the full proof of the archived head refused `picture/film.js`. The proof's ESLint, which reads no repository configuration, reports two declarations as assigned and never used: `easeOut` at line 20 and `swapped` at line 4839. Their last uses went on 2026-11-08 (`78bd563`) and 2026-11-07 (`131b94e`). `mise run check` runs no ESLint, and this lane had no full proof since release 1.2.0, so nothing reported them in the review rounds since. The archive was returned with `ethos lane archive-change --compensate`, and both declarations are removed.
+
+The composition is a film-bound source: round 39's review and each staged picture bind its digest, so the films of release 1.3.0 are built again from the cleaned composition. All four pictures of each edition are rendered and packaged, and each film is compared with round 39's film of the same name by its decoded audio and at every frame. Nothing reads either declaration, so a frame may differ only as two encodings of one picture differ; a frame under the reproduction floor of 45 dB, or an audio stream that differs, stops the release. A review round then judges the rebuilt films with that comparison before it: each reviewer verifies the comparison on the media and carries round 39's judgments only where it holds, and the delivery replaces round 39's films with the rebuilt ones.
+
+The same ESLint observation now runs over the tracked JavaScript before a build goes to review (`build/evidence/next-edition/2026-11-13-lint/`), and the film engine is asked to run it with its picture checks.
+
 ## Risks / Trade-offs
 
 - [The English voice sits 0.3 dB above its floor] → The computation is exact, so a reviewer reproduces the producer's figure; a measurement below the floor is a material finding that a new recording, not a lower floor, resolves.

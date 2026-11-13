@@ -17,7 +17,6 @@ const TYPE = 1.12;
 const clamp = q => Math.max(0, Math.min(1, q));
 const mix = (a, b, q) => a + (b - a) * q;
 const ease = q => { q = clamp(q); return q * q * (3 - 2 * q); };
-const easeOut = q => { q = clamp(q); return 1 - Math.pow(1 - q, 3); };
 const units = v => v.replace(/[^\p{L}\p{N}]/gu, "").toLowerCase();
 const ramp = (t, start, duration = .7) => ease((t - start) / duration);
 /* Movement easing: the standard curve cubic-bezier(.4, 0, .2, 1). A movement leaves rest gently, travels quickly and
@@ -4836,7 +4835,7 @@ scenes["13"] = function (s, t) {
     check(dl + W, top + 2, 22, {alpha: ok});
     nameText(testsName, dl + W + 26 + NAME_GAP, top, {align: "left", color: P.evidence, alpha: p1 * named(t, tests)});
     // The issuer's identifier flips over under the data instead of cutting from one value to the other.
-    const flip = clamp((t - changeId + .1) / .6), sx = Math.max(.04, Math.abs(Math.cos(Math.PI * flip))), swapped = flip >= .5;
+    const flip = clamp((t - changeId + .1) / .6), sx = Math.max(.04, Math.abs(Math.cos(Math.PI * flip)));
     ctx.save(); ctx.translate(dx, low); ctx.scale(sx, 1); ctx.translate(-dx, -low);
     // Edge on, the old value fades out over the last frames of its half turn and the new one fades in over the first of
     // its own, so neither value leaves or arrives in one frame and the two never stand together.
