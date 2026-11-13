@@ -26,9 +26,12 @@
 - [x] 3.11 Repair round 37's picture findings and settle every still state within 50 px for 2 s (design § 17); verify the picture tests, the geometry check, the cover check and `check-picture` of both editions. On `9af6d5c` the 15 picture tests pass, the three checks pass both editions, and round 38 found no material or minor finding.
 - [x] 3.12 Answer round 38's notes and round 37's text notes (design § 18): adopt the n9 text, narrate and bind its changed thoughts, assemble both soundtracks and repair the picture on filmkit 0.21.0; verify the recheck, the readings and concept checks, minimal pairs on the new heteronyms, both soundtracks at exactly 1500 s with the English dry fit leaving at least 0.3 s, and the picture gates. The recheck scores both editions 96, 98, 96 and 96 (`build/evidence/next-edition/2026-11-12-n9/recheck-n9.md`); in `build/evidence/next-edition/2026-11-13-n9/` the pairs read every occurrence as declared, the soundtracks are `bd875674…` and `fc230753…` with 0.60 s left in English, and gate run 3 passes `check-picture`, the geometry and cover checks of both editions and the 15 picture tests.
 
-## 4. Release and landing
+## 4. Release preparation
 
-- [ ] 4.1 Prepare release 1.3.0: `VERSION`, the CHANGELOG entry, the README's comparison and `content/release.json` naming the new films and their reviews; verify `film:compare` against the release folder.
-- [ ] 4.2 Run the full proof on the final head and land it on `dev`; verify the landed head on GitHub.
-- [ ] 4.3 Publish release 1.3.0 with both films, their reviews and `SHA256SUMS`; verify each asset's digest on GitHub against the manifest.
-- [ ] 4.4 Archive the Change and retire the Work Lane; verify that the evidence the CHANGELOG cites is in the canonical checkout's `build/evidence/`.
+- [x] 4.1 Prepare release 1.3.0: `VERSION`, the CHANGELOG entry, the README's comparison and `content/release.json` naming the new films and their reviews; verify `film:compare` against the release folder. On 2026-11-13 `content/release.json` records round 39's 21 assets, both editions' soundtracks and staged pictures, the 20 film-bound sources and a 45 dB PSNR floor for each of the eight films (`f58484c`), and `build/artifacts/release/` holds the assets with `SHA256SUMS`. `film:compare` passes against that folder: 8 films, 720,000 frames, every frame identical, every document, soundtrack and staged picture as recorded (`build/evidence/reproduction/report.json`).
+
+## Workflow follow-up
+
+- Archive the Change, prove the archived head once, land it on `dev` and close out; verify the landed head on GitHub. The commits after `f58484c` change only this Change's OpenSpec files, so the comparison of 4.1 and the verification of 3.6 stand for the released head; verify that no film-bound source differs between the two heads.
+- Tag `v1.3.0` through `ethos land --release`, publish the branches and the tag as `ethos publish` declares, and upload release 1.3.0 with its 21 assets; verify each asset's digest on GitHub against the manifest and `SHA256SUMS`.
+- Retire the Work Lane once the evidence the CHANGELOG cites is in the canonical checkout's `build/evidence/`.
