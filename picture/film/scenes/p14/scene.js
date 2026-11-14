@@ -111,7 +111,7 @@ scenes["14"] = function (s, t) {
       : [
           ["生产环境", ""],
           ["共享资产", ""],
-          ["关键管理链条", ""],
+          ["关键的管理流程", ""],
         ],
   );
   // Each control's gate arrives on the words that begin it and opens one step per requirement said. A control whose key

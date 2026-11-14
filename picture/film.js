@@ -8419,7 +8419,7 @@ function s14Vault(s, t, vaultAts, lockAts, p3) {
     "当前的版本和环境"
   ];
   const vaultName = L(
-    ["生产环境、共享资产，", "或者关键管理链条"],
+    ["生产环境、共享资产，", "或者关键的管理流程"],
     "Production, shared assets or critical management chains"
   );
   const lastW = Math.max(...wrapName(keys.at(-1), Infinity).map((v) => measure(v)));
@@ -8755,7 +8755,7 @@ scenes["14"] = function(s, t) {
     ] : [
       ["生产环境", ""],
       ["共享资产", ""],
-      ["关键管理链条", ""]
+      ["关键的管理流程", ""]
     ]
   );
   const lockAts = (en ? [
