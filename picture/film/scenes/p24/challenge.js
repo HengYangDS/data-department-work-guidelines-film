@@ -232,9 +232,9 @@ export function s24Checkable(s, t, updates, four) {
       alpha: principle,
       draw: { t, at: checkAt + 0.05 },
     });
-    // The occasions the principle holds for name the card from the first words.
+    // The occasions the principle holds for name the card from the first words, in the voice's words.
     nameText(
-      L("汇报、答复、纪要和上报", "Updates, answers, meeting records and escalations"),
+      L("汇报、答复、写纪要和上报", "Updates, answers, meeting records and escalations"),
       960,
       TOP + 2 * ROW + 40 + NAME_GAP,
       { valign: "top", width: 420, alpha: principle * named(t, updates) },

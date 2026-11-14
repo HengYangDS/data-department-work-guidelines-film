@@ -20,10 +20,10 @@ import { voiceTime } from "../../timing/pauses.js";
 /* Stage 1: the manager joined to two rows, what they make clear and where they act in time. */
 export function s29Managers(s, t, managers, clarify, conflicts, stalled, protect, one) {
   // The manager stands at 325 and the duties span 645 to 1565, so the named structure stands about the centre; in
-  // English the manager stands 25 px further left and the duties span 620 to 1620, so the last act's name stands whole
-  // on one line, 40 px from its neighbour, as no break keeps its phrase.
-  const MX = L(325, 300),
-    TX = L(475, 450),
+  // English the manager stands 49 px further left and the duties span 596 to 1644, so the last act's name stands whole
+  // on one line, a clear 48 px or more from its neighbour, as no break keeps its phrase.
+  const MX = L(325, 276),
+    TX = L(475, 426),
     RA = 375,
     RB = 665,
     MY = (RA + RB) / 2,
@@ -34,7 +34,7 @@ export function s29Managers(s, t, managers, clarify, conflicts, stalled, protect
   const namesB = en
     ? ["Cross-domain conflicts", "Stalled decisions", ["Those who expose problems"]]
     : ["跨领域的冲突", "久拖不决的事项", "暴露问题的人"];
-  const xa = railStations(namesA, L(645, 620), L(1565, 1620), { wrap: 300 }),
+  const xa = railStations(namesA, L(645, 596), L(1565, 1644), { wrap: 300 }),
     xb = xa.slice(0, namesB.length);
   const duties = [...clarify, conflicts, stalled, protect];
   person(MX, MY - 24, {

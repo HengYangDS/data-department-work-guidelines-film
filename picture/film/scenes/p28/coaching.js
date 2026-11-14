@@ -27,7 +27,7 @@ import { glide } from "../../timing/pace.js";
 /* Stage 1: one task as a rail the member walks, stopping where the guidelines say to look. */
 export function s28RealWork(s, t, grows, boundary, g1) {
   // The English last action stands whole on one line and is the widest name, so in English the rail starts 20 px
-  // further left, the step rises 195 px further right and the next task's stop stands 160 px further on, its name
+  // further left, the step rises 195 px further right and the next task's stop stands 176 px further on, its name
   // clear of the member climbing the step by the headless canvas's wider estimate too, which keeps every pair of
   // stations well apart.
   const moments = cues(s, [
@@ -61,14 +61,15 @@ export function s28RealWork(s, t, grows, boundary, g1) {
       moment ? measure(moment, NOTE) / 2 : 0,
       ...wrapName(act, 360).map((line) => measure(line) / 2),
     );
-  // The English lane widens by as much on each side as keeps the middle action, whole on one line, 34 px or more from
-  // both its neighbours' names: the stops' pitch grows by that much.
+  // The English lane widens by as much on each side as keeps the middle action, whole on one line, 50 px or more from
+  // both its neighbours' names, the clear gap two names on one row keep (48 px at 1080p and 1.5 em): the stops' pitch
+  // grows by that much, and the next task's stop and the rail's end stand 16 px further on with the step.
   const delta = en
     ? Math.max(
         0,
         half(names[1]) +
           Math.max(half(names[0]), half(names[2])) +
-          34 -
+          50 -
           (1495 - 70 - (200 - 20) - 48 - half(names[0]) - half(names[2])) / 2,
       )
     : 0;
@@ -76,7 +77,7 @@ export function s28RealWork(s, t, grows, boundary, g1) {
     UP = 370,
     X0 = L(220, 200 - delta),
     RISE = L(1300, 1495 + delta),
-    X1 = 1700,
+    X1 = L(1700, 1716),
     rows = [Y, Y, Y, UP];
   // The task's three stops stand at one pitch about the middle of its lane (BX0 to BX1), as far apart as keeps every
   // stop's names inside the lane with room to spare; the next task's stop stands on the step beyond. The English
@@ -88,7 +89,7 @@ export function s28RealWork(s, t, grows, boundary, g1) {
     ? (BX1 - BX0 - 48 - half(names[0]) - half(names[2])) / 2
     : Math.min(BC - BX0 - half(names[0]), BX1 - BC - half(names[2])) - 24;
   const MC = en ? (BX0 + 24 + half(names[0]) + BX1 - 24 - half(names[2])) / 2 : BC,
-    xs = [MC - pitch, MC, MC + pitch, L(1500, 1660)];
+    xs = [MC - pitch, MC, MC + pitch, L(1500, 1676)];
   const starts = acts.map((at, i) => Math.min(at, moments[i] ?? Infinity));
   // The rail, the task's whole course, stands from the first words, whole, so the stage stands balanced while its
   // stations build; each station marks on it on its own words.

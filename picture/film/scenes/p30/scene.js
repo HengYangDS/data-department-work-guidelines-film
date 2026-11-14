@@ -294,14 +294,16 @@ scenes["30"] = function (s, t) {
     const names = en
       ? [
           ["Problem solved?"],
-          ["Judgment tested, limits clear?"],
+          ["Judgment tested,", " limits clear?"],
           ["Better able to recognize", " or handle", " the next occurrence?"],
         ]
       : [["问题解决了吗"], ["判断经过检验，限度清楚"], ["工作体系能不能更好地发现或应对"]];
     // The rail, its names and the bracket with the value above it are balanced on the content centre. A name wraps no
     // wider than W, the third a little wider; in Chinese W is the rail's own wrap width, so its two long questions break
-    // at their clause marks and neighbouring names stand well apart.
+    // at their clause marks and neighbouring names stand well apart. The English second question breaks at its comma
+    // (MID), so it keeps a clear gap of well over 48 px from the third's first line, which reaches toward it.
     const W = en ? 380 : RAIL_WRAP,
+      MID = en ? 300 : W,
       R = 56,
       Y = CONTENT_CY - 20,
       xs = [520, 960, 1400],
@@ -338,7 +340,7 @@ scenes["30"] = function (s, t) {
     // A name stands whole on its first words, so its lines are set as one name, centred on the station.
     names.forEach((parts, i) =>
       nameText(
-        growTexts(parts, i < 2 ? W : W + 120).map((line) => line.map(([, v]) => v).join("")),
+        growTexts(parts, [W, MID, W + 120][i]).map((line) => line.map(([, v]) => v).join("")),
         xs[i],
         Y + R + NAME_GAP,
         {

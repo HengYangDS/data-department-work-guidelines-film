@@ -139,12 +139,14 @@ export function s11PeopleDecide(s, t, leadCut, nine) {
   // The stage stands right of its place while the lead and the bundle stand alone, 198 px in Chinese and 193 in
   // English, so they stand centred; it eases left as the owner joins, to 65 and 46 px, so the owner's frame stands
   // centred with them; and it eases on to 61 px left of its place as the frame begins to widen for the acceptor, so it
-  // stands centred once the acceptor joins, the glide done before the thought's last word ends.
+  // stands centred once the acceptor joins, the glide done before the thought's last word ends. The first glide sets
+  // off 0.15 s before the owner's word, so at the glide peak of 420 px/s it has all but settled when the frame begins
+  // to widen: a frame whose left edge still glides as its right edge sets out would stand still for one frame.
   const [bundle, owned] = L([198, 65], [193, 46]);
   ctx.save();
   ctx.translate(
     bundle -
-      (bundle - owned) * glide(t, ownerAt - 0.1, bundle - owned) -
+      (bundle - owned) * glide(t, ownerAt - 0.15, bundle - owned) -
       (owned + 61) * glide(t, accAt - 0.1 - drawTime(r1 - r0, 0.4), owned + 61),
     0,
   );

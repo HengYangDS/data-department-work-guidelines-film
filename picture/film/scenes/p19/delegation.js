@@ -235,8 +235,8 @@ export function s19Cannot(
       const d = to - (k ? targets[k - 1] : small);
       return w + d * pacedTo(tt, does[k] + 0.1, d, 0.4);
     }, small);
-  // As the frame widens to take the refused names whole, it and the Agent ease left, 83 px in Chinese and 150 in
-  // English, so the stage stays centred.
+  // As the frame widens to take the refused names whole, it and the Agent ease left, 83 px in Chinese and 164 in
+  // English, so the stage stays centred, the English within 30 px as its thought rests.
   const fx3 = FX - lean19 * glide(t, does[0] - 0.3, lean19),
     ax3 = fx3 + small / 2,
     kx3 = fx3 + 210;

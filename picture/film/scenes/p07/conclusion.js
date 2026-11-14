@@ -49,7 +49,7 @@ export function s07Reasoning(s, t, reason, eight) {
   // commas as key words, on two lines of even width, so its name already lies inside the action-safe area when it
   // inks in, before the stage has glided to its new extent: with "or", the even break ends a line on it, and the
   // break before it leaves the wider second line outside that area as it inks in.
-  // Each Chinese trap stands on one line, as said; the one-sided search by its key words, short of the clause its
+  // Each Chinese trap stands on one line, as said; the one-sided search in the voice's words, short of the clause its
   // caption shows.
   const names = en
     ? [
@@ -66,7 +66,7 @@ export function s07Reasoning(s, t, reason, eight) {
         "把个案看成全部",
         "把必要条件看成充分条件",
         "认定只有一个原因",
-        "只找有利的证据",
+        "只找对自己有利的证据",
         "换标准",
         "搬出常识、经验或“最佳实践”",
       ];

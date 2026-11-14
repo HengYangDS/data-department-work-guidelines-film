@@ -105,7 +105,8 @@ scenes["04"] = function (s, t) {
   // first boundary alone and all four, in the second the cases before the breach and all three (in English, whose last
   // gloss, on one line, is far the widest, the first two alone, moving on the breach's words to all three). So each stage leans no
   // further one way while its column builds than the other way once it is built; the field and the column move together
-  // to the second stage's place on the words that open it. Places are reckoned from the field's left edge.
+  // to the second stage's place on the words that open it, each move a glide timed by its way (0.55 s at least).
+  // Places are reckoned from the field's left edge.
   const rowW = ([term, qual], W) =>
     Math.max(
       measure(term),
@@ -116,17 +117,16 @@ scenes["04"] = function (s, t) {
   const place = (LX, widths, built) =>
     960 - (290 + LX + (Math.max(...widths.slice(0, built)) + Math.max(...widths)) / 2) / 2;
   const caseW = caseRows.map((v) => rowW(v, W2));
+  const first = place(
+      LX1,
+      boundaryRows.map((v) => rowW(v, W1)),
+      1,
+    ),
+    cases = L(place(LX2, caseW, 2), place(LX2, caseW.slice(0, 2), 2)),
+    breached = L(0, place(LX2, caseW, 3) - place(LX2, caseW.slice(0, 2), 2));
   const ox =
-    mix(
-      place(
-        LX1,
-        boundaryRows.map((v) => rowW(v, W1)),
-        1,
-      ),
-      L(place(LX2, caseW, 2), place(LX2, caseW.slice(0, 2), 2)),
-      soon(t, inside + 0.05, 0.55),
-    ) +
-    L(0, place(LX2, caseW, 3) - place(LX2, caseW.slice(0, 2), 2)) * soon(t, breach + 0.05, 0.55);
+    mix(first, cases, glide(t, inside + 0.05, cases - first, 0.55)) +
+    breached * glide(t, breach + 0.05, breached, 0.55);
   const formed = stageIn(t, truth);
   // The glide sets off on the first word of the first boundary's thought, over the field's whole way, and the first
   // row's key and words wait until the field's right side has passed them.

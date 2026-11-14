@@ -12,7 +12,7 @@ import { LABEL, P } from "../../palette.js";
 import { L, en } from "../../timeline.js";
 import { cueFrom, cues } from "../../timing/cues.js";
 import { clamp, mix, ramp } from "../../timing/easing.js";
-import { drawShare, glide, smoother } from "../../timing/pace.js";
+import { GLIDE_PEAK, drawShare, glide, smoother } from "../../timing/pace.js";
 import { thoughtEnd, voiceTime } from "../../timing/pauses.js";
 import { CORR, DEC, X0, X1, corrected, priceAt, series } from "./prices.js";
 
@@ -125,7 +125,10 @@ export function s11Delegation(s, t, agentCut, seven) {
     alpha: seven,
     draw: { t, at: ats[1] - 0.05 },
   });
-  const sweep = clamp((voiceTime(t) - voiceTime(ats[2] + 0.05)) / 1.2),
+  // The sweep runs at one even pace, GLIDE_PEAK px/s at most, so it crosses the copy in 1.2 s or as long as that asks.
+  const sweep = clamp(
+      (voiceTime(t) - voiceTime(ats[2] + 0.05)) / Math.max(1.2, (mx(X1) - mx(X0)) / GLIDE_PEAK),
+    ),
     sx = mix(mx(X0), mx(X1), sweep);
   if (sweep > 0 && sweep < 1)
     line(sx, 300, sx, 494, {

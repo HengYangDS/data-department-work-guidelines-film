@@ -11,9 +11,11 @@ import { stageCuts } from "./stages.js";
  * `start` on the smootherstep curve, 6x⁵ - 15x⁴ + 10x³, whose pace rises from rest and falls back to it with no jerk, so
  * even sampled at 30 frames a second it neither sets off nor stops at a visible pace; it peaks at 1.875 times its mean
  * pace, and the glide lasts at least `min` seconds and long enough that its pace peaks at GLIDE_PEAK px/s, well within
- * what the eye follows at 1080p. It advances in voice time, so a glide still under way when a thought ends rests with
- * the voice clock and finishes on the next words. Returns the share of the move made at t. */
-export const GLIDE_PEAK = 450,
+ * what the eye follows at 1080p and, with the camera's slow push of up to 4% and the frame-to-frame sampling of the
+ * motion audit, under the 450 px/s the reviews hold a calm picture to (Z40-7, EN40-12). It advances in voice time, so a
+ * glide still under way when a thought ends rests with the voice clock and finishes on the next words. Returns the
+ * share of the move made at t. */
+export const GLIDE_PEAK = 420,
   GLIDE_MIN = 0.6;
 export const smoother = (q) => {
   q = clamp(q);

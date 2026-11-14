@@ -81,12 +81,12 @@ scenes["18"] = function (s, t) {
   // change, the other run reaches the first step, which lights again.
   // The loop holds until the next thought names the work it asks more of, and hands the picture over in one cut.
   // The two changes are a list said member by member, the right one first, so from the right change's words the loop
-  // eases toward the left change's side by as much as centres the loop with the right change, 62 px in Chinese and 114
+  // eases toward the left change's side by as much as centres the loop with the right change, 62 px in Chinese and 120
   // in English, whose right change stands further out, and eases back as the left change comes, so the stage stays
   // balanced while it builds.
   const one = base * stageOut(t, two);
   if (one > 0) {
-    const lean = L(62, 114);
+    const lean = L(62, 120);
     ctx.save();
     ctx.translate(-lean * (glide(t, evidence - 0.1, lean) - glide(t, subject - 0.1, lean)), 0);
     const cx = 960,
@@ -145,12 +145,12 @@ scenes["18"] = function (s, t) {
     });
     // The changes, at either end of the top line: evidence or risk on the right, over analysis, and the subject, outcome
     // or boundaries on the left, before the first step. Each run draws on from its change on the words that say what
-    // to do, and a dot keeps running along it. The changes stand 340 px either side of the centre, the right English one
-    // 400 px, since each English name stands whole on one line and the left is the longer, so the two stand balanced once
-    // both have come.
+    // to do, and a dot keeps running along it. The changes stand 340 px either side of the centre, the English ones 352
+    // px left and 412 px right, since each English name stands whole on one line and the left is the longer, so the two
+    // stand balanced once both have come and the left keeps a clear 48 px from the first step's name on their line.
     const changes = [
       {
-        x: cx + L(340, 400),
+        x: cx + L(340, 412),
         ats: [evidence, risk],
         color: P.evidence,
         beat: P.unknown,
@@ -160,7 +160,7 @@ scenes["18"] = function (s, t) {
         route: "hv",
       },
       {
-        x: cx - 340,
+        x: cx - L(340, 352),
         ats: [subject, outcome, bounds],
         color: P.ink,
         beat: P.ink,

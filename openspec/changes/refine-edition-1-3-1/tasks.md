@@ -28,12 +28,12 @@
 
 ## 6. Picture
 
-- [ ] 6.1 Balance the opening of 15.1 in the Chinese edition (Z40-1); done when no run beyond 50 px lasts longer than 1.0 s there.
-- [ ] 6.2 Set the eight labels of Z40-5 in the voice's words or declare them in the design; done when the picture-sync audit matches each label to its words or lists it as declared.
-- [ ] 6.3 Lower the glide peak to 420 px/s with each glide timed by its distance (Z40-7, EN40-12); done when the motion audit shows every stage glide and flow at or under 450 px/s.
-- [ ] 6.4 Centre the nine finished stages of EN40-14 where no shown name has to move; done when every rest stands within 30 px.
-- [ ] 6.5 Give neighbouring names on one row a clear gap (EN40-16); done when no gap between two names on a row is under 48 px at 1080p.
-- [ ] 6.6 End each reading run of 21.2 by its tick or its thought's last word (EN40-17); done when no run is visible after 21.2.6's last word unless it stands at its box.
+- [x] 6.1 Balance the opening of 15.1 in the Chinese edition (Z40-1); done when no run beyond 50 px lasts longer than 1.0 s there. Done on the composition's layout (14 November): the three stations' rail inks with the action, so the run beyond 50 px lasts 0.15 s (was 1.45 s).
+- [x] 6.2 Set the eight labels of Z40-5 in the voice's words or declare them in the design; done when the picture-sync audit matches each label to its words or lists it as declared. Four labels say the voice's words (07.7, 11.6, 14.4, 24.3); declared with their reasons: 22.1 and 22.4 name the film's recurring figures where no voice names an actor, 22.2 keeps the kind's name within the rail's wrap, and 29.8 shortens a label that would otherwise repeat its caption cue whole.
+- [ ] 6.3 Lower the glide peak to 420 px/s with each glide timed by its distance (Z40-7, EN40-12); done when the motion audit shows every stage glide and flow at or under 450 px/s. The glide peak is 420 px/s and stage moves are glides timed by their distance; on the layout the scene maxima over 450 fell from 35 to 16 (Chinese) and 39 to 11 (English). The remaining ones are bounded by their words (10's price flight, 21's seal) or ride a drawing tip or a moving frame (11, 14, 15, 19, 23) or compound two moves (13, 17, 21); each is listed for the design to declare or the scene to recut; the motion audit on the staged picture decides.
+- [x] 6.4 Centre the nine finished stages of EN40-14 where no shown name has to move; done when every rest stands within 30 px. Done on the layout: the nine rests stand within 30 px in English (25.4 from 39 to 4 px, 07.1 from 35 to 5 px); 20.2's build state stands 58 px off for 1.3 s and 13.2's first state 48 px for 4 s, under the still-state line.
+- [x] 6.5 Give neighbouring names on one row a clear gap (EN40-16); done when no gap between two names on a row is under 48 px at 1080p. Done on the layout with a 48 px and 1.5 em line: twelve English pairs under 48 px, the five of EN40-16 included, now stand at 49 to 105 px; no Chinese pair stood under it. Real ink widths come with the browser geometry check.
+- [x] 6.6 End each reading run of 21.2 by its tick or its thought's last word (EN40-17); done when no run is visible after 21.2.6's last word unless it stands at its box. Done: each row's run fades over 0.3 s at its tick or 0.35 s before the thought's last word, whichever comes first; no run is visible after the last word in either edition.
 - [ ] 6.7 Run the picture audits on both staged editions, with the two masters' transient test (EN40-13) and the typeset timeline (EN40-9); done when `mise run film:picture` reports no gated finding before its first render.
 
 ## 7. Edition

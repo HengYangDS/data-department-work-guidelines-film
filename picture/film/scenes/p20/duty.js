@@ -20,12 +20,13 @@ import { STAGE_CUT } from "../../timing/stages.js";
 
 /* Stage 4: the caller and the Agent on one line, and what the caller owns of the Agent's work. */
 export function s20Caller(s, t, caller, owned, g4) {
-  // The English caller stands 80 px further right, so its name, whole on one line, keeps the stage about the centre.
+  // The English caller stands 80 px further right, so its name, whole on one line, keeps the stage about the centre;
+  // its marks stand 204 px apart, so the two long names in the middle keep a clear 48 px between them.
   const px = L(380, 460),
     ax = 1540,
     y = 500,
     rail = 500,
-    xs = [700, 900, 1100, 1300];
+    xs = en ? [694, 898, 1102, 1306] : [700, 900, 1100, 1300];
   person(px, y, { alpha: g4, color: P.authority, size: 1.7 });
   nameText(L("调用智能体的人", "The person who calls an Agent"), px, y + 38 + NAME_GAP, {
     valign: "top",
@@ -78,9 +79,12 @@ export function s20Submitting(s, t, submit, vouched, g5) {
   // person and the work stand on one ground line, the page's foot, and their names hang from it on one line, a row
   // clear below the vouchers' last item rather than just off its line. The English vouchers stand 30 px further
   // left, so their longest name keeps well clear of the work's name on the line below rather than stepping into it.
+  // The English work stands 26 px nearer the person, so the thought rests within 30 px of the centre once the person
+  // is named you; the wider name before it, which leans the stage the other way for the second before, stands where
+  // the last stage showed it.
   const px = 560,
     y = 500,
-    wx = 1340,
+    wx = L(1340, 1314),
     kx = L(800, 770),
     youAt = cueFrom(s, "你", "you", submit),
     you = named(t, youAt);
@@ -175,7 +179,8 @@ export function s20Duty(s, t, transfers, dutyAt, g6) {
 export function s20Acceptor(s, t, examine, acceptor, unmet, met, noExpand, steps, g7) {
   // The two branches' conditions are named on one line: the met branch's rail stands so its label shares the unmet
   // reason's first line under the boundary, clear below the line of names. The English rail stops 100 px left, short
-  // of the 135 px that would centre the stage exactly, so its start keeps clear of the work's page.
+  // of the 135 px that would centre the stage exactly, so its start keeps clear of the work's page, and its steps stand
+  // 184 px apart from the last back, so the last two names keep a clear 48 px between them.
   const lead = L(210, 170) * (1 - glide(t, met + 0.05, L(210, 170)));
   const ax = 470 + lead,
     ay = 500,
@@ -186,7 +191,7 @@ export function s20Acceptor(s, t, examine, acceptor, unmet, met, noExpand, steps
     bh = 190,
     ex = 960 + lead,
     ey = 500;
-  const xs = [1220, 1400, 1580].map((x) => x - L(84, 100)),
+  const xs = [1220 - L(0, 8), 1400 - L(0, 4), 1580].map((x) => x - L(84, 100)),
     ry = by + bh + NAME_GAP + labelSize(LABEL) + NAME_GAP + 22;
   const returns = cueFrom(s, "退回", "goes back", unmet),
     memberAt = cueFrom(s, "成员", "the member", unmet);

@@ -389,7 +389,7 @@ scenes["02"] = function (s, t) {
       run = 150,
       taskName = L("一项任务", "A task");
     // The stage's extents from the task: the rows' names begin 300 px right of it, the task's name centres on it and the
-    // reports' column begins 186 px left of it.
+    // reports' column begins 186 px left of it, 148 px in English, so both of its last pictures rest within 30 px.
     const lineW = (parts, w, size) =>
       Math.max(
         ...growTexts(parts, w, size).map((line) =>
@@ -404,12 +404,12 @@ scenes["02"] = function (s, t) {
         ),
       );
     const columnMid = (rowsEnd - Math.max(TR + 7, measure(taskName) / 2)) / 2,
-      stageMid = (rowsEnd - 186) / 2;
+      stageMid = (rowsEnd - L(186, 148)) / 2;
     const TY = CONTENT_CY + 30,
       TX = Math.round(960 - (columnMid + stageMid) / 2),
       MX = TX + run + R,
       NX = MX + R + NAME_GAP,
-      RX = TX - 160;
+      RX = TX - L(160, 122);
     const ys = [TY - 170, TY, TY + 170],
       colors = [P.ink, P.evidence, P.authority];
     // Until the first outcome arrives the task stands right of its place, balanced between the task alone and the task

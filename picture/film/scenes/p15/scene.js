@@ -63,7 +63,8 @@ scenes["15"] = function (s, t) {
   // opens on these words, under the chapter's rising title: the action stands on the right behind a closed bar from the
   // words that put it after them. The three build one row of stations on the left, each station with its mark on its
   // own words, and the one being named lights its station; on the words that make them visible the bar lifts and the
-  // way runs on to the action. The row holds until the chain of trust is named and leaves in one cut.
+  // way runs on to the action. The row holds until the chain of trust is named and leaves in one cut. The row's rail
+  // inks in with the action, the places of the three, so the frame is balanced before the first of them is named.
   const [acting, visibleAt] = cues(s, [
     ["动手之前", "before acting"],
     ["摆到明面上", "visible"],
@@ -80,6 +81,7 @@ scenes["15"] = function (s, t) {
     // The bar lifts within its thought, so it is still before the quiet that follows the words that lift it.
     const open = soon(t, visibleAt + 0.05, Math.min(0.5, thoughtEnd(visibleAt) - visibleAt - 0.1));
     const act = seats * ramp(t, acting - 0.45, 0.45);
+    line(xs[0] - 70, sy, xs[2] + 70, sy, { color: P.line, alpha: act, width: 3.5 });
     ring(AX, y, 54, { color: P.ink, alpha: act, width: 3 });
     path(
       [

@@ -15,7 +15,7 @@ import { L, en } from "../../timeline.js";
 import { cue } from "../../timing/cues.js";
 import { ease, mix, ramp, soon } from "../../timing/easing.js";
 import { GLIDE_PEAK, glide } from "../../timing/pace.js";
-import { pauseHold, voiceTime } from "../../timing/pauses.js";
+import { pauseHold, thoughtEnd, voiceTime } from "../../timing/pauses.js";
 
 /* Stage 1: the Agent's output as a stack of pages under the check's lens, the work and not just its summary. */
 export function s21Output(
@@ -165,8 +165,10 @@ export function s21Checklist(s, t, two) {
     // The row is one mark under its name: a rule under the row runs from its marks to the box where it is ticked.
     line(IX - 80, y + 40, TX + 18, y + 40, { color: P.line, alpha: row, width: 2 });
     // The reviewer reads the row: a bright run travels along its rule, under its name, from its marks to its box while
-    // it is asked, easing off and settling as the row is ticked, and leaves as the row is ticked. It runs in voice
-    // time, so a run still under way when a thought ends rests in the quiet.
+    // it is asked, easing off and settling as the row is ticked, and leaves as the row is ticked, or by the last word
+    // of the thought that asks it, whichever comes first, so no run stands mid-rule under a ticked row in the quiet
+    // after the thought (EN40-17). It runs in voice time, so a run still under way when a thought ends rests in the
+    // quiet.
     const read = ease(
         (voiceTime(t) - voiceTime(starts[k])) /
           Math.max(
@@ -175,11 +177,12 @@ export function s21Checklist(s, t, two) {
             (1.5 * (TX - 90 - IX + 80)) / GLIDE_PEAK,
           ),
       ),
-      rx = mix(IX - 80, TX - 90, read);
-    if (read > 0 && read < 1)
+      rx = mix(IX - 80, TX - 90, read),
+      left = 1 - ramp(t, Math.min(ticks[k] + 0.05, thoughtEnd(starts[k]) - 0.35), 0.3);
+    if (read > 0 && read < 1 && left > 0)
       line(rx, y + 40, rx + 60, y + 40, {
         color: P.evidence,
-        alpha: two * pass(read, 0.15),
+        alpha: two * pass(read, 0.15) * left,
         width: 6,
       });
     // The box stands level with its row's name, centred on the name's line and clear of the rule under it.

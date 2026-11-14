@@ -12,7 +12,7 @@ import { railNames } from "../../naming/placement.js";
 import { rejectedName } from "../../naming/rejected.js";
 import { P } from "../../palette.js";
 import { L, en } from "../../timeline.js";
-import { cueFrom, cues } from "../../timing/cues.js";
+import { cue, cueFrom, cues } from "../../timing/cues.js";
 import { mix, ramp, soon } from "../../timing/easing.js";
 import { glide, glideTime } from "../../timing/pace.js";
 import { thoughtEnd } from "../../timing/pauses.js";
@@ -34,8 +34,9 @@ export function s07Understanding(s, t, one) {
   });
   // The side named first stands alone centred under the knot, and moves out to its own side on the words that name
   // the other, so the frame stays balanced while one side stands alone. The list is 264 px wide; the model centres on
-  // its lower part (x 1230).
-  const second = en ? longer : model,
+  // its lower part (x 1230). The English model sets off on the first word of the clause that names the list, "not",
+  // so it has all but reached its side when the thought ends and the frame rests within 30 px of the centre.
+  const second = en ? cue(s, "", "not a longer list") : model,
     alone = 1 - glide(t, second + 0.05, en ? 960 - 1230 + 50 : 960 - 132 - 560);
   // The English model rests 50 px left of its place, so its whole name keeps the stage centred.
   const lx = 560 + (en ? 0 : (960 - 132 - 560) * alone),

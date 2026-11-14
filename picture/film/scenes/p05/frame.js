@@ -36,9 +36,10 @@ export function s05Frame(s, t, frame, subject, present, criteria, outScope, limi
   // top and the sides' feet as they build, and its bottom edge stands that far below the last item.
   // The English frame keeps 75 px round its four items, 70 px apart, centred where the Chinese frame stands, so its
   // first picture, the frame round one item, covers a tenth of the band while its bottom edge stands where the limits
-  // have room above the next stage.
-  const FL = L(560, 540),
-    FR = L(1360, 1380),
+  // have room above the next stage. It stands 40 px wider on each side than its items alone would ask, so the limits'
+  // names, at the one pitch that keeps the widest pair 50 px apart, stand inside its sides by the inset they kept.
+  const FL = L(560, 500),
+    FR = L(1360, 1420),
     FT = L(370, 385),
     ys = en ? [460, 530, 600, 670] : [470, 575, 680],
     PADV = ys[0] - FT,
@@ -153,7 +154,8 @@ export function s05Frame(s, t, frame, subject, present, criteria, outScope, limi
   // The bottom edge, closed by its limits.
   // The row of the limits' names stands centred on the frame: its first and last names keep one inset from the sides.
   // The English names differ most in width, so they stand at one pitch, the widest pair's need, their row's ink
-  // centred on the frame, each name centred on its tick.
+  // centred on the frame, each name centred on its tick. The widest pair keeps a clear gap of 50 px, the gap two names
+  // on one row keep (48 px at 1080p and 1.5 em).
   const limitNames = en
     ? ["Time", "Cost", "Compliance", "Technical", "Resource"]
     : ["时间", "成本", "合规", "技术", "资源"];
@@ -164,7 +166,7 @@ export function s05Frame(s, t, frame, subject, present, criteria, outScope, limi
     (lastX - firstX) / 4,
     ...limitNames
       .slice(1)
-      .map((v, i) => (measure(limitNames[i], LABEL) + measure(v, LABEL)) / 2 + 34),
+      .map((v, i) => (measure(limitNames[i], LABEL) + measure(v, LABEL)) / 2 + 50),
   );
   const xs = en
     ? limitNames.map((_, i) => 960 - (wn - w0) / 4 + (i - 2) * pitchEn)

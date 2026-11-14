@@ -221,11 +221,13 @@ export function s13Decisions(s, t, decisions, schema, owners, opensDecisions, p2
   // The first owner's name and list stand while the second question still waits, and then both owners stand with
   // their lists; each owner reaches half the wider of its name and its list either side of it, and the question half
   // its mark. The stage stands right of the frame's centre by as much as balances those two pictures, so neither
-  // leans far.
+  // leans far; in English it stands nearer the second picture's balance (LATER of the way from the first), the
+  // picture the thought rests on, which then rests within 30 px of the centre while the first leans under 50 px.
   const listW = (k) => 7 + 9 + NAME_GAP + 7 + Math.max(...items[k].flat().map((v) => measure(v))),
     half = (k) => Math.max(measure(ownerNames[k]), listW(k)) / 2;
-  const shift =
-    960 - (2 * (xs[0] - half(0)) + 2 * xs[1] + measure("?", 80, false, "mark") / 2 + half(1)) / 4;
+  const LATER = L(0.5, 0.58),
+    waits = measure("?", 80, false, "mark") / 2,
+    shift = 960 - (xs[0] - half(0) + xs[1] + (1 - LATER) * waits + LATER * half(1)) / 2;
   ctx.save();
   ctx.translate(shift, 0);
   const heading = p2 * named(t, opensDecisions) * (1 - ramp(t, itemAts[1].at(-1) - 0.15, 0.3));

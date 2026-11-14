@@ -25,10 +25,12 @@ export function s21Path(s, t, own, unrelated, three) {
   // words with the rules named by theirs, fits on two even lines, the task, target and current state over the person
   // and the rules (with "and" before the rules no two lines keep a block's shape), and its Chinese name, 60 px
   // further right, on two. Each other name stands on one line but the Chinese steps', a
-  // term row whose term, 一步步来, stands over what it says of each step; the stations keep the names 40 px apart or more,
-  // the steps' name centres on its stones, and the Chinese checks' name stands clear of the side way's column.
+  // term row whose term, 一步步来, stands over what it says of each step; the stations keep the names 40 px apart or more
+  // (the English ones 48 px or more, the clear gap two names on one row keep: its first station stands 20 px further
+  // left and its last 4 px further right for that), the steps' name centres on its stones, and the Chinese checks' name
+  // stands clear of the side way's column.
   const Y = 560,
-    xs = en ? [340, 720, 1080, 1390, 1700] : [400, 820, 1230, 1520, 1720],
+    xs = en ? [320, 720, 1080, 1390, 1704] : [400, 820, 1230, 1520, 1720],
     stones = [565, 655, 745, 835].map((x) => x + L(120, 20)),
     SP = L(1020, 900);
   const [confirm, runs, read, conclude] = cues(s, [

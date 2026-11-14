@@ -361,8 +361,9 @@ scenes["09"] = function (s, t) {
     // it will be, about the centre, while each view takes its place on it on its own words: the Chinese names its views
     // late in its thought, after a long first sentence, so a row grown out to each view would leave the picture thin
     // there. The source keeps the frame's centre, where the next scene lifts its price from, so the price's flight keeps
-    // its length.
-    const xs = [450, 790, 1130, 1470],
+    // its length. The English views stand 5 px left, as their last name is far the widest: the row's arms then differ by
+    // 10 px in 1020 and the finished stage rests within 30 px of the centre.
+    const xs = [450, 790, 1130, 1470].map((x) => x - L(0, 5)),
       sx = cx,
       sb = 360,
       bus = 410,

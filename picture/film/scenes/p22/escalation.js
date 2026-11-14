@@ -58,10 +58,10 @@ export function s22Escalation(
   });
   // The stations stand at one pitch from the first to the last: the Chinese as railStations pitches them when every
   // pair of names fits, the names measured as railNames wraps them within that pitch; the English, whose names stand
-  // on two baselines, from a first station far enough right that its name stands a word space and more clear of the
+  // on two baselines, from a first station far enough right that its name stands a clear 48 px and more from the
   // group's name, to a last whose name ends with the way.
   const xs = en
-    ? names.map((_, i) => 540 + i * 270)
+    ? names.map((_, i) => 548 + i * 268)
     : railStations(names, 500, 1660, { wrap: 260 });
   // The first sign stands on the words that stop the Agent and its escalation rises on "escalate"; every later sign
   // stands with its kind's name, and its escalation rises as it stands.

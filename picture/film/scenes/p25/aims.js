@@ -299,7 +299,8 @@ export function s25Mechanisms(s, t, fidelity, clarity, elegance, example, colors
       radius: 4,
     });
     // The two refusals stand beneath the frame on one baseline, each named and struck on its own words, the pair with
-    // its crosses centred on the frame.
+    // its crosses centred on the frame. The English pair, far wider than the frame, stands as two rows from the frame's
+    // left edge, 48 px apart, its crosses in one column after the longer name, so the stage rests within 30 px of centre.
     const refused = en ? ["Slogans", "Pretended depth"] : ["喊口号", "故作高深"],
       refusedAt = cues(s, [
         ["喊口号", "slogans"],
@@ -308,12 +309,18 @@ export function s25Mechanisms(s, t, fidelity, clarity, elegance, example, colors
     const rw = refused.map((v) => measure(v) + 42),
       rx0 = L0 - 8 + 310 / 2 - (rw[0] + 40 + rw[1]) / 2;
     refused.forEach((v, k) =>
-      rejectedName(v, rx0 + k * (rw[0] + 40), 610 + 22 + NAME_GAP, {
-        align: "left",
-        valign: "top",
-        alpha: g1 * named(t, refusedAt[k]),
-        mark: ramp(t, refusedAt[k] + 0.05, 0.35),
-      }),
+      rejectedName(
+        v,
+        en ? L0 - 8 : rx0 + k * (rw[0] + 40),
+        610 + 22 + NAME_GAP + (en ? k * 48 : 0),
+        {
+          align: "left",
+          valign: "top",
+          alpha: g1 * named(t, refusedAt[k]),
+          mark: ramp(t, refusedAt[k] + 0.05, 0.35),
+          markLeft: en ? L0 - 8 + Math.max(...rw) - 26 : null,
+        },
+      ),
     );
   }
 }

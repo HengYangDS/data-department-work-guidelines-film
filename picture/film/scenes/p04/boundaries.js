@@ -15,7 +15,7 @@ import { LABEL, P } from "../../palette.js";
 import { L, en } from "../../timeline.js";
 import { cue, cueFrom, cues } from "../../timing/cues.js";
 import { clamp, mix, ramp, soon } from "../../timing/easing.js";
-import { drawShare } from "../../timing/pace.js";
+import { drawShare, glide } from "../../timing/pace.js";
 import { voiceTime } from "../../timing/pauses.js";
 import { STAGE_CUT } from "../../timing/stages.js";
 
@@ -107,7 +107,8 @@ export function s04Escalation(s, t, inside, near, breach, caseRows, W2, LX2, ox,
     OY = FY + 70,
     owner = ramp(t, nearAts[2] - 0.15, 0.4) * two;
   person(OX, OY, { color: P.authority, alpha: owner, size: 0.8 });
-  const nx = mix(FX + FS * 0.5, FX + FS - 46, soon(t, near - 0.1, 1.0)),
+  // The action nears the side as a glide timed by its way, so it never moves faster than a calm picture's glide.
+  const nx = mix(FX + FS * 0.5, FX + FS - 46, glide(t, near - 0.1, FS * 0.5 - 46)),
     ny = FY + FS * 0.6,
     nq = ramp(t, near - 0.15, 0.4) * two;
   dot(nx, ny, 10, { color: P.ink, alpha: nq });
@@ -122,10 +123,11 @@ export function s04Escalation(s, t, inside, near, breach, caseRows, W2, LX2, ox,
     draw: { t, at: nearAts[2] - 0.1 },
     width: 2.5,
   });
-  // The breach crosses the bottom side on its words, stops outside and returns inside when it is corrected.
+  // The breach crosses the bottom side on its words, stops outside and returns inside when it is corrected, each way a
+  // glide timed by its length.
   const bx = FX + 210,
-    out = soon(t, breach - 0.1, 0.7),
-    back = soon(t, outAts[2] - 0.1, 0.8),
+    out = glide(t, breach - 0.1, 106, 0.7),
+    back = glide(t, outAts[2] - 0.1, 106, 0.8),
     by = mix(FY + FS - 60, FY + FS + 46, out * (1 - back));
   const bq = ramp(t, breach - 0.15, 0.3) * two;
   dot(bx, by, 10, { color: blend(P.ink, P.unknown, clamp(out * 2) * (1 - back)), alpha: bq });

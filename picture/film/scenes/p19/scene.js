@@ -77,7 +77,7 @@ scenes["19"] = function (s, t) {
   const kx = FX + 210,
     refused = L("组织的授权", "Organizational authorization"),
     RW = 400,
-    lean19 = L(83, 150);
+    lean19 = L(83, 164);
   const widthFor = (names) => 210 + 20 + NAME_GAP + Math.max(...names) + 40;
   const g2 = base * stageIn(t, Math.min(within, extend)) * stageOut(t, sourceCut);
   if (g2 > 0)

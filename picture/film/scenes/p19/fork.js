@@ -78,11 +78,11 @@ export function s19MissingContext(s, t, em, ACTOR, snap, gap, g9) {
   // its place beside the member, on the first outcome it moves to S2 px from that place, and on the second to S3 px:
   // the Chinese second outcome's name is long, so the finished tree stands centred only once the fork has moved again. The English S1 is taken
   // from the full-size draft, whose Latin lines run narrower than the headless estimate. The English column takes what
-  // may be unclear on two even lines, each ending on a whole member, so there the fork ends 20 px left of its place,
-  // its branches turn nearer the Agent and its outcomes stand nearer their conditions, and the finished tree stays
-  // about the centre. The first condition stands far enough right that it and the member stand within 40 px of the
-  // centre while it builds.
-  const [S1, S2, S3] = en ? [378, -20, -20] : [380, 90, 0];
+  // may be unclear on two even lines, each ending on a whole member, so there the fork ends 6 px left of its place,
+  // where the Agent's name keeps a clear 48 px from the member's on their line, its branches turn nearer the Agent and
+  // its outcomes stand nearer their conditions, and the finished tree stays about the centre. The first condition
+  // stands far enough right that it and the member stand within 40 px of the centre while it builds.
+  const [S1, S2, S3] = en ? [378, -6, -6] : [380, 90, 0];
   const fork =
     mix(S1, S2, glide(t, (en ? assume : ask) + 0.05, S1 - S2)) +
     (S3 - S2) * glide(t, (en ? ask : assume) + 0.05, S3 - S2);

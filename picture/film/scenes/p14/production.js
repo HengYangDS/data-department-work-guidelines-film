@@ -41,7 +41,7 @@ export function s14Vault(s, t, vaultAts, lockAts, p3) {
         "测试、验收和\n发布后的观察",
         ["发布窗口", "回滚或降级预案"],
         "查安全、权限\n和敏感信息",
-        "上报、交人接管或停下",
+        ["上报、交给人接管或停下"],
         "当前的版本和环境",
       ];
   // The vault's name heads the vault, its lines centred on it, and the stage, from the change's ring to the name's
@@ -51,11 +51,13 @@ export function s14Vault(s, t, vaultAts, lockAts, p3) {
     ["生产环境、共享资产，", "或者关键的管理流程"],
     "Production, shared assets or critical management chains",
   );
-  // The gates stand 144 px apart in Chinese and 180 px in English, so each control's name stands whole on one line, 40
-  // px or more from the next name on its side of the way; the vault stands 40 px clear of the last control's name. The
-  // English last control stands as one name in two lines, broken before its "and", so the seven gates and the vault stand centred inside the safe area.
+  // The gates stand 158 px apart in Chinese and 185 px in English, so each control's name stands whole on one line, 48
+  // px or more from the next name on its side of the way, the clear gap two names on one row keep; the first gate stands
+  // 140 px from the change, so its halo keeps clear of the change's name, and the vault stands 40 px clear of the last
+  // control's name. The English last control stands as one name in two lines,
+  // broken before its "and", so the seven gates and the vault stand centred inside the safe area.
   const lastW = Math.max(...wrapName(keys.at(-1), Infinity).map((v) => measure(v)));
-  const GP = L(144, 180),
+  const GP = L(158, 185),
     VX0 = 470 + (keys.length - 1) * GP + lastW / 2 + 40,
     VW = 140;
   const half = Math.max(...wrapName(vaultName, 480).map((v) => measure(v))) / 2,
@@ -137,8 +139,8 @@ export function s14Vault(s, t, vaultAts, lockAts, p3) {
     });
     // The first control names its subject and impact first; the second pair, the task lead with the authority, joins
     // its name on the task lead's words, a line nearer the way, so the station changes while its four requirements are
-    // spoken and its two lines stand at one width. The Chinese escalation stands on one line, 40 px from its neighbour
-    // below the way, as no break at its list mark keeps an even block.
+    // spoken and its two lines stand at one width. The Chinese escalation stands whole on one authored line, in the
+    // voice's words, 48 px from its neighbour below the way, as no break at its list mark keeps an even block.
     const ky = up ? LY - 46 - NAME_GAP : LY + 46 + NAME_GAP;
     const key = Array.isArray(keys[k]) ? keys[k] : [keys[k]];
     key.forEach((part, j) =>
