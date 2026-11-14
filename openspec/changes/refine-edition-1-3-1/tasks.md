@@ -14,7 +14,7 @@
 
 ## 4. Text
 
-- [ ] 4.1 Ask the owner of the guidelines what "critical management chains" covers and how the sentence behind 21.2 reads (Z40-6, EN40-2); done when the answers are recorded here and the film's wording follows them or keeps the faithful term.
+- [ ] 4.1 Say 「关键的管理流程」 for 「关键管理链条」 in 14.3 and on its label, as the owner approved on 14 November 2026 (Z40-6), and keep 21.2's reading of the authority to act by the same decision (EN40-2); done when the script, narration text and label hold the wording and the readings, concept and picture-sync checks pass on 14.3.
 - [ ] 4.2 Adopt the complete bilingual text of the changed thoughts: the charter's two clauses (Z40-4), the three qualifiers (EN40-1), 14.2's verb (EN40-4), the split of 11.10.1 (EN40-8) and 07.6.2 (EN40-10); done when each is read against its source lines, an independent recheck judges it clear on first hearing, and the readings and concept checks pass.
 
 ## 5. Voice
