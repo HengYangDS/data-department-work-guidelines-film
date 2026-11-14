@@ -4,3 +4,8 @@
 forge = "github"
 executables = ["mise", "mkdir"]
 references = ["github"]
+
+[[runner]]
+forge = "gitlab"
+executables = ["mise", "mkdir"]
+references = ["gitlab"]
