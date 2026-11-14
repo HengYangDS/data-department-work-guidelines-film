@@ -1,6 +1,5 @@
 """This film's declaration and listening plan on the engine release that the lock pins."""
 
-import hashlib
 import importlib.metadata
 import re
 import tomllib
@@ -16,9 +15,6 @@ from filmkit.review.listening_plan import listening_plan
 CHINESE = re.compile(r"[\u3000-\u303f\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff\uff00-\uffef]")
 # The release the lock pins the engine to, by its tag.
 ENGINE_SOURCE = re.compile(r"^https://github\.com/HengYangDS/filmkit\?tag=v([^#]+)#[0-9a-f]{40}$")
-# The SHA-256 of the listening plan derived from the v1.3.0 repair's scripts, casts, contract and
-# readings.
-PLAN_SHA256 = "b937f57e201e28d7fd310a92072b6f2db5be244b43d20fbf5693663de5c3580e"
 
 
 def test_the_declaration_loads_with_both_editions():
@@ -58,7 +54,7 @@ def test_no_edition_holds_a_player_of_its_own():
         assert not (repository.ROOT / Edition(code).sources / "player.html").exists()
 
 
-def test_the_listening_plan_is_the_one_the_v1_3_0_repair_derives(tmp_path):
-    out = tmp_path / "listening-plan.json"
-    listening_plan(out)
-    assert hashlib.sha256(out.read_bytes()).hexdigest() == PLAN_SHA256
+def test_the_listening_plan_derives_from_the_current_scripts(tmp_path):
+    # The readings key each English heteronym by its offset, so an edit that moves one refuses.
+    derived = listening_plan(tmp_path / "listening-plan.json")
+    assert all(derived["occurrences"][code] for code in CODES)

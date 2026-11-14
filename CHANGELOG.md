@@ -4,6 +4,13 @@ All notable changes to the DDWG introduction films and their build are recorded 
 
 ## [Unreleased]
 
+### Fixed
+
+- The listening-plan test derives the plan from the current scripts and no longer pins its SHA-256.
+  The engine's plan records each assembled edition's timeline and soundtrack, so the pinned digest
+  held only in a checkout with a local build and failed in a fresh one, as the hosted runs of dev,
+  `v1.3.0` and main at `6ed89d4` did. The films of 1.3.0 are unchanged.
+
 ## [1.3.0] - 2026-11-14
 
 ### Added
