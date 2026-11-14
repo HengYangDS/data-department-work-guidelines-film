@@ -4,6 +4,13 @@ All notable changes to the DDWG introduction films and their build are recorded 
 
 ## [Unreleased]
 
+### Changed
+
+- The repository runs ETHOS 0.2.0-beta.10 instead of 0.2.0-alpha.29, declares its GitLab and GitHub
+  publication peers by their Git remotes, verifies every change with the portable full proof on
+  Apple-silicon macOS in the hosted jobs of both forges, and installs Mise 2026.11.8 instead of
+  2026.10.25 in the GitHub job. The films of 1.3.0 are unchanged.
+
 ### Fixed
 
 - The listening-plan test derives the plan from the current scripts and no longer pins its SHA-256.
