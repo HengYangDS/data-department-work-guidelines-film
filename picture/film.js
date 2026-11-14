@@ -4454,7 +4454,7 @@ function s07Reasoning(s, t, reason, eight) {
     "把个案看成全部",
     "把必要条件看成充分条件",
     "认定只有一个原因",
-    "只找对自己有利的证据",
+    "只找有利的证据",
     "换标准",
     "搬出常识、经验或“最佳实践”"
   ];
@@ -6807,7 +6807,7 @@ function s11Bias(s, t, biasCut, four) {
   const LY = 405, LX = RX - L(220, 240);
   ring(LX, LY, 44, { color: P.ink, alpha: lens, width: 4 });
   line(LX + 31, LY + 31, LX + 62, LY + 62, { color: P.ink, alpha: lens, width: 6 });
-  nameText(L(["偏差还可能", "藏在别的地方"], "Bias may hide elsewhere"), LX, LY + 62 + NAME_GAP, {
+  nameText(L("偏差可能藏在别处", "Bias may hide elsewhere"), LX, LY + 62 + NAME_GAP, {
     valign: "top",
     width: L(280, 340),
     alpha: lens

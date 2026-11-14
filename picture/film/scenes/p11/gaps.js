@@ -80,13 +80,14 @@ export function s11Bias(s, t, biasCut, four) {
   // The lens stands at 405, above the places' middle, so across this stage's two cuts its handle and the chart's axis,
   // which stands near it before and after, are never read as one mark jumping. The English name stands on one line, as
   // no break keeps its phrase and its block, so its lens stands 20 px further left and the name keeps 40 px from the
-  // bracket. The Chinese name says the clause in the voice's words on two authored lines of even width, broken between
-  // its subject and its verb, so it keeps 40 px from the bracket too; the English says it by its key words on one line.
+  // bracket. The Chinese name says the clause by its key words on one line, short of the whole clause its caption
+  // shows, as the English does: the clause whole would repeat that caption word for word, which the sync gate refuses,
+  // and a run of its words short of it loses its subject (还可能藏在别的地方).
   const LY = 405,
     LX = RX - L(220, 240);
   ring(LX, LY, 44, { color: P.ink, alpha: lens, width: 4 });
   line(LX + 31, LY + 31, LX + 62, LY + 62, { color: P.ink, alpha: lens, width: 6 });
-  nameText(L(["偏差还可能", "藏在别的地方"], "Bias may hide elsewhere"), LX, LY + 62 + NAME_GAP, {
+  nameText(L("偏差可能藏在别处", "Bias may hide elsewhere"), LX, LY + 62 + NAME_GAP, {
     valign: "top",
     width: L(280, 340),
     alpha: lens,
