@@ -4439,7 +4439,7 @@ function s07Reasoning(s, t, reason, eight) {
     ["认定只有一个原因", "one outcome blamed"],
     ["只找对自己有利", "selective evidence"],
     ["中途换标准", "criteria changed midstream"],
-    ["搬出常识", "citing common sense"]
+    ["搬出常识", "an appeal to common sense"]
   ]);
   const kinds = [0, 1, 2, 3, 4, 6, 5];
   const limitsAt = cue(s, "在这里适不适用", "its limits");
@@ -7003,7 +7003,7 @@ scenes["11"] = function(s, t) {
     ["在委托范围内", "within its delegation"],
     ["任务负责人", "the task lead"]
   ]);
-  const admitCut = cue(s, "这就叫准入", "permission");
+  const admitCut = cue(s, "这就叫准入", "Admission is permission");
   illustrative(ramp(t, ill - 0.2, 0.6));
   const head = s.words[0].start, drawFor = Math.min(1, voiceTime(thoughtEnd(head) - 0.1) - voiceTime(head + 0.05));
   const latest = DRAW_PACE * drawFor / 1.5, history = lengthOf(lift(priceAt));
@@ -9911,7 +9911,7 @@ scenes["17"] = function(s, t) {
     [["智能体说完成了"], []]
   ];
   const right = en ? [
-    ["Overall correctness or acceptance", "overall correctness"],
+    ["Review, overall correctness or acceptance", "review, overall correctness"],
     ["Work complete", "work complete"]
   ] : [
     ["整体正确或已验收", "整体正确或已验收"],

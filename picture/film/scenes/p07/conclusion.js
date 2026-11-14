@@ -28,7 +28,7 @@ export function s07Reasoning(s, t, reason, eight) {
     ["认定只有一个原因", "one outcome blamed"],
     ["只找对自己有利", "selective evidence"],
     ["中途换标准", "criteria changed midstream"],
-    ["搬出常识", "citing common sense"],
+    ["搬出常识", "an appeal to common sense"],
   ]);
   // The mechanism each spoken trap takes, in spoken order.
   const kinds = [0, 1, 2, 3, 4, 6, 5];

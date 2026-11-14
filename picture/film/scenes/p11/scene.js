@@ -49,7 +49,7 @@ scenes["11"] = function (s, t) {
     ["在委托范围内", "within its delegation"],
     ["任务负责人", "the task lead"],
   ]);
-  const admitCut = cue(s, "这就叫准入", "permission");
+  const admitCut = cue(s, "这就叫准入", "Admission is permission");
   // The illustrative chip stays while the same case continues, through the admission decision it ends on.
   illustrative(ramp(t, ill - 0.2, 0.6));
   // The history is recorded day by day from the first word: the series draws from its first close to today's, its
@@ -198,7 +198,8 @@ scenes["11"] = function (s, t) {
   if (seven > 0) s11Delegation(s, t, agentCut, seven);
   // 8. Admission is permission for one specific use under stated conditions: the data waits at a closed gate; under the
   // conditions checked at the gate it opens, and one way runs through it to one use, which stands as the gate opens.
-  // The Chinese opens the thought by naming admission, the English names it a thought earlier and opens on "permission".
+  // The Chinese opens the thought by naming admission, the English names it a sentence earlier and opens on that sentence's first
+  // words, "Admission is permission", so the stage cut no longer falls inside a sentence (EN40-8).
   // The Chinese names the use only at the thought's end, so the data waits near enough to the gate that the stage is
   // balanced before the use arrives.
   const eight = stageIn(t, admitCut) * stageOut(t, leadCut);

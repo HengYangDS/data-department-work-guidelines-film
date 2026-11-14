@@ -147,7 +147,7 @@ scenes["17"] = function (s, t) {
       ];
   const right = en
     ? [
-        ["Overall correctness or acceptance", "overall correctness"],
+        ["Review, overall correctness or acceptance", "review, overall correctness"],
         ["Work complete", "work complete"],
       ]
     : [
