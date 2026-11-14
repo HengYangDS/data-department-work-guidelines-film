@@ -4,7 +4,7 @@ All notable changes to the DDWG introduction films and their build are recorded 
 
 ## [Unreleased]
 
-## [1.3.0] - 2026-11-13
+## [1.3.0] - 2026-11-14
 
 ### Added
 
@@ -22,8 +22,9 @@ All notable changes to the DDWG introduction films and their build are recorded 
 - Text blocks break evenly, no line under four fifths of the longest and no last line under three fifths, and a wrapped English label breaks at a phrase; only the English 04.7 is declared against the rule. A mark stands at most 0.6 s before its name, and every thought's picture at rest stands within 40 px of the content centre.
 - Each picture is drawn in Chrome's software rasterizer, because the GPU rasterizer drew one-frame faults into Chinese glyphs in renders of this edition. Before packaging, the engine compares each edition's two pictures at every frame and refuses a one-frame fault; it found none in the 90,000 frames of either edition.
 - The player saves the transcript, chapter files and captions without leaving the page and opens every film and cover link in a new tab.
-- Review round 39 scored the Chinese edition 98.8 and the English edition 96.7, with every one of the twelve dimensions at 96 or more, each of 信, 达 and 雅 passing and no material or minor finding. Its 7 Chinese and 15 English notes are listed in the published review records, `ddwg-zh-production-review.md` and `ddwg-en-production-review.md`.
-- The films are built by `filmkit` 0.21.0 instead of 0.5.0 and rendered with HyperFrames 0.9.9 instead of 0.9.5; fontTools 4.68.0 and snowballstemmer 3.1.1 join the lock, every other locked package keeps its version, and Node moves from 26.13.0 to 26.13.1, a security release.
+- The picture's source is now 123 ES modules under `picture/film/`, which esbuild bundles into `picture/film.js`, the script the engine reads; in earlier releases that script was one file written by hand. Prettier formats the modules, and none exceeds 450 effective lines by ETHOS's count. The bundle was proved to paint every frame of both editions, with captions and without them, as the single file did: on the engine's headless runtime, 368,000 frames, 9,953,021 paints and 151,632,157 canvas calls and property writes were compared, with no difference. The films of this release are rendered from the bundle. Each was compared with the film of the same name that review round 39 had passed, rendered from the single file: each has the same frame count, decoded audio, streams, chapters and tags, with every one of the 720,000 frames compared at or above the 45 dB PSNR floor; the lowest frame measured 48.33 dB.
+- Review round 40 scored the Chinese edition 98.8 and the English edition 96.6, with every one of the twelve dimensions at 96 or more, each of 信, 达 and 雅 passing and no material or minor finding. Its 7 Chinese and 17 English notes are listed in the published review records, `ddwg-zh-production-review.md` and `ddwg-en-production-review.md`.
+- The films are built by `filmkit` 0.21.0 instead of 0.5.0 and rendered with HyperFrames 0.9.9 instead of 0.9.5; fontTools 4.68.0 and snowballstemmer 3.1.1 join the lock, every other locked package keeps its version, esbuild 0.28.2, which the lock already held for HyperFrames, becomes a development dependency, and Node moves from 26.13.0 to 26.13.1, a security release.
 
 ### Removed
 
