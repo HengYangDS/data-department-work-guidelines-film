@@ -395,11 +395,6 @@
           "text_sha256": "44576720159e122d663e19e0b849a6f576d884aee6ff857839bab45ee98e8b7a",
           "spoken_sha256": "44576720159e122d663e19e0b849a6f576d884aee6ff857839bab45ee98e8b7a"
         },
-        "3": {
-          "seed": 4471010,
-          "text_sha256": "84a8e6bcb4a5aa1008813adafc59f163c4dae2bbc84b0d04d8da5406dabdc562",
-          "spoken_sha256": "84a8e6bcb4a5aa1008813adafc59f163c4dae2bbc84b0d04d8da5406dabdc562"
-        },
         "4": {
           "seed": 1311329,
           "text_sha256": "0bc67124b99bf61fe82bce12a3557a9981a78960401166b60961e6db300d69ef",
@@ -481,20 +476,12 @@
           "text_sha256": "6839160141f6727eb559f9b13739867df5f9b45024526b423ad00fea384bbfb5",
           "spoken_sha256": "6839160141f6727eb559f9b13739867df5f9b45024526b423ad00fea384bbfb5"
         },
-        "2": {
-          "seed": 5761804,
-          "text_sha256": "1c47a7ae22339c6c34c7c89b926d02bf4f72ef1ebd6fc23c8f88803415b76d6a",
-          "spoken_sha256": "1c47a7ae22339c6c34c7c89b926d02bf4f72ef1ebd6fc23c8f88803415b76d6a"
-        },
         "3": {
           "seed": 5389611,
           "text_sha256": "d5840ad30ae2a10670422b7570ef3c205d985603c53ec5aa457dd07f4420f88e",
           "spoken_sha256": "d5840ad30ae2a10670422b7570ef3c205d985603c53ec5aa457dd07f4420f88e"
         }
       }
-    },
-    "20": {
-      "groups": {}
     },
     "26": {
       "groups": {
@@ -526,11 +513,6 @@
           "seed": 1295481,
           "text_sha256": "b98a036eadbfec808c62ba37d9ac153b0ee4fb69e8dd79c74fb577bb7758413a",
           "spoken_sha256": "b98a036eadbfec808c62ba37d9ac153b0ee4fb69e8dd79c74fb577bb7758413a"
-        },
-        "6": {
-          "seed": 5437118,
-          "text_sha256": "35934fe16891aad42643bdb0744974f5d86a4230a05ababdd5d7f4293a968c8a",
-          "spoken_sha256": "35934fe16891aad42643bdb0744974f5d86a4230a05ababdd5d7f4293a968c8a"
         }
       }
     },
@@ -611,11 +593,6 @@
         "5": {
           "seed": 99726,
           "text_sha256": "1ae73959cef83c85260d686842cdfc7a2caf0ffc8adb067ef3d378257941f928"
-        },
-        "2": {
-          "seed": 5492565,
-          "text_sha256": "e406a5728dc676e681faaea48ad3b1f5f3f98e305f75545fb3795d17d3f95f4e",
-          "spoken_sha256": "e406a5728dc676e681faaea48ad3b1f5f3f98e305f75545fb3795d17d3f95f4e"
         }
       }
     },
