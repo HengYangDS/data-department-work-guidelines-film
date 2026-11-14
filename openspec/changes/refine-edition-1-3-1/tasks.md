@@ -9,8 +9,8 @@
 
 ## 3. Engine
 
-- [ ] 3.1 Adopt the `filmkit` release that offers thought levelling, typeset timeline text, clarity frame assignment as prompted, the glide and stopped-end gates, the transient test of the two masters and the row-gap probe (depends on that release); done when `pyproject.toml` and `uv.lock` pin it and `mise run check` passes.
-- [ ] 3.2 Declare the film's thought-level tolerance (Z40-2, EN40-7); done when the assembled soundtracks show no step at or above 1.0 LU inside a segment and none above 1.2 LU across a pause.
+- [x] 3.1 Adopt the `filmkit` release that offers thought levelling, typeset timeline text, clarity frame assignment as prompted, the glide and stopped-end gates, the transient test of the two masters and the row-gap probe (depends on that release); done when `pyproject.toml` and `uv.lock` pin it and `mise run check` passes. Done with `filmkit` 0.22.0 (15 November): the lock holds the tag's commit, `film:sound` passes `check-sound` after each edition's captions, the geometry check gates the row gaps, the review prompt states the engine's clarity rules and the measured medium, the nine English readings that the text repairs moved are re-keyed, and the Prettier and Taplo carriers that repeat ETHOS's shipped settings are gone. The pace limit of 450 px/s is declared once the staged picture's motion audit has listed the stretches to recut or keep (task 6.3).
+- [ ] 3.2 Declare the film's thought-level tolerance (Z40-2, EN40-7); done when the assembled soundtracks show no step at or above 1.0 LU inside a segment and none above 1.2 LU across a pause. Declared: 0.4 dB in both editions (was 0.5); the assembled soundtracks decide.
 
 ## 4. Text
 
