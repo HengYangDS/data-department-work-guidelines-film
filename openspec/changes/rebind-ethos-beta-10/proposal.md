@@ -5,10 +5,15 @@ publishes only to GitHub. The owner asked that every governed repository run the
 release and decided on 4 November 2026 that the films are also published on the GitLab peer. Under
 0.2.0-alpha.29 the release declaration carries each peer's forge address and two local command
 fields; 0.2.0-beta.6 retired them, so the declaration names only Git remotes and this public
-repository can declare the GitLab peer without tracking its address. 0.2.0-beta.10 upgrades
-directly from 0.2.0-alpha.29, and it publishes its own Mise declaration, whose platform checksums
-equal the release's `SHA256SUMS` and the published asset digests. The hosted GitHub job still
-installs Mise 2026.10.25, nine releases behind 2026.11.8.
+repository can declare the GitLab peer without tracking its address. 0.2.0-beta.10 upgrades directly
+from 0.2.0-alpha.29, and it publishes its own Mise declaration, whose platform checksums equal the
+release's `SHA256SUMS` and the published asset digests. The hosted GitHub job still installs Mise
+2026.10.25, nine releases behind 2026.11.8.
+
+The hosted runs of `dev`, `v1.3.0` and `main` at `6ed89d4` failed: `tests/test_film.py` pins the
+SHA-256 of the listening plan, and the engine's plan records each assembled edition's timeline and
+soundtrack, so the digest held only in a checkout with a local build. Hosted verification, which
+this Change extends to the GitLab peer, cannot pass until the test stops depending on a build.
 
 What 0.2.0-beta.10 asks of a repository that 0.2.0-alpha.29 did not:
 
@@ -53,9 +58,10 @@ refuse.
 - Declare the GitLab runner prerequisites in `.config/ci/runners.toml`, the GitLab jobs in
   `.config/ci/verification.toml` and the GitLab projection in the projection policy, move the hosted
   GitHub job from Mise 2026.10.25 to 2026.11.8, and generate `.github/workflows/ci.yml` and
-  `.gitlab-ci.yml` with `ethos lane project --apply`. The GitLab jobs use the Mise on their
-  runners.
-- Record the move in the Changelog's Unreleased section.
+  `.gitlab-ci.yml` with `ethos lane project --apply`. The GitLab jobs use the Mise on their runners.
+- Derive the listening plan in its test instead of pinning its digest, as the sister films' test
+  does, so the test passes in a fresh checkout.
+- Record the move and the repair in the Changelog's Unreleased section.
 
 ## Capabilities
 
@@ -73,8 +79,8 @@ None. The films, their build and their checks behave as before, so `.openspec.ya
 `.config/mise/config.toml`, `.config/mise/mise.lock`, `.ethos/release.toml`,
 `.config/ci/runners.toml`, `.config/ci/verification.toml`,
 `.config/checks/ci-projection/policy.toml`, the generated `.github/workflows/ci.yml` and
-`.gitlab-ci.yml`, `CHANGELOG.md` and the repository-common runtime selection. No film source,
-script, cast, manifest, carrier declaration, test or gate changes, and the films of 1.3.0 stay as
-released: this Change cuts no release. The GitLab project's runners, its ref protection and the
-removal of its two seed tags belong to the films' maintainer. `tasks.md` is the sole progress
+`.gitlab-ci.yml`, `tests/test_film.py`, `CHANGELOG.md` and the repository-common runtime selection.
+No film source, script, cast, manifest, carrier declaration or gate changes, and the films of 1.3.0
+stay as released: this Change cuts no release. The GitLab project's runners, its ref protection and
+the removal of its two seed tags belong to the films' maintainer. `tasks.md` is the sole progress
 ledger.
