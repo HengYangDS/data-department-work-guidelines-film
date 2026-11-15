@@ -202,7 +202,7 @@ test("English grows the table of 17's refusals about the content centre", async 
   const reached = ["A passing test", "An Agent reports completion"];
   // As each refusal arrives, the names standing in the table stay within the reviewers' 12% balance limit of the
   // content centre (960, 510), so the table never opens high and fills downwards.
-  for (const t of [at("proves") + 0.6, at("Agent") + 0.6, at("When") - 0.3]) {
+  for (const t of [at("prove") + 0.6, at("Agent") + 0.6, at("When") - 0.3]) {
     const boxes = composition
       .render(t)
       .texts.filter((v) => v.scene && reached.includes(v.text) && v.alpha > 0.2)

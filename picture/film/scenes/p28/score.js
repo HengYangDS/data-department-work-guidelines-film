@@ -14,6 +14,7 @@ import { P } from "../../palette.js";
 import { L, en } from "../../timeline.js";
 import { cue, cueFrom, cues } from "../../timing/cues.js";
 import { clamp, ease, mix, ramp, soon } from "../../timing/easing.js";
+import { glide } from "../../timing/pace.js";
 import { voiceTime } from "../../timing/pauses.js";
 import { STAGE_CUT, stageIn, stageOut } from "../../timing/stages.js";
 
@@ -185,7 +186,7 @@ export function s28Score(
     const AX = 700,
       ay = yAt(AX),
       an = named(t, anomaly),
-      spike = soon(t, anomaly - 0.05, 0.5);
+      spike = glide(t, anomaly - 0.05, 84);
     line(AX, ay - 6, AX, ay - 6 - 84 * spike, { color: P.unknown, alpha: d2 * an, width: 2 });
     dot(AX, ay - 6 - 84 * spike, 9, { color: P.unknown, alpha: d2 * an });
     nameText(L("异常", "Anomaly"), AX, ay - 100 - NAME_GAP, { valign: "bottom", alpha: d2 * an });

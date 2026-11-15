@@ -51,8 +51,8 @@ scenes["14"] = function (s, t) {
     ["推给下一个环节", "next stage"],
     ["交出结果之前", "before handing"],
   ]);
-  // The hand-over's five parts: the criteria, the actual inputs, version and environment, the results and what they did
-  // not cover, each failure and how it was handled, and the remaining risk with its owner, each part's words in the order
+  // The hand-over's five parts: the criteria, the actual inputs, version, environment and method, the results and what
+  // they did not cover, each failure and how it was handled, and the remaining risk with its owner, each part's words in the order
   // spoken. Each edition states them as three things, which `groups` gives as the list the names build in: in Chinese
   // the criteria with the inputs, the results, and the failures with the risk; in English, by its semicolons, the
   // criteria, the inputs with the results, and the failures with the risk.
@@ -64,6 +64,7 @@ scenes["14"] = function (s, t) {
             ["", "inputs version"],
             ["", "version"],
             ["", "environment"],
+            ["", "method"],
           ],
           [
             ["", "results with"],
@@ -71,7 +72,7 @@ scenes["14"] = function (s, t) {
           ],
           [
             ["", "each failure"],
-            ["", "its handling"],
+            ["", "how it was handled"],
           ],
           [
             ["", "who owns"],
@@ -84,6 +85,7 @@ scenes["14"] = function (s, t) {
             ["输入", ""],
             ["版本", ""],
             ["环境", ""],
+            ["方法", ""],
           ],
           [
             ["结果怎样", ""],
@@ -273,10 +275,10 @@ scenes["14"] = function (s, t) {
   // 2. Before handing a result over, its owner states three things, each a group of parts that attach to the result on
   // their words, sliding in until their ways meet the result's ring. The result the owner carried stands at the centre,
   // and the three stand left of it, round it and right of it, in the order spoken. In Chinese: the criteria and the
-  // actual inputs, version and environment they were tested with, one over the other on the left; the results, the ring
+  // actual inputs, version, environment and method they were tested with, one over the other on the left; the results, the ring
   // that draws round the result, all but one stretch at its foot, what was not covered, which stays a dashed gap; and
   // each failure with how it was handled over the remaining risk, held by the one who owns it, on the right. In English,
-  // by its semicolons: the criteria on the left; the actual inputs, version and environment as tiles from above, with the
+  // by its sentences: the criteria on the left; the actual inputs, version, environment and method as tiles from above, with the
   // results and what was not covered; and the failures over the risk on the right. A side's two
   // parts join the result by one way, so each side reads as one group, and the parts' names stand on one edge beyond
   // them. The names build as the three things the narration speaks, the parts of one thing sharing its level, and every
@@ -286,16 +288,18 @@ scenes["14"] = function (s, t) {
     resultAt = cueFrom(s, "结果", "result", handing);
   const modelName = L(["按什么标准"], ["Criteria tested"]),
     inputsName = en
-      ? ["Actual inputs", ", version", ", environment"]
-      : ["实际的输入", "、版本", "和环境"];
-  const failName = en ? ["Each failure", ", its handling"] : ["每个失败或差异", "怎么处理"],
+      ? ["Actual inputs", ", version", ", environment", ", method"]
+      : ["输入", "、版本", "、环境", "和方法"];
+  const failName = en ? ["Each failure", ", how it was handled"] : ["每一项失败或差异", "怎么处理"],
     riskName = en ? ["Remaining risk", " and its owner"] : ["剩下的风险", "归谁"];
-  // A side's two parts stand 45 px above and below the result's line, their outer edges on one line 296 px from the
+  // A side's two parts stand 45 px above and below the result's line, their outer edges on one line 396 px from the
   // result (the English criteria, alone, on the line with its edge 270 px out), and their ways meet 112 px from it.
-  const TW = 76,
+  // The inputs' bar holds four tiles at a pitch of 54 px, 103 px either side of its middle; in Chinese its last tile
+  // stands 72 px clear of the name under the result's ring, out of that name's reach.
+  const TW = 103,
     RR = 64,
     PAIR = 45,
-    OUT = en ? 270 : 296,
+    OUT = en ? 270 : 396,
     MEET = 112;
   const widest = (parts, width) =>
     Math.max(
@@ -315,10 +319,10 @@ scenes["14"] = function (s, t) {
     220 + 50 + NAME_GAP + Math.max(widest(failName, 480), measure(riskName.join(""))),
   );
   const centreOn = (right) => 960 - (reportLeft + right) / 2,
-    third = cue(s, "每个失败或差异", "each failure");
+    third = cue(s, "每一项失败或差异", "each failure");
   // The report moves on the inputs' words in English, about 190 px, and on the first words of the third thing, about
   // 270 px in Chinese and 100 px in English, so the third's names arrive inside the frame; each move is a glide from 0.3 s
-  // before those words, so the room is there as the names arrive.
+  // before those words, and the move to the whole from 0.4 s before them, so the room is there as the names arrive.
   const toInputs = centreOn(inputsRight) - centreOn(firstRight),
     toWhole = centreOn(wholeRight) - centreOn(inputsRight);
   const docked = t >= handing + STAGE_CUT,
@@ -326,11 +330,11 @@ scenes["14"] = function (s, t) {
     RCX =
       centreOn(firstRight) +
       toInputs * glide(t, rows[1][0] - 0.3, toInputs) +
-      toWhole * glide(t, third - 0.3, toWhole);
+      toWhole * glide(t, third - 0.4, toWhole);
   // A part that docks on the report the way the report glides gives its own pace up to the glide's, as a flow does:
   // the voice time its dock has given up to those glides by the time u.
   const carried = (u) =>
-    glideYield(u, rows[1][0] - 0.3, toInputs) + glideYield(u, third - 0.3, toWhole);
+    glideYield(u, rows[1][0] - 0.3, toInputs) + glideYield(u, third - 0.4, toWhole);
   if (pB > 0)
     s14Handover(
       t,

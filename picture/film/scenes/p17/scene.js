@@ -131,8 +131,8 @@ scenes["17"] = function (s, t) {
   // Chinese in two), so one table holds them until missing evidence is named. The table balances on the frame: it grows
   // about the content centre, its first row on the centre line and the first row stepping up by half a row as the words
   // that bring the second begin, and it stands centred across on the rows said so far.
-  // In English the passing test's bar stands on "proves neither", and the Agent's on "does not".
-  const stopWords = en ? ["proves neither", "does not"] : ["不等于", "也"];
+  // In English the passing test's bar stands on "does not prove", and the Agent's on "does not make".
+  const stopWords = en ? ["does not prove", "does not make"] : ["不等于", "也"];
   const stops = nots.map((at, i) => cueFrom(s, stopWords[i], stopWords[i], at));
   // A reached state given as lines would keep them, one under the other, each ending at the column's edge; every state
   // stands on one line, as said, the Chinese Agent's report among them.
@@ -147,11 +147,11 @@ scenes["17"] = function (s, t) {
       ];
   const right = en
     ? [
-        ["Review, overall correctness or acceptance", "review, overall correctness"],
+        ["Reviewed, correct overall or accepted", "was reviewed"],
         ["Work complete", "work complete"],
       ]
     : [
-        ["整体正确或已验收", "整体正确或已验收"],
+        ["已评审、整体正确或已验收", "已评审"],
         ["完成了", "完成了"],
       ];
   const rightAts = right.map(([, v], i) => cueFrom(s, v, v, stops[i]));

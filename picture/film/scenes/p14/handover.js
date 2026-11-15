@@ -72,7 +72,7 @@ export function s14Handover(
     gap: NAME_GAP + 4,
     alpha: pB * named(t, resultAt),
   });
-  radialName(L("哪里没覆盖到", "What was not covered"), RCX, RCY, RR, Math.PI / 2, {
+  radialName(L("还有什么没覆盖到", "What was not covered"), RCX, RCY, RR, Math.PI / 2, {
     gap: NAME_GAP + 14,
     width: 420,
     alpha: level(2) * named(t, rows[2][1]),
@@ -119,11 +119,11 @@ export function s14Handover(
     alpha: level(0),
     set: "report",
   });
-  // The actual inputs, version and environment: a tile for each, docking down onto one bar on its word. The Chinese
-  // tiles stand under the criteria, and the English three above the ring.
+  // The actual inputs, version, environment and method: a tile for each, docking down onto one bar on its word. The
+  // Chinese tiles stand under the criteria, and the English four above the ring.
   const IX = en ? RCX : RCX - OUT + TW,
     IY = en ? 338 : RCY + PAIR;
-  [-54, 0, 54].forEach((dx, k) => {
+  [-81, -27, 27, 81].forEach((dx, k) => {
     const q = on(rows[1][k]),
       x = IX + dx,
       y = IY - 20 * (1 - att(rows[1][k]));
@@ -139,6 +139,9 @@ export function s14Handover(
       box(x - 13, y - 11, 26, 22, { stroke: P.ink, alpha: q, radius: 4 });
       dot(x, y, 4, { color: P.ink, alpha: q });
     }
+    // The method holds its own mark, as the version does, so each tile of the row is named where it stands.
+    if (k === 3)
+      text("fx", x, y + 1, 26, { role: "mark", align: "center", color: P.ink, alpha: q });
   });
   const iq = on(rows[1][0]);
   line(IX - TW, IY + 30, IX + TW, IY + 30, { color: P.evidence, alpha: iq, width: 2 });

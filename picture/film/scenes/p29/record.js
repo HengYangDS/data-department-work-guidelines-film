@@ -15,7 +15,7 @@ import { LABEL, P } from "../../palette.js";
 import { L, en } from "../../timeline.js";
 import { cue } from "../../timing/cues.js";
 import { ease, mix, ramp, soon } from "../../timing/easing.js";
-import { drawShare, glide } from "../../timing/pace.js";
+import { drawShare, glide, glideYield } from "../../timing/pace.js";
 import { voiceTime } from "../../timing/pauses.js";
 import { STAGE_CUT } from "../../timing/stages.js";
 
@@ -38,6 +38,10 @@ export function s29Urgency(s, t, urgency, uncertain, noAuthority, eight) {
         -70,
         glide(t, target - 0.1, pairE + 70),
       );
+  // The clock's hand turns on the stage that glides, so its clock gives its pace up to the glides'.
+  const carried = en
+    ? glideYield(t, uncertain - 0.1, 440)
+    : glideYield(t, uncertain - 0.1, 360 - pairE) + glideYield(t, target - 0.1, pairE + 70);
   const cx = 600 + E,
     cy = 510,
     rows = [400, 620],
@@ -49,7 +53,7 @@ export function s29Urgency(s, t, urgency, uncertain, noAuthority, eight) {
   // frames rather than in one and is not read as one of them jumping to it.
   // Its hand turns at 0.3 of a turn a second, slowly enough that no part of it is followed as moving at a pace.
   clock(cx, cy, 44, {
-    hand: (voiceTime(t) * 0.3) % 1,
+    hand: ((voiceTime(t) - carried) * 0.3) % 1,
     color: P.unknown,
     alpha: eight * ramp(t, urgency + STAGE_CUT, 0.15),
   });

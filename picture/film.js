@@ -8298,7 +8298,7 @@ function s14Handover(t, handing, rows, groups, pB, resultAt, modelName, inputsNa
     gap: NAME_GAP + 4,
     alpha: pB * named(t, resultAt)
   });
-  radialName(L("哪里没覆盖到", "What was not covered"), RCX, RCY, RR, Math.PI / 2, {
+  radialName(L("还有什么没覆盖到", "What was not covered"), RCX, RCY, RR, Math.PI / 2, {
     gap: NAME_GAP + 14,
     width: 420,
     alpha: level(2) * named(t, rows[2][1]),
@@ -8338,7 +8338,7 @@ function s14Handover(t, handing, rows, groups, pB, resultAt, modelName, inputsNa
     set: "report"
   });
   const IX = en ? RCX : RCX - OUT + TW, IY = en ? 338 : RCY + PAIR;
-  [-54, 0, 54].forEach((dx, k) => {
+  [-81, -27, 27, 81].forEach((dx, k) => {
     const q = on(rows[1][k]), x = IX + dx, y = IY - 20 * (1 - att(rows[1][k]));
     box(x - 22, y - 22, 44, 44, { fill: P.row, stroke: P.evidence, alpha: q, radius: 6 });
     if (k === 0) {
@@ -8352,6 +8352,8 @@ function s14Handover(t, handing, rows, groups, pB, resultAt, modelName, inputsNa
       box(x - 13, y - 11, 26, 22, { stroke: P.ink, alpha: q, radius: 4 });
       dot(x, y, 4, { color: P.ink, alpha: q });
     }
+    if (k === 3)
+      text("fx", x, y + 1, 26, { role: "mark", align: "center", color: P.ink, alpha: q });
   });
   const iq = on(rows[1][0]);
   line(IX - TW, IY + 30, IX + TW, IY + 30, { color: P.evidence, alpha: iq, width: 2 });
@@ -8734,7 +8736,8 @@ scenes["14"] = function(s, t) {
     [
       ["", "inputs version"],
       ["", "version"],
-      ["", "environment"]
+      ["", "environment"],
+      ["", "method"]
     ],
     [
       ["", "results with"],
@@ -8742,7 +8745,7 @@ scenes["14"] = function(s, t) {
     ],
     [
       ["", "each failure"],
-      ["", "its handling"]
+      ["", "how it was handled"]
     ],
     [
       ["", "who owns"],
@@ -8753,7 +8756,8 @@ scenes["14"] = function(s, t) {
     [
       ["输入", ""],
       ["版本", ""],
-      ["环境", ""]
+      ["环境", ""],
+      ["方法", ""]
     ],
     [
       ["结果怎样", ""],
@@ -8905,9 +8909,9 @@ scenes["14"] = function(s, t) {
       tokQ
     );
   const pB = stageIn(t, handing) * base * handOff, resultAt = cueFrom(s, "结果", "result", handing);
-  const modelName = L(["按什么标准"], ["Criteria tested"]), inputsName = en ? ["Actual inputs", ", version", ", environment"] : ["实际的输入", "、版本", "和环境"];
-  const failName = en ? ["Each failure", ", its handling"] : ["每个失败或差异", "怎么处理"], riskName = en ? ["Remaining risk", " and its owner"] : ["剩下的风险", "归谁"];
-  const TW = 76, RR = 64, PAIR = 45, OUT = en ? 270 : 296, MEET = 112;
+  const modelName = L(["按什么标准"], ["Criteria tested"]), inputsName = en ? ["Actual inputs", ", version", ", environment", ", method"] : ["输入", "、版本", "、环境", "和方法"];
+  const failName = en ? ["Each failure", ", how it was handled"] : ["每一项失败或差异", "怎么处理"], riskName = en ? ["Remaining risk", " and its owner"] : ["剩下的风险", "归谁"];
+  const TW = 103, RR = 64, PAIR = 45, OUT = en ? 270 : 396, MEET = 112;
   const widest = (parts, width) => Math.max(
     ...growTexts(parts, width).map((line2) => line2.reduce((w, [, v]) => w + measure(v), 0))
   );
@@ -8921,10 +8925,10 @@ scenes["14"] = function(s, t) {
     inputsRight,
     220 + 50 + NAME_GAP + Math.max(widest(failName, 480), measure(riskName.join("")))
   );
-  const centreOn = (right) => 960 - (reportLeft + right) / 2, third = cue(s, "每个失败或差异", "each failure");
+  const centreOn = (right) => 960 - (reportLeft + right) / 2, third = cue(s, "每一项失败或差异", "each failure");
   const toInputs = centreOn(inputsRight) - centreOn(firstRight), toWhole = centreOn(wholeRight) - centreOn(inputsRight);
-  const docked = t >= handing + STAGE_CUT, RCY = 550, RCX = centreOn(firstRight) + toInputs * glide(t, rows[1][0] - 0.3, toInputs) + toWhole * glide(t, third - 0.3, toWhole);
-  const carried = (u) => glideYield(u, rows[1][0] - 0.3, toInputs) + glideYield(u, third - 0.3, toWhole);
+  const docked = t >= handing + STAGE_CUT, RCY = 550, RCX = centreOn(firstRight) + toInputs * glide(t, rows[1][0] - 0.3, toInputs) + toWhole * glide(t, third - 0.4, toWhole);
+  const carried = (u) => glideYield(u, rows[1][0] - 0.3, toInputs) + glideYield(u, third - 0.4, toWhole);
   if (pB > 0)
     s14Handover(
       t,
@@ -9931,7 +9935,7 @@ scenes["17"] = function(s, t) {
   if (g1 > 0) s17Complete(s, t, complete, rows, starts, marks, holds, done, g1);
   const g2 = base * stageIn(t, questions) * stageOut(t, nots[0]);
   if (g2 > 0) s17Questions(s, t, questions, g2);
-  const stopWords = en ? ["proves neither", "does not"] : ["不等于", "也"];
+  const stopWords = en ? ["does not prove", "does not make"] : ["不等于", "也"];
   const stops = nots.map((at, i) => cueFrom(s, stopWords[i], stopWords[i], at));
   const left = en ? [
     [["A passing test"], []],
@@ -9941,10 +9945,10 @@ scenes["17"] = function(s, t) {
     [["智能体说完成了"], []]
   ];
   const right = en ? [
-    ["Review, overall correctness or acceptance", "review, overall correctness"],
+    ["Reviewed, correct overall or accepted", "was reviewed"],
     ["Work complete", "work complete"]
   ] : [
-    ["整体正确或已验收", "整体正确或已验收"],
+    ["已评审、整体正确或已验收", "已评审"],
     ["完成了", "完成了"]
   ];
   const rightAts = right.map(([, v], i) => cueFrom(s, v, v, stops[i]));
@@ -15584,7 +15588,7 @@ function s28Score(s, t, score, deliveryRisk, noLabel, metric, decision, gamed, a
       yAt(X12) - 130 - NAME_GAP,
       { valign: "bottom", color: P.muted, alpha: d2 * gm }
     );
-    const AX = 700, ay = yAt(AX), an = named(t, anomaly), spike = soon(t, anomaly - 0.05, 0.5);
+    const AX = 700, ay = yAt(AX), an = named(t, anomaly), spike = glide(t, anomaly - 0.05, 84);
     line(AX, ay - 6, AX, ay - 6 - 84 * spike, { color: P.unknown, alpha: d2 * an, width: 2 });
     dot(AX, ay - 6 - 84 * spike, 9, { color: P.unknown, alpha: d2 * an });
     nameText(L("异常", "Anomaly"), AX, ay - 100 - NAME_GAP, { valign: "bottom", alpha: d2 * an });
@@ -16216,10 +16220,11 @@ function s29Urgency(s, t, urgency, uncertain, noAuthority, eight) {
     -70,
     glide(t, target - 0.1, pairE + 70)
   );
+  const carried = en ? glideYield(t, uncertain - 0.1, 440) : glideYield(t, uncertain - 0.1, 360 - pairE) + glideYield(t, target - 0.1, pairE + 70);
   const cx = 600 + E, cy = 510, rows = [400, 620], sx = 900 + E, bx = 1200 + E, tx = 1480 + E;
   const un = ramp(t, uncertain - 0.15, 0.4) * eight;
   clock(cx, cy, 44, {
-    hand: voiceTime(t) * 0.3 % 1,
+    hand: (voiceTime(t) - carried) * 0.3 % 1,
     color: P.unknown,
     alpha: eight * ramp(t, urgency + STAGE_CUT, 0.15)
   });
