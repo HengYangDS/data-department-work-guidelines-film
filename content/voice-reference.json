@@ -302,15 +302,24 @@
           "seed": 361049,
           "text_sha256": "b35bbd67069c7265894f85b69be4195eb28aa58db071f4219c5ff6bbad75b0ea"
         },
+        "5": {
+          "seed": 5468804,
+          "text_sha256": "dd637b5486081719ce06dda4365bd3cfbf3cf1c7c918aa650f7df5a11b22da4c",
+          "spoken_sha256": "dd637b5486081719ce06dda4365bd3cfbf3cf1c7c918aa650f7df5a11b22da4c"
+        },
         "6": {
           "seed": 5635103,
           "text_sha256": "1ef2c851022308462e6145a8b46186bae43a853a89978bca1e6784e0cbe6f21e",
           "spoken_sha256": "1ef2c851022308462e6145a8b46186bae43a853a89978bca1e6784e0cbe6f21e"
         },
-        "5": {
-          "seed": 5468804,
-          "text_sha256": "dd637b5486081719ce06dda4365bd3cfbf3cf1c7c918aa650f7df5a11b22da4c",
-          "spoken_sha256": "dd637b5486081719ce06dda4365bd3cfbf3cf1c7c918aa650f7df5a11b22da4c"
+        "4": {
+          "seed": 16658351,
+          "text_sha256": "80f1c228d97712dd76f1378bbbe41c479f0edb0d99e4ff71e70be5bbe45855b9",
+          "spoken_sha256": "80f1c228d97712dd76f1378bbbe41c479f0edb0d99e4ff71e70be5bbe45855b9",
+          "run_on": {
+            "spoken_text": "智能体说完成了，也证明不了真的完成了。",
+            "cut_sample": 81360
+          }
         }
       }
     },
@@ -377,11 +386,6 @@
           "seed": 3829575,
           "text_sha256": "1e2955335bc96b5d50f1917af5fce30fcb3b022c683cd55d313415f203706038",
           "spoken_sha256": "1e2955335bc96b5d50f1917af5fce30fcb3b022c683cd55d313415f203706038"
-        },
-        "2": {
-          "seed": 5413375,
-          "text_sha256": "776b47e9eb23475a945d9dc140cffcb3a9499deec4cc89643748e879e2e24a54",
-          "spoken_sha256": "776b47e9eb23475a945d9dc140cffcb3a9499deec4cc89643748e879e2e24a54"
         }
       }
     },
