@@ -1,6 +1,6 @@
 ## Why
 
-Release 1.3.0 published the films that review round 40 accepted: Chinese 98.8 and English 96.6, with no finding and twenty-four notes, seven on the Chinese edition and seventeen on the English one. The owner asked that notes are repaired, not set aside. The release also left the films' reproduction unproved from a clean checkout: its comparison ran beside the production build, and the hosted runs of the tag showed that a check which passes beside a build can fail without one.
+Release 1.3.0 published the films that review round 40 accepted: Chinese 98.8 and English 96.6, with no finding and twenty-four notes, seven on the Chinese edition and seventeen on the English one. The owner asked that notes are repaired, not set aside. The release also left the films' reproduction unproved from a clean checkout: its comparison ran beside the production build, and the hosted runs of the tag showed that a check which passes beside a build can fail without one. That rebuild is made on this edition's own tag by the Change that follows it.
 
 The notes are recorded, each with its observation, repair and reverification line, in the review records that release 1.3.0 publishes, `ddwg-zh-production-review.md` and `ddwg-en-production-review.md`, under the ids Z40-1 to Z40-7 and EN40-1 to EN40-17. This Change cites them by id and does not copy them.
 
@@ -12,12 +12,11 @@ The notes are recorded, each with its observation, repair and reverification lin
 - The picture balances 15.1's opening (Z40-1), names eight labels in the voice's words or declares them (Z40-5), centres nine finished stages (EN40-14), gives neighbouring names on a row a clear gap (EN40-16) and ends 21.2's reading run before the quiet (EN40-17).
 - Glides are timed by their distance under a lower peak (Z40-7, EN40-12).
 - The soundtracks, captions and comparisons are made on the engine release that levels each thought within a declared tolerance, typesets the timeline text, assigns clarity frames as its prompt states, gates glides and stopped phrase ends, tests the two masters for one-frame transients and probes row gaps (Z40-2, EN40-6, EN40-7, EN40-9, EN40-11, EN40-12, EN40-13, EN40-16).
-- Each film's picture floor comes from a rebuild of release 1.3.0 in a clean checkout.
 - The requirements name the four films and both staged picture documents that each edition publishes.
 
 The films stay 1500 seconds, with the same narrator, chapters and argument. The result is edition 1.3.1.
 
-Out of scope: the faint non-text marks of EN40-15, which meet their contrast line and need no repair unless such a mark comes to carry meaning; the engine's release itself, which `filmkit` owns.
+Out of scope: the faint non-text marks of EN40-15, which meet their contrast line and need no repair unless such a mark comes to carry meaning; the engine's release itself, which `filmkit` owns; the rebuild from a clean checkout, which the Change that follows this edition makes on the `v1.3.1` tag.
 
 ## Capabilities
 
@@ -36,5 +35,5 @@ None.
 - `content/film-script.json`, `content/en/film-script.json`, the narration texts and both casts, which are film-bound sources: their digests, the release manifest and every review binding change with them.
 - `picture/film` for the scenes the notes name and the glide timing, and the picture tests that pin them.
 - `pyproject.toml`, `uv.lock` and `content/film.toml` for the engine release and its declared values.
-- `content/release.json` for the floors and the new assets.
+- `content/release.json` for the new assets.
 - Both editions are narrated where their text or cast changes, rendered and reviewed again; release 1.3.0 stays published as it is.
