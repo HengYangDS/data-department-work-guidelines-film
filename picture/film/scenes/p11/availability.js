@@ -14,7 +14,7 @@ import { NOTE, TERM_GAP, termRow } from "../../naming/terms.js";
 import { LABEL, P } from "../../palette.js";
 import { L, en } from "../../timeline.js";
 import { cue, cueFrom, cues } from "../../timing/cues.js";
-import { clamp, mix, ramp, soon } from "../../timing/easing.js";
+import { clamp, ease, mix, ramp, soon } from "../../timing/easing.js";
 import { GLIDE_PEAK, drawShare } from "../../timing/pace.js";
 import { voiceTime } from "../../timing/pauses.js";
 import {
@@ -31,7 +31,7 @@ import {
 } from "./prices.js";
 
 /* Stage 1: the case, a stretch of prices the vendor corrects after the decisions were made on them. */
-export function s11Correction(s, t, yv, py, lift, corr, todayS, head, drawFor, draw, chartDx, one) {
+export function s11Correction(s, t, yv, py, lift, corr, todayS, head, drawFor, chartDx, one) {
   ctx.save();
   ctx.translate(chartDx, 0);
   // The case is named as it is introduced, above the chart it is told on: in English a line and 60 px above the
@@ -42,12 +42,13 @@ export function s11Correction(s, t, yv, py, lift, corr, todayS, head, drawFor, d
     valign: "bottom",
     alpha: one * named(t, cue(s, "看一个虚构的例子", "here is an illustrative case")),
   });
-  // Today's price stands at the head of the history once it has been recorded, at its latest close: it inks in as the
-  // history comes to rest rather than racing along the head as the history draws on.
-  const hx = mix(X0, X1, draw),
-    today = one * ramp(t, head + 0.05 + drawFor - 0.15, 0.3);
-  dot(hx, py(hx), 6, { color: P.ink, alpha: today });
-  text(priceLabel(hx), hx + 16, py(hx), 26, { role: "mark", color: P.ink, alpha: today });
+  // Today's price stands where the history ends, at its latest close. It inks in there over the last 0.3 s of the
+  // history's drawing, on the voice clock the history draws by, so it is whole as the head arrives at it, before the
+  // thought ends. It does not ride the head: the head draws on at the tip pace, faster than a mark may travel, and a
+  // mark that waited for the head to slow would have to ink in within a frame.
+  const today = one * ease((voiceTime(t) - voiceTime(head + 0.05) - (drawFor - 0.3)) / 0.3);
+  dot(X1, py(X1), 6, { color: P.ink, alpha: today });
+  text(priceLabel(X1), X1 + 16, py(X1), 26, { role: "mark", color: P.ink, alpha: today });
   path(lift(corrected, CORR[0] - 20, CORR[1] + 20), {
     color: P.ink,
     width: 2.5,

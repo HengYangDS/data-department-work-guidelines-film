@@ -2,7 +2,7 @@
  * the words that name it. */
 
 import { ctx } from "../../canvas.js";
-import { since } from "../../drawing/flows.js";
+import { FLOW_PACE, since } from "../../drawing/flows.js";
 import { restMark } from "../../drawing/levels.js";
 import { link } from "../../drawing/links.js";
 import { box, dot, labelSize, line, measure, path, stroke } from "../../drawing/strokes.js";
@@ -17,8 +17,8 @@ import { LABEL, P } from "../../palette.js";
 import { L, en } from "../../timeline.js";
 import { cue, cueFrom, cues } from "../../timing/cues.js";
 import { clamp, mix, ramp, soon } from "../../timing/easing.js";
-import { glide } from "../../timing/pace.js";
-import { thoughtEnd } from "../../timing/pauses.js";
+import { glide, glideTime } from "../../timing/pace.js";
+import { thoughtEnd, voiceTime } from "../../timing/pauses.js";
 import { stageIn, stageOut } from "../../timing/stages.js";
 import { scenes } from "../registry.js";
 
@@ -367,15 +367,24 @@ scenes["15"] = function (s, t) {
       color: P.authority,
       alpha: five * named(t, ownerAt),
     });
-    // Over the change the link rises straight to the owner's feet; as the two part it turns to the owner's side.
+    // Over the change the link rises straight to the owner's feet; as the two part it turns to the owner's side. A
+    // point travels it from the moment it is whole, on the words that return to the owner, and again once the two
+    // stand apart, along the way as it then stands. No point is on the way while its ends part: carried along a way
+    // that turns and stretches, it would move faster than the eye follows. So before the parting a pass begins only if
+    // it reaches the owner first.
+    const rise = dy - 216 / 2 - 12 - (oy + 46),
+      turned = Math.abs((DX + RX + rw / 2) / 2 - 44 - DX) + (dy - 216 / 2 - 12 - oy),
+      parting = voiceTime(writing + 0.05),
+      parted = voiceTime(t) - parting - glideTime(960 - DX);
     link(dx, dy - fh / 2 - 12, ox - 44 * apart, mix(oy + 46, oy, apart), {
       route: "vh",
       color: P.authority,
       alpha: five,
       width: 2.5,
       draw: { t, at: back - 0.05 },
-      flowing: since(t, back + 0.85),
-      span: Math.abs((DX + RX + rw / 2) / 2 - 44 - DX) + (dy - 216 / 2 - 12 - oy),
+      flowing: parted >= 0 ? parted : since(t, back + 0.45),
+      last: parted >= 0 ? Infinity : parting - voiceTime(back + 0.45) - rise / FLOW_PACE,
+      span: parted >= 0 ? turned : rise,
     });
     // The existing record: a document at full ink from the words that begin the writing, its earlier entries ruled as
     // one stroke over the rows to be written, named on its own words; its two rows are written on their words.

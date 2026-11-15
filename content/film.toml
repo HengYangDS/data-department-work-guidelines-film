@@ -88,6 +88,11 @@ lines = [
 ]
 reason = "04.7's high-risk work is read as a list, one condition to a line as each is said, so its lines end where its conditions end and the block is not even; set as seven names the ladder would show eighteen, over the twelve a frame may hold."
 
+# The fastest a glide or a flow may move, in px/s at 1080p: the line the reviews hold this film's calm picture to
+# (Z40-7, EN40-12). The picture gate refuses a stretch whose peak exceeds it.
+[picture.motion]
+pace_limit = 450
+
 # The colours of each edition's player page: its ground, text, quieter text, rules and borders,
 # and the accent of a chosen or focused control.
 [player]

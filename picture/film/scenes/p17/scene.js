@@ -14,8 +14,8 @@ import { NOTE, termRow } from "../../naming/terms.js";
 import { LABEL, P } from "../../palette.js";
 import { en } from "../../timeline.js";
 import { cue, cueFrom, cues } from "../../timing/cues.js";
-import { ramp, soon } from "../../timing/easing.js";
-import { glide } from "../../timing/pace.js";
+import { ramp } from "../../timing/easing.js";
+import { glide, glideTime, smoother } from "../../timing/pace.js";
 import { pauseHold } from "../../timing/pauses.js";
 import { stageIn, stageOut } from "../../timing/stages.js";
 import { scenes } from "../registry.js";
@@ -269,8 +269,10 @@ scenes["17"] = function (s, t) {
   };
   const g3 = base * stageIn(t, nots[0]) * stageOut(t, missing);
   if (g3 > 0) {
-    const grown = soon(t, pauseHold(nots[1] - 0.3, 0.4), 0.4),
-      row = (n) => [0, 1].map((k) => CONTENT_CY + 160 * (k - n / 2));
+    // The first row steps up half a row, 80 px, on the glide's curve in the time that way takes.
+    const STEP_UP = 80,
+      grown = smoother((t - pauseHold(nots[1] - 0.3, 0.6)) / glideTime(STEP_UP)),
+      row = (n) => [0, 1].map((k) => CONTENT_CY + 2 * STEP_UP * (k - n / 2));
     ledger([0, 1], row(grown), row(1), g3, "all", cueFrom(s, "完成了", "complete", rightAts[1]));
   }
   // 4. When evidence is missing, the claim narrows to it. A row of evidence stands on the words that say evidence is

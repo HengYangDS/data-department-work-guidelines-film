@@ -17,8 +17,8 @@ import { P } from "../../palette.js";
 import { L, en } from "../../timeline.js";
 import { cue, cueFrom, cues } from "../../timing/cues.js";
 import { clamp, ease, mix, ramp, soon } from "../../timing/easing.js";
-import { drawShare, glide, glideTime } from "../../timing/pace.js";
-import { voiceTime } from "../../timing/pauses.js";
+import { GLIDE_PEAK, drawShare, glide } from "../../timing/pace.js";
+import { thoughtEnd } from "../../timing/pauses.js";
 import { stageIn, stageOut } from "../../timing/stages.js";
 import { scenes } from "../registry.js";
 
@@ -85,29 +85,51 @@ scenes["10"] = function (s, t) {
       const [tx, ty, k] = across(s, t, 960, 285);
       tableIcon(tx - 120 * k, ty - 75 * k, 240 * k, 150 * k, { alpha: tableOut });
     }
-    // The card flies from its cell in the table to the first station on the rail.
-    const [cx0, cy0, k0] = across(s, t, 960, 303.75),
-      flightWay = Math.hypot(xs[0] - cx0, RAIL - cy0);
-    const flightTime = Math.min(
-      glideTime(flightWay),
-      voiceTime(at[0] - 0.3) - voiceTime(priceAt - 0.05),
-    );
-    // The way is long for the time the words leave it, so the card gathers pace over the flight's first fifth, flies on
-    // at one even pace and slows over its last fifth: its pace peaks at 1.25 times its mean, not 1.5 as on a smoothstep.
+    // The card flies from its cell in the table to the first station on the rail. It lifts on the scene's first words
+    // and stands on the rail by the end of their thought's last word, before the next thought names that station. The
+    // flight runs on the film's own clock: the voice clock slows through a thought's last half second, and a flight
+    // timed by it would have that much less time for its way. The cell is the table's nearest to the rail's first
+    // station, the first of its last row, so the way is as short as the table allows.
+    const [cx0, cy0, k0] = across(s, t, 880, 341.25),
+      flightWay = Math.hypot(xs[0] - cx0, RAIL - cy0),
+      lift = priceAt - 0.05;
+    // The card gathers pace at one even rate, FLIGHT_GAIN px/s² (the film's shortest glides gather theirs at up to
+    // 2,150), flies on at one even pace and sheds it at that rate. Where the words leave the time, it flies at the
+    // glide's pace: the Chinese flight, about 610 px, takes 1.6 s of the 2.19 s its thought leaves. The English thought
+    // leaves 1.81 s for about 700 px, so its card flies at about 430 px/s; from the table's middle cell, 787 px away,
+    // it flew at about 490 px/s, over the film's pace limit.
+    const FLIGHT_GAIN = 2470,
+      flightTime = Math.min(
+        flightWay / GLIDE_PEAK + GLIDE_PEAK / FLIGHT_GAIN,
+        Math.min(thoughtEnd(priceAt), at[0] - 0.3) - lift,
+      ),
+      gain = FLIGHT_GAIN * flightTime,
+      pace = (gain - Math.sqrt(Math.max(0, gain * gain - 4 * FLIGHT_GAIN * flightWay))) / 2,
+      gathering = Math.min(0.5, pace / gain),
+      gathered = 2 * gathering * (1 - gathering);
     const cruise = (q) => {
       q = clamp(q);
-      return q < 0.2 ? (q * q) / 0.32 : q > 0.8 ? 1 - ((1 - q) * (1 - q)) / 0.32 : (q - 0.1) / 0.8;
+      return q < gathering
+        ? (q * q) / gathered
+        : q > 1 - gathering
+          ? 1 - ((1 - q) * (1 - q)) / gathered
+          : (q - gathering / 2) / (1 - gathering);
     };
-    const flight = cruise((voiceTime(t) - voiceTime(priceAt - 0.05)) / flightTime);
+    const flight = cruise((t - lift) / flightTime);
     // The rail shows no direction, so it stands whole rather than drawing on. The card's name, flying under the card,
     // crosses the rail's line only left of the second station, so the rail from there on fades in as the card sets off
     // (and balances the card through its flight), and its first stretch, under the first station, fades in from the
-    // card's last tenth of flight, when the name stands 16 px or more below the rail, over 0.4 s of voice time however
-    // short the flight, so the stretch never inks in within a frame.
+    // moment the card has a tenth of its way left, when the name stands 16 px or more below the rail, and is whole as
+    // the card lands: over the rest of the flight, a quarter of a second, so the stretch never inks in within a frame.
     const grouped = ramp(t, five + 0.1, 0.4),
       BY = ICON - R - 40;
-    const lastTenth = voiceTime(priceAt - 0.05) + (1 - Math.sqrt(0.032)) * flightTime,
-      first = ease((voiceTime(t) - lastTenth) / 0.4);
+    const lastTenth =
+        lift +
+        flightTime *
+          (0.1 * gathered < gathering * gathering
+            ? 1 - Math.sqrt(0.1 * gathered)
+            : 0.9 * (1 - gathering) + gathering / 2),
+      first = ease((t - lastTenth) / (lift + flightTime - lastTenth));
     if (flight > 0.35)
       line(xs[1] - 70, RAIL, xs[4] + 70, RAIL, {
         color: P.line,

@@ -55,7 +55,9 @@ export function s13Responsibilities(s, t, roles, seats, coordinate, p3) {
   // one line, 40 px or more from its neighbours. Once the duties have given way, as the roles are said to be
   // responsibilities, it closes up to 220 px, a glide, so the row the task lead coordinates stands compact; its short
   // names keep wide gaps at that pitch. Both rows stand at one pitch about the centre, and the lead under it.
-  const closeUp = en ? 0 : glide(t, seats + 0.05, 2 * 70),
+  // As it closes up the row also moves back the 40 px it stood left for its duties, so its first token travels
+  // 2 * 70 + 40 px, and the one glide that carries both is timed by that way.
+  const closeUp = en ? 0 : glide(t, seats + 0.05, 2 * 70 + 40),
     PITCH = mix(L(290, 275), 220, closeUp);
   const TR = 50,
     Y = 440,
@@ -68,12 +70,19 @@ export function s13Responsibilities(s, t, roles, seats, coordinate, p3) {
   // The Chinese duties end in the longest, under the last role, so the whole row with them stands 40 px further left,
   // a glide with the last role, and glides back as the duties give way and the row closes up.
   // The Chinese third duty is wide too, so the row stands 62 px further left from the third role to the fourth.
-  const lean = en
-    ? 0
-    : -40 * (glide(t, roles[4] - 0.45, 40) - glide(t, seats + 0.05, 40)) -
-      62 * (glide(t, roles[2] - 0.45, 62) - glide(t, roles[3] - 0.45, 62));
-  const shift = building(t, roles.slice(2), L(145, 140), 0.45),
-    xs = [-2, -1, 0, 1, 2].map((k) => 960 + k * PITCH + shift + lean);
+  // A step and a lean that fall on one word are one glide, timed by the way the row makes on that word: 62 px left on
+  // the third role, 145 - 62 on the fourth, 145 + 40 on the fifth, and 40 back with the closing up. Timed each by its
+  // own way they would add their paces.
+  const STEP = L(145, 140),
+    [third, fourth, fifth] = roles.slice(2).map((at) => at - 0.45);
+  const shift = en
+      ? building(t, roles.slice(2), STEP, 0.45)
+      : 2 * STEP -
+        62 * glide(t, third, 62) -
+        (STEP - 62) * glide(t, fourth, STEP - 62) -
+        (STEP + 40) * glide(t, fifth, STEP + 40) +
+        40 * closeUp,
+    xs = [-2, -1, 0, 1, 2].map((k) => 960 + k * PITCH + shift);
   const these = ramp(t, seats + 0.05, 0.3) * (1 - ramp(t, notSeats + 0.05, 0.3));
   // The joins Development checks stand under the row's centre while the roles are named, reached by one way down and
   // across from Development's token: the shared data and the calculation joined, checked on the words that say so.

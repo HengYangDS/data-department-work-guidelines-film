@@ -11,6 +11,7 @@ import { radialName } from "../../naming/placement.js";
 import { P } from "../../palette.js";
 import { L, en } from "../../timeline.js";
 import { clamp, ramp, soon } from "../../timing/easing.js";
+import { GLIDE_MIN, smoother } from "../../timing/pace.js";
 
 /* Stage 2: the result with the three things its owner states before handing it over, each a group of parts. */
 export function s14Handover(
@@ -33,6 +34,7 @@ export function s14Handover(
   reportLeft,
   RCY,
   RCX,
+  carried,
 ) {
   // The heading starts where the diagram starts, at the left names, and stands well clear above the inputs' tiles.
   const modelLeft = RCX + reportLeft;
@@ -43,8 +45,10 @@ export function s14Handover(
   });
   const starts = rows.filter((_, i) => groups[i] !== groups[i - 1]).map((v) => v[0]),
     level = (i) => pB * listLevel(t, starts, groups[i]);
+  // A part docks over the last 20 to 28 px of its way on the glide's curve, in the glide's least time. `gone` is the
+  // time its dock has given up to a glide of the report (see the failures' card).
   const on = (at) => ramp(t, at - 0.15, 0.35) * pB,
-    att = (at) => soon(t, at + 0.05, 0.5);
+    att = (at, gone = 0) => smoother((t - gone - at - 0.05) / GLIDE_MIN);
   // The results: the stretch the tests covered draws round the result, and the stretch at its foot they did not reach
   // stays a gap, named under it. The results are named over the ring in Chinese and, above its inputs' way, at its upper
   // left in English.
@@ -160,10 +164,12 @@ export function s14Handover(
     IY,
     { valign: "middle", width: 480, alpha: level(1), set: "report" },
   );
-  // Each failure and how it was handled, from the right: two failures, each handled along its own way.
+  // Each failure and how it was handled, from the right: two failures, each handled along its own way. The card docks
+  // leftward, the way the report glides to make the third thing room, so its dock gives its pace up to that glide
+  // (`carried`): the card never moves faster than a glide.
   const fy = RCY - PAIR,
     fq = on(rows[3][0]),
-    fx = RCX + 220 + 28 * (1 - att(rows[3][0])),
+    fx = RCX + 220 + 28 * (1 - att(rows[3][0], carried(t) - carried(rows[3][0] + 0.05))),
     dq = on(rows[3][1]);
   box(fx - 50, fy - 36, 100, 72, { fill: P.row, stroke: P.evidence, alpha: fq, radius: 8 });
   [-16, 16].forEach((d, k) => {

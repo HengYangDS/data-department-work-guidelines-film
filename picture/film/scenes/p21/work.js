@@ -13,8 +13,8 @@ import { NAME_GAP, nameText } from "../../naming/names.js";
 import { P } from "../../palette.js";
 import { L, en } from "../../timeline.js";
 import { cue } from "../../timing/cues.js";
-import { ease, mix, ramp, soon } from "../../timing/easing.js";
-import { GLIDE_PEAK, glide } from "../../timing/pace.js";
+import { ease, mix, ramp } from "../../timing/easing.js";
+import { GLIDE_PEAK, glide, glideTime, smoother } from "../../timing/pace.js";
 import { pauseHold, thoughtEnd, voiceTime } from "../../timing/pauses.js";
 
 /* Stage 1: the Agent's output as a stack of pages under the check's lens, the work and not just its summary. */
@@ -125,10 +125,14 @@ export function s21Checklist(s, t, two) {
     NX = 620,
     TX = PL + PW - 60;
   // A row whose words open a thought reflows the page on those words, not in the quiet before them, and the page is
-  // grown to take the row before the row stands in it.
-  const shown = starts.map((at) => soon(t, pauseHold(at - 0.3, 0.4), 0.4)),
+  // grown to take the row before the row stands in it. Each reflow moves the rows half a pitch on the glide's curve in
+  // the time that way takes, so a mark still moving in a row that stands, as the verification's lap is when the Chinese
+  // names the next row, is carried gently and the two moves together stay within a glide's pace.
+  const REFLOW = glideTime(pitch / 2),
+    reflows = starts.map((at) => pauseHold(at - 0.45, REFLOW)),
+    shown = reflows.map((at) => smoother((t - at) / REFLOW)),
     n = shown.reduce((a, b) => a + b, 0);
-  const rowAt = starts.map((at) => Math.max(at - 0.15, pauseHold(at - 0.3, 0.4) + 0.25));
+  const rowAt = starts.map((at, k) => Math.max(at - 0.15, reflows[k] + 0.4));
   // A mark stands on its words, and not before its row does.
   const on = (k, j) => ramp(t, Math.max(marks[k][j] - 0.15, rowAt[k]), 0.4) * two;
   const yOf = (k) => 500 + (k - (n - 1) / 2) * pitch,
@@ -278,10 +282,11 @@ export function s21Checklist(s, t, two) {
       box(IX - 78, y - 38, 156, 76, { stroke: P.ink, alpha: on(4, 2), radius: 12, width: 2 });
     }
     if (k === 5) {
-      // The high-risk action and the decision owner, whose seal moves onto the action once it is approved.
+      // The high-risk action and the decision owner, whose seal moves onto the action once it is approved, a glide
+      // over its 72 px that is done before the thought's last word ends in either edition.
       diamond(IX - 46, y + 6, 18, { color: P.unknown, alpha: on(5, 0), solid: true });
       person(IX + 44, y + 12, { color: P.authority, alpha: on(5, 1), size: 0.8 });
-      const move = soon(t, sealAt, 0.35),
+      const move = glide(t, sealAt, Math.hypot(70, 18)),
         sealX = mix(IX + 44, IX - 26, move),
         sealY = mix(y - 30, y - 12, move);
       dot(sealX, sealY, 14, { color: P.row, alpha: on(5, 2) });

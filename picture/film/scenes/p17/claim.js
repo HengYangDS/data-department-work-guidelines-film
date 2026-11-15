@@ -31,7 +31,9 @@ export function s17Questions(s, t, questions, g2) {
   ].map(([a, b]) => cueFrom(s, a, b, questions));
   // The subject reaches 110 + 320 px past the card's right edge, the signatures 196 px and their widest name past its
   // left; the card eases left by half the subject's reach as the subject is pinned, so the pair stands centred, and
-  // back as the signatures come, each move a glide at the film's pace.
+  // back as the signatures come, each move a glide at the film's pace. The move back takes at least 0.8 s: the first
+  // signature draws on into the card while the claim carries it, and a stroke still lengthening on a gliding stage
+  // moves faster than the stage, by half its tip's pace.
   const CW = 700,
     CH = 290,
     CT = 355,
@@ -48,7 +50,7 @@ export function s17Questions(s, t, questions, g2) {
       960 -
       CW / 2 -
       pairLean * glide(t, about + 0.05, pairLean) +
-      (pairLean - wholeLean) * glide(t, Math.min(who, when, how) + 0.05, pairLean - wholeLean),
+      (pairLean - wholeLean) * glide(t, Math.min(who, when, how) + 0.05, pairLean - wholeLean, 0.8),
     OL = CL + CW + 110;
   const on = named(t, questions) * g2;
   box(CL, CT, CW, CH, { fill: P.row, stroke: P.ink, alpha: on, radius: 14, width: 2.5 });

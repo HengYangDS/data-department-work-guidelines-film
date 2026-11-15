@@ -25,8 +25,8 @@ export const flowDot = (x, y, r, q, o, length = Infinity) => {
  * way's first pass back by that share of a pass, so neighbouring ways do not run in step; a flow that stops begins no
  * pass after `last` (voice time since it began), and the pass under way runs to the way's end. Returns the pass phase,
  * or null between passes. */
-const FLOW_PACE = 160,
-  FLOW_GAP = 1 / 30;
+export const FLOW_PACE = 160;
+const FLOW_GAP = 1 / 30;
 export const loopPhase = (flowing, length, lag = 0, last = Infinity) => {
   if (flowing === null || !(length >= 1)) return null;
   const travel = length / FLOW_PACE,

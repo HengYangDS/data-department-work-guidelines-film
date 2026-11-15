@@ -52,8 +52,9 @@ scenes["11"] = function (s, t) {
   const admitCut = cue(s, "这就叫准入", "Admission is permission");
   // The illustrative chip stays while the same case continues, through the admission decision it ends on.
   illustrative(ramp(t, ill - 0.2, 0.6));
-  // The history is recorded day by day from the first word: the series draws from its first close to today's, its
-  // latest price riding its head, and it is whole before 11.1's words end, so nothing moves in the quiet that follows.
+  // The history is recorded day by day from the first word: the series draws from its first close to today's, where
+  // its latest price inks in as it arrives, and it is whole before 11.1's words end, so nothing moves in the quiet that
+  // follows.
   // The history draws on from the first word within its short thought, at the tip pace: the thought leaves time for its
   // latest stretch only, so the earlier history stands with the chart and the latest days draw on, whole 0.1 s before
   // the thought's words end.
@@ -161,7 +162,7 @@ scenes["11"] = function (s, t) {
   // draws as the correction is said, under its name; the test needs the values each decision could see, not today's
   // corrected data, which is that stretch, refused above its own crest, and it leaves with its names at the next cut.
   const one = stageOut(t, unknownCut);
-  if (one > 0) s11Correction(s, t, yv, py, lift, corr, todayS, head, drawFor, draw, chartDx, one);
+  if (one > 0) s11Correction(s, t, yv, py, lift, corr, todayS, head, drawFor, chartDx, one);
   // 2. When each value first became available is unknown: above each decision a "?" stands on the words that say it is
   // not known, and the claim that the test used only what was available then is refused under the axis. The snapshots of
   // that time replace the marks, the correction history stands at the correction date, and authorized exploration is

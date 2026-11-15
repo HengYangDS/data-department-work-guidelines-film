@@ -131,10 +131,13 @@ export function s25ClarityExample(
     rows = [fy + 70, fy + 180, fy + 290],
     sx = rx + 60;
   // The frame keeps the room above its first part's words below its last line too: 57 px.
+  // In English the case's frame (top 388, foot 700, 2.5 px) re-forms into this one. The second part that leads is
+  // named before a frame re-formed for the first alone would be at rest, and its foot, come up 207 px, would turn back
+  // down for that part while its top still rose; so the frame re-forms once to the height of the two parts that lead,
+  // its foot travelling 97 px, and lengthens for the detail alone. The spine still grows to each part on its words.
   const grown = lead.map((at, i) => (i ? drawShare(t, at - 0.45, [0, 110, 154][i], 0.4) : 1)),
-    fh = 70 + 36 + 57 + 110 * grown[1] + (110 + 44) * grown[2];
-  // In English the case's frame (top 388, foot 700, 2.5 px) re-forms into this one; its foot travels 207 px.
-  const k = en ? glide(t, reformAt, 207) : 1,
+    fh = 70 + 36 + 57 + 110 * (en ? 1 : grown[1]) + (110 + 44) * grown[2];
+  const k = en ? glide(t, reformAt, 97) : 1,
     top = en ? mix(388, fy, k) : fy,
     foot = en ? mix(700, fy + fh, k) : fy + fh;
   box(rx, top, rw, en ? foot - top : fh, {

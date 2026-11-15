@@ -10,8 +10,8 @@ import { RAIL_WRAP, railStations } from "../../naming/placement.js";
 import { P } from "../../palette.js";
 import { L, en } from "../../timeline.js";
 import { cue, cueFrom, cues } from "../../timing/cues.js";
-import { mix, ramp } from "../../timing/easing.js";
-import { glide } from "../../timing/pace.js";
+import { ramp } from "../../timing/easing.js";
+import { glide, glideYield, ride } from "../../timing/pace.js";
 import { STAGE_CUT, stageIn, stageOut } from "../../timing/stages.js";
 import { scenes } from "../registry.js";
 import { s14Handover } from "./handover.js";
@@ -241,11 +241,14 @@ scenes["14"] = function (s, t) {
     handOff = stageOut(t, changesCut);
   // The owner carries the result through the stages and leaves with the track; the result stays and docks.
   person(250, trackY, { alpha: ramp(t, owner - 0.15, 0.5) * pA, color: P.authority });
-  // The result rides to each stage as it is named, each ride a glide.
-  let tx = 320;
-  stations.forEach((at, k) => {
-    tx = mix(tx, xs[k], glide(t, at - 0.1, xs[k] - (k ? xs[k - 1] : 320)));
-  });
+  // The result rides to each stage as it is named. The stages are named faster than a glide reaches them, so the
+  // rides the next stage's word finds under way are one move through those stages, at the glide's pace.
+  const tx = ride(
+    t,
+    320,
+    xs,
+    stations.map((at) => at - 0.1),
+  );
   const tokQ = ramp(t, result - 0.15, 0.4) * base;
   if (pA > 0)
     s14Track(
@@ -324,6 +327,10 @@ scenes["14"] = function (s, t) {
       centreOn(firstRight) +
       toInputs * glide(t, rows[1][0] - 0.3, toInputs) +
       toWhole * glide(t, third - 0.3, toWhole);
+  // A part that docks on the report the way the report glides gives its own pace up to the glide's, as a flow does:
+  // the voice time its dock has given up to those glides by the time u.
+  const carried = (u) =>
+    glideYield(u, rows[1][0] - 0.3, toInputs) + glideYield(u, third - 0.3, toWhole);
   if (pB > 0)
     s14Handover(
       t,
@@ -345,6 +352,7 @@ scenes["14"] = function (s, t) {
       reportLeft,
       RCY,
       RCX,
+      carried,
     );
   // The result stands at its dock from the cut that brings the report, rather than gliding there across the frame.
   token(docked ? RCX : tx, docked ? RCY : trackY, { alpha: tokQ * handOff, r: docked ? 24 : 10 });

@@ -24,6 +24,58 @@ export const smoother = (q) => {
 export const glideTime = (d, min = GLIDE_MIN) => Math.max(min, (1.875 * Math.abs(d)) / GLIDE_PEAK);
 export const glide = (t, start, d, min = GLIDE_MIN) =>
   smoother((voiceTime(t) - voiceTime(start)) / glideTime(d, min));
+/* A mark carried one way along a row of stops, each ride setting off at its own time (`starts`, on its stop's words).
+ * A ride alone is a glide. A ride that the next stop's word finds still under way does not slow for its stop: those
+ * rides are one move through their stops, timed by its whole way. It gathers pace over RIDE_RAMP seconds by the
+ * smoothstep curve, as the voice clock does, carries on at GLIDE_PEAK and slows over as long, so however quickly the
+ * stops are named the mark never moves faster than a glide; rides nested as glides compound instead, each timed for
+ * its own stretch while the mark still has the stretch before to make up. It advances in voice time. Returns the
+ * mark's place at t. */
+const RIDE_RAMP = 0.5;
+const gathered = (x) => x ** 3 - x ** 4 / 2;
+export function ride(t, from, stops, starts) {
+  const v = voiceTime(t),
+    cruise = GLIDE_PEAK * RIDE_RAMP;
+  let place = from;
+  for (let k = 0; k < stops.length;) {
+    const origin = k ? stops[k - 1] : from,
+      way = (i) => stops[i] - (i ? stops[i - 1] : from),
+      start = voiceTime(starts[k]);
+    // The rides of this move: each further ride the same way whose time comes before the move so far would end. A
+    // move too short for its two ramps is one glide over its whole way.
+    let last = k,
+      whole = Math.abs(way(k)),
+      time = glideTime(whole);
+    while (
+      last + 1 < stops.length &&
+      way(last + 1) * way(k) > 0 &&
+      voiceTime(starts[last + 1]) < start + time
+    ) {
+      last++;
+      whole = Math.abs(stops[last] - origin);
+      time = whole >= cruise ? whole / GLIDE_PEAK + RIDE_RAMP : glideTime(whole);
+    }
+    const at = Math.max(0, Math.min(time, v - start));
+    const share =
+      last === k || whole < cruise
+        ? smoother(at / time)
+        : (at < RIDE_RAMP
+            ? cruise * gathered(at / RIDE_RAMP)
+            : at > time - RIDE_RAMP
+              ? whole - cruise * gathered((time - at) / RIDE_RAMP)
+              : cruise / 2 + GLIDE_PEAK * (at - RIDE_RAMP)) / whole;
+    place += (stops[last] - origin) * share;
+    k = last + 1;
+  }
+  return place;
+}
+/* A looping flow whose way a glide carries, or a part that docks the way its stage glides, gives its own pace up to
+ * the glide's, so the mark, carried as it moves, is never seen faster than a glide: its clock runs slower by the share
+ * of GLIDE_PEAK at which the glide moves, resting where the glide moves at that peak and at full pace where the glide
+ * rests, and it never sets off or stops at once. Returns the voice time the clock has given up to that glide at t,
+ * which a scene takes from the mark's own clock (a flow's `since`). */
+export const glideYield = (t, start, d, min = GLIDE_MIN) =>
+  (glide(t, start, d, min) * Math.abs(d)) / GLIDE_PEAK;
 /* A stroke drawing on, solid or dashed, as only its tip moves: the smoothstep curve in voice time, at least `least`
  * seconds and otherwise long enough that its tip peaks at DRAW_PACE px/s, under the 900 px/s at which a mark races: a
  * smoothstep's tip peaks at 1.5 times its mean pace. Returns the share of a stroke `length` px long drawn at t from `at`. */

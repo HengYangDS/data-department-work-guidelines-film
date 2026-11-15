@@ -83,6 +83,7 @@
     "thought_boundary_ratio": 1.62,
     "thought_boundary_margin_seconds": 0.09,
     "thought_level_tolerance_db": 0.4,
+    "segment_level_tolerance_db": 0.2,
     "chapter_level_tolerance_db": 0.3,
     "paragraph_pause_range": [
       1.0,
@@ -197,7 +198,42 @@
         "Expertise alone grants no authority to decide or act. Professional judgment belongs with people who have the competence and the facts; when either is missing, bring in the domain owner."
       ],
       "text": "The guidelines apply to members and the Agents they delegate to: AI systems that investigate, reason and act within a delegated boundary. Direction, authorization, decisions and responsibility for consequences stay with people. Two kinds of authority need to stay apart: authority to act, and authority about facts. Authority to act answers who may decide what to do, and it has an order of precedence. Law, regulation, security requirements and mandatory company policy come first. Within those limits comes what the decision owner for this matter explicitly decides. Then contracts, policies, specifications and decision records in force. Work plans, provisional agreements and personal preferences come last. Authority about facts answers what can establish what is true: preferably primary records and repeatable observations, with a source, time, subject and scope. Second-hand accounts, caches kept for speed, generated views built from records, Agent output and memory are unverified, so they are only leads. Authority to act cannot make a false fact true, and a fact does not grant permission to act. If a release is set for today but verification finds the data wrong, report the conflict and its impact. Do not alter the record, nor silently act as if one side had won. Expertise alone grants no authority to decide or act. Professional judgment belongs with people who have the competence and the facts; when either is missing, bring in the domain owner.",
-      "spoken_text": "The guidelines apply to members and the Agents they delegate to: AI systems that investigate, reason and act within a delegated boundary. Direction, authorization, decisions and responsibility for consequences stay with people. Two kinds of authority need to stay apart: authority to act, and authority about facts. Authority to act answers who may decide what to do, and it has an order of precedence. Law, regulation, security requirements and mandatory company policy come first. Within those limits comes what the decision owner for this matter explicitly decides. Then contracts, policies, specifications and decision records in force. Work plans, provisional agreements and personal preferences come last. Authority about facts answers what can establish what is true: preferably primary records and repeatable observations, with a source, time, subject and scope. Second-hand accounts, caches kept for speed, generated views built from records, Agent output and memory are unverified, so they are only leads. Authority to act cannot make a false fact true, and a fact does not grant permission to act. If a release is set for today but verification finds the data wrong, report the conflict and its impact. Do not alter the record, nor silently act as if one side had won. Expertise alone grants no authority to decide or act. Professional judgment belongs with people who have the competence and the facts; when either is missing, bring in the domain owner."
+      "spoken_text": "The guidelines apply to members and the Agents they delegate to: AI systems that investigate, reason and act within a delegated boundary. Direction, authorization, decisions and responsibility for consequences stay with people. Two kinds of authority need to stay apart: authority to act, and authority about facts. Authority to act answers who may decide what to do, and it has an order of precedence. Law, regulation, security requirements and mandatory company policy come first. Within those limits comes what the decision owner for this matter explicitly decides. Then contracts, policies, specifications and decision records in force. Work plans, provisional agreements and personal preferences come last. Authority about facts answers what can establish what is true: preferably primary records and repeatable observations, with a source, time, subject and scope. Second-hand accounts, caches kept for speed, generated views built from records, Agent output and memory are unverified, so they are only leads. Authority to act cannot make a false fact true, and a fact does not grant permission to act. If a release is set for today but verification finds the data wrong, report the conflict and its impact. Do not alter the record, nor silently act as if one side had won. Expertise alone grants no authority to decide or act. Professional judgment belongs with people who have the competence and the facts; when either is missing, bring in the domain owner.",
+      "caption_phrases": [
+        "The guidelines apply to members and the Agents they delegate to: ",
+        "AI systems that investigate, ",
+        "reason and act within a delegated boundary. ",
+        "Direction, authorization, decisions ",
+        "and responsibility for consequences stay with people. ",
+        "Two kinds of authority need to stay apart: ",
+        "authority to act, and authority about facts. ",
+        "Authority to act answers who may decide what to do, ",
+        "and it has an order of precedence. ",
+        "Law, regulation, security requirements ",
+        "and mandatory company policy come first. ",
+        "Within those limits ",
+        "comes what the decision owner for this matter explicitly decides. ",
+        "Then contracts, policies, ",
+        "specifications and decision records in force. ",
+        "Work plans, provisional agreements ",
+        "and personal preferences come last. ",
+        "Authority about facts answers what can establish what is true: ",
+        "preferably primary records and repeatable observations, ",
+        "with a source, time, subject and scope. ",
+        "Second-hand accounts, caches kept for speed, ",
+        "generated views built from records, ",
+        "Agent output and memory are unverified, so they are only leads. ",
+        "Authority to act cannot make a false fact true, ",
+        "and a fact does not grant permission to act. ",
+        "If a release is set for today ",
+        "but verification finds the data wrong, ",
+        "report the conflict and its impact. ",
+        "Do not alter the record, nor silently act as if one side had won. ",
+        "Expertise alone grants no authority to decide or act. ",
+        "Professional judgment belongs with people ",
+        "who have the competence and the facts; ",
+        "when either is missing, bring in the domain owner."
+      ]
     },
     {
       "id": "04",
@@ -350,7 +386,26 @@
         "Data with unknown meaning, quality or historical availability may be explored within an authorized scope, but must stay out of sharing, production and decisions until qualified for that use. Reports, catalogs, caches and Agent summaries are derived, so none may quietly be treated as the source of truth."
       ],
       "text": "Data earns trust only after it is shown fit for a specific use. A file that opens, a chart that looks good, a promising model signal: none of them alone establishes meaning, quality, permission, or reproducibility. So answer six questions first. Where did it come from? When did it become available? What does it mean? What changed it? How good is it? How may it be used? Data with unknown meaning, quality or historical availability may be explored within an authorized scope, but must stay out of sharing, production and decisions until qualified for that use. Reports, catalogs, caches and Agent summaries are derived, so none may quietly be treated as the source of truth.",
-      "spoken_text": "Data earns trust only after it is shown fit for a specific use. A file that opens, a chart that looks good, a promising model signal: none of them alone establishes meaning, quality, permission, or reproducibility. So answer six questions first. Where did it come from? When did it become available? What does it mean? What changed it? How good is it? How may it be used? Data with unknown meaning, quality or historical availability may be explored within an authorized scope, but must stay out of sharing, production and decisions until qualified for that use. Reports, catalogs, caches and Agent summaries are derived, so none may quietly be treated as the source of truth."
+      "spoken_text": "Data earns trust only after it is shown fit for a specific use. A file that opens, a chart that looks good, a promising model signal: none of them alone establishes meaning, quality, permission, or reproducibility. So answer six questions first. Where did it come from? When did it become available? What does it mean? What changed it? How good is it? How may it be used? Data with unknown meaning, quality or historical availability may be explored within an authorized scope, but must stay out of sharing, production and decisions until qualified for that use. Reports, catalogs, caches and Agent summaries are derived, so none may quietly be treated as the source of truth.",
+      "caption_phrases": [
+        "Data earns trust only after it is shown fit for a specific use. ",
+        "A file that opens, a chart that looks good, ",
+        "a promising model signal: none of them alone establishes meaning, ",
+        "quality, permission, or reproducibility. ",
+        "So answer six questions first. ",
+        "Where did it come from? ",
+        "When did it become available? ",
+        "What does it mean? ",
+        "What changed it? ",
+        "How good is it? ",
+        "How may it be used? ",
+        "Data with unknown meaning, quality or historical availability ",
+        "may be explored within an authorized scope, ",
+        "but must stay out of sharing, production and decisions ",
+        "until qualified for that use. ",
+        "Reports, catalogs, caches and Agent summaries are derived, ",
+        "so none may quietly be treated as the source of truth."
+      ]
     },
     {
       "id": "10",
@@ -632,7 +687,23 @@
         "The acceptor examines the actual work and evidence. If the agreed conditions are unmet, the work goes back to the member for revision within the delegation boundary. If they are met, it is accepted, recorded and handed off. Acceptance never expands permission."
       ],
       "text": "A piece of work can involve a task lead, an executing member, an Agent, a reviewer and an acceptor. Where policy permits, one person may hold several roles, but a title alone grants no authority to decide or accept. The person who calls an Agent owns its context, permissions, verification and result. Submitting Agent-assisted work means you have understood and checked it, and accept responsibility for its consequences. Delegation transfers the work, not that duty. The acceptor examines the actual work and evidence. If the agreed conditions are unmet, the work goes back to the member for revision within the delegation boundary. If they are met, it is accepted, recorded and handed off. Acceptance never expands permission.",
-      "spoken_text": "A piece of work can involve a task lead, an executing member, an Agent, a reviewer and an acceptor. Where policy permits, one person may hold several roles, but a title alone grants no authority to decide or accept. The person who calls an Agent owns its context, permissions, verification and result. Submitting Agent-assisted work means you have understood and checked it, and accept responsibility for its consequences. Delegation transfers the work, not that duty. The acceptor examines the actual work and evidence. If the agreed conditions are unmet, the work goes back to the member for revision within the delegation boundary. If they are met, it is accepted, recorded and handed off. Acceptance never expands permission."
+      "spoken_text": "A piece of work can involve a task lead, an executing member, an Agent, a reviewer and an acceptor. Where policy permits, one person may hold several roles, but a title alone grants no authority to decide or accept. The person who calls an Agent owns its context, permissions, verification and result. Submitting Agent-assisted work means you have understood and checked it, and accept responsibility for its consequences. Delegation transfers the work, not that duty. The acceptor examines the actual work and evidence. If the agreed conditions are unmet, the work goes back to the member for revision within the delegation boundary. If they are met, it is accepted, recorded and handed off. Acceptance never expands permission.",
+      "caption_phrases": [
+        "A piece of work can involve a task lead, ",
+        "an executing member, an Agent, a reviewer and an acceptor. ",
+        "Where policy permits, one person may hold several roles, ",
+        "but a title alone grants no authority to decide or accept. ",
+        "The person who calls an Agent owns its context, ",
+        "permissions, verification and result. ",
+        "Submitting Agent-assisted work means you have understood ",
+        "and checked it, and accept responsibility for its consequences. ",
+        "Delegation transfers the work, not that duty. ",
+        "The acceptor examines the actual work and evidence. ",
+        "If the agreed conditions are unmet, the work goes back ",
+        "to the member for revision within the delegation boundary. ",
+        "If they are met, it is accepted, recorded and handed off. ",
+        "Acceptance never expands permission."
+      ]
     },
     {
       "id": "21",

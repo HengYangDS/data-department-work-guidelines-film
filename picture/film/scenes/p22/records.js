@@ -123,8 +123,11 @@ export function s22Records(t, handoff, told, interrupt, kept, HY, handway, g2) {
   // The frame keeps one padding round its 80 px boxes, above and below alike, about the 22 px between them.
   const FW = grown.reduce((w, q, k) => mix(w, Math.max(w, widths[k]), q), widths[0]),
     FH = grown.reduce((h, q) => h + ROW3 * q, 2 * FPAD - (ROW3 - 80));
-  if (grown[0] > 0)
-    box(FX, FT, FW, FH, { stroke: P.authority, alpha: g2 * grown[0], radius: 14, width: 2 });
+  // The frame inks in over the time it opens for its first row, by the curve every mark inks in by: the opening's own
+  // curve rises steeply enough at its middle to take a stroke from faint to firm within one frame.
+  const framed = ramp(t, pauseHold(kept[0] - 0.45, 0.4), 0.4);
+  if (framed > 0)
+    box(FX, FT, FW, FH, { stroke: P.authority, alpha: g2 * framed, radius: 14, width: 2 });
   kept.forEach((at, k) => {
     const q = ramp(t, at - 0.15, 0.4) * g2,
       y = FT + FPAD + 40 + k * ROW3;

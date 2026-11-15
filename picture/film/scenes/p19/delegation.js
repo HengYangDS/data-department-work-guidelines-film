@@ -358,9 +358,12 @@ export function s19ClearBoundary(
       toward: 50 + FX - FX4,
       opens: FX - FX4 - lean19,
     });
+  // The member's flow gives its pace up to the frame's while the frame carries the way's end to the middle, so its
+  // point is carried no faster than the frame moves.
+  const flow = since(t, Math.min(within, extend) + STAGE_CUT);
   link(MX + 40, 500, f.x - 12, 500, {
     alpha: g4,
-    flowing: since(t, Math.min(within, extend) + STAGE_CUT),
+    flowing: flow === null ? null : flow - f.carried,
     span: FX - MX - 52,
   });
   box(f.x, f.y, f.w, f.h, {

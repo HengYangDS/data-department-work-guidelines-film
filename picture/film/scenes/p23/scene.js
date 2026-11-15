@@ -17,7 +17,7 @@ import { LABEL, P } from "../../palette.js";
 import { L, en } from "../../timeline.js";
 import { cue, cues } from "../../timing/cues.js";
 import { mix, ramp, soon } from "../../timing/easing.js";
-import { drawShare, drawTime, glide } from "../../timing/pace.js";
+import { drawShare, drawTime, glide, glideYield, ride } from "../../timing/pace.js";
 import { pauseHold } from "../../timing/pauses.js";
 import { STAGE_CUT, stageIn, stageOut } from "../../timing/stages.js";
 import { scenes } from "../registry.js";
@@ -53,10 +53,13 @@ scenes["23"] = function (s, t) {
       : ["工作的成果", "沟通", "别人能接着做的事"];
     const centred = 960 - (460 - 60 + 960 + Math.max(42, measure(names[1]) / 2)) / 2,
       settle = 1 - glide(t, become + 0.05, Math.abs(centred));
-    const pair = (en ? 0 : mix(960 - 460, centred, glide(t, comm + 0.05, centred - 500))) * settle;
+    // The Chinese result moves from the centre to its place in the pair on the channel's word and on to its station
+    // on the words that make it action. Those words follow within half a second, before the first move could end, so
+    // the two are one ride through the pair's place to the station, at the glide's pace.
+    const result = en ? 460 : ride(t, 960, [460 + centred, 460], [comm + 0.05, become + 0.05]);
     // The Chinese channel arrives at its place in the centred pair and stays there until the stations; only the result
     // moves. The first of each edition stands from the opening.
-    const xs = [460 + pair, 960 + L(centred, 0) * settle, 1460],
+    const xs = [result, 960 + L(centred, 0) * settle, 1460],
       at = [work, comm, others],
       first = L(0, 1);
     const seen = (i) =>
@@ -135,14 +138,19 @@ scenes["23"] = function (s, t) {
         }),
       { color: P.ink, alpha: ans * 0.85, width: 5 },
     );
-    // The answer reaches the reader, and goes on reaching them while the stage stands.
-    const reach = soon(t, answers + 0.1, 0.5);
+    // The answer reaches the reader, and goes on reaching them while the stage stands. While the group glides left to
+    // make the process room, the flow, which runs the same way, gives its pace up to the glide's.
+    const reach = soon(t, answers + 0.1, 0.5),
+      reaching = since(t, answers + 0.6);
     link(ax - 14, RY, px + 72, RY, {
       color: P.evidence,
       alpha: ans,
       upto: reach,
       width: 2.5,
-      flowing: since(t, answers + 0.6),
+      flowing:
+        reaching === null
+          ? null
+          : reaching - glideYield(t, notYet + 0.05, (NAME_GAP + measure(later)) / 2),
     });
     nameText(
       L("回答对方真正需要的", "Answer the reader's actual need"),
@@ -335,13 +343,21 @@ scenes["23"] = function (s, t) {
       lead = mid0 - hh0 / 2 + labelSize(LABEL) / 2,
       stateY = mid0 + drop;
     person(rx, lead + 52, { alpha: four, size: 2.6 });
-    const given = soon(t, update + STAGE_CUT, 0.5);
+    // The lead goes on reaching the reader; while the page and the reader glide left to their places, the flow, which
+    // runs the same way, gives its pace up to each glide's.
+    const given = soon(t, update + STAGE_CUT, 0.5),
+      giving = since(t, update + STAGE_CUT + 0.5);
     link(x0 - 12, lead, rx + 64, lead, {
       color: P.evidence,
       alpha: four,
       upto: given,
       width: 2.5,
-      flowing: since(t, update + STAGE_CUT + 0.5),
+      flowing:
+        giving === null
+          ? null
+          : giving -
+            glideYield(t, termAt + 0.05, aside0 - aside1) -
+            glideYield(t, qualAt + 0.05, aside1),
     });
     sections.forEach(([term, termAts, qual, qualAts], i) => {
       const top = tops[i],

@@ -4,7 +4,7 @@
 import { measure } from "../../drawing/strokes.js";
 import { growLines, growTexts } from "../../naming/parts.js";
 import { mix, soon } from "../../timing/easing.js";
-import { glide, glideTime } from "../../timing/pace.js";
+import { glide, glideTime, glideYield } from "../../timing/pace.js";
 
 /* A delegated boundary round an Agent: the frame opens about the Agent alone, too small to hold a group, and on the
  * words of the first member set inside it widens to its full width, its top rising to hold the first row; its bottom
@@ -15,7 +15,8 @@ import { glide, glideTime } from "../../timing/pace.js";
  * balanced while its members are still to come, and it widens about that middle over 0.7 s while the Agent returns to
  * its side; with `from`, a time, it first closes round the Agent at its side and moves to the middle from then, over
  * 0.7 s; `toward` stands the waiting frame that many px right of that middle, and it widens from there to its full
- * place. It returns the frame's box and the Agent's x. */
+ * place. It returns the frame's box, the Agent's x and, as `carried`, the voice time a flow on a way to the frame gives
+ * up while the frame moves to the middle (glideYield). */
 export function s19Frame(
   t,
   fx,
@@ -27,14 +28,17 @@ export function s19Frame(
   [top1, bottom1],
   { middle = null, from = null, toward = 0, opens = 0 } = {},
 ) {
-  // A card waiting at the middle grows into the full frame as a glide timed by the farther of its edges' ways, finishing
-  // as its first part's name comes in, so neither the frame nor the name over it travels faster than the eye follows.
+  // A card waiting at the middle grows into the full frame as a glide timed by the farthest of the ways made in it, its
+  // two edges' and the Agent's back to its side, which is the longest since the Agent's small frame is narrower than
+  // the card; it finishes as its first part's name comes in, so neither the frame, the name over it nor the Agent
+  // travels faster than the eye follows.
   const reach =
     middle === null
       ? 0
       : Math.max(
           Math.abs(full / 2 + toward - middle / 2),
           Math.abs(full / 2 - toward - middle / 2),
+          Math.abs(full / 2 + toward - small / 2),
         );
   const grow =
       middle === null
@@ -54,13 +58,22 @@ export function s19Frame(
       w: typeof full === "function" ? full(t) : mix(small, full, grow),
       h,
       ax: side,
+      carried: 0,
     };
   // A card that opens from further away glides further; the frame's edges open on the widening's easing, while the
   // Agent steps back to its side as a glide, so it never travels faster than the eye follows.
-  const go = from === null ? 1 : glide(t, from, Math.abs(fx + full / 2 + toward - side - opens)),
+  const way = Math.abs(fx + full / 2 + toward - side - opens),
+    go = from === null ? 1 : glide(t, from, way),
     at = mix(side + opens, fx + full / 2 + toward, go),
     w = mix(mix(small, middle, go), full, grow);
-  return { x: mix(at, fx + full / 2, grow) - w / 2, y: top, w, h, ax: mix(at, side, grow) };
+  return {
+    x: mix(at, fx + full / 2, grow) - w / 2,
+    y: top,
+    w,
+    h,
+    ax: mix(at, side, grow),
+    carried: from === null ? 0 : glideYield(t, from, way),
+  };
 }
 /* The lines of a list said member by member, set as growTexts sets them (a member's leading mark hangs at the end of
  * the line before), but balanced: of the splits into as few lines as fit `width`, the one whose widest line is

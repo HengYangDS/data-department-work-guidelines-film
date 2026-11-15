@@ -25,11 +25,15 @@ export function s11Admission(s, t, admitCut, eight) {
     ["一项具体用途", "one specific use"],
   ]);
   const gateAt = cueFrom(s, "准入", "permission", admitCut);
-  // The English use is named just after the cut, so its stage stands 65 px left, centred once the use stands; the
-  // Chinese stage stands 129 px right while the data waits at the gate, centred with it, and eases 174 px left on the
-  // use's words.
+  // The stage stands right of its place while the data waits at the gate, centred with it, 129 px in Chinese and 200 px
+  // in English, and eases left on the use's words, 174 px and 265 px, to stand centred once the use stands. The English
+  // names the use within a second of the cut, and its thought's late instant falls before that, on the data and the
+  // gate alone; its stage stands 18 px short of their centre, so the use's name arrives inside the safe area.
   ctx.save();
-  ctx.translate(en ? -65 : 129 - 174 * glide(t, useAt + 0.05, 174), 0);
+  ctx.translate(
+    en ? 200 - 265 * glide(t, useAt + 0.05, 265) : 129 - 174 * glide(t, useAt + 0.05, 174),
+    0,
+  );
   // The way stands at 575, within 5 px of the middle of the gate's posts (330 to 810) and 75 px below the axis of the
   // copy in the Agent's frame it replaces, so at the cut the data's frame is not read as that copy jumping.
   const GX = 1000,
