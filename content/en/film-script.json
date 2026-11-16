@@ -107,6 +107,9 @@
     "inner_pause_cap_seconds": 0.26,
     "inner_pause_caps_seconds": {
       ",": 0.22
+    },
+    "inner_pause_floors_seconds": {
+      "?": 0.26
     }
   },
   "caption_timing": {
