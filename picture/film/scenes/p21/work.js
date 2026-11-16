@@ -298,7 +298,11 @@ export function s21Checklist(s, t, two) {
       align: "left",
       alpha:
         two *
-        ramp(t, en && k === 5 ? Math.max(rowAt[k], marks[5][2] - 0.7) : rowAt[k], 0.4) *
+        ramp(
+          t,
+          en && k === 5 ? Math.max(rowAt[k], c("", "approve anything") - 1.0) : rowAt[k],
+          0.4,
+        ) *
         listLevel(t, starts, k),
       set: "checks",
     });
