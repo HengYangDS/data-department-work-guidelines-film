@@ -45,11 +45,11 @@ export function s14Vault(s, t, vaultAts, lockAts, p3) {
         "当前的版本和环境",
       ];
   // The vault's name heads the vault, its lines centred on it, and the stage, from the change's ring to the name's
-  // far edge, stands centred on the frame in each edition. The Chinese name is authored as two even lines, each
-  // group whole on its line.
+  // far edge, stands centred on the frame in each edition. Each name is authored as two even lines, each group whole on
+  // its line; the English names the three as a list, as the controls' names do.
   const vaultName = L(
     ["生产环境、共享资产，", "或者关键的管理流程"],
-    "Production, shared assets or critical management chains",
+    ["Production, shared assets,", "critical management processes"],
   );
   // The gates stand 158 px apart in Chinese and 185 px in English, so each control's name stands whole on one line, 48
   // px or more from the next name on its side of the way, the clear gap two names on one row keep; the first gate stands

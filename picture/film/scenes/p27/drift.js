@@ -8,7 +8,7 @@ import { box, dot, line, path, stroke, text } from "../../drawing/strokes.js";
 import { cross, ring } from "../../drawing/symbols.js";
 import { listIn, named, speaking } from "../../naming/lists.js";
 import { NAME_GAP, nameText } from "../../naming/names.js";
-import { RAIL_ROW, railNames } from "../../naming/placement.js";
+import { RAIL_ROW_CLEAR, railNames } from "../../naming/placement.js";
 import { rejectedName } from "../../naming/rejected.js";
 import { P } from "../../palette.js";
 import { L, en } from "../../timeline.js";
@@ -72,14 +72,14 @@ export function s27SmallSignals(t, changes, defects, signals, X0, X1, Y0, s27Lin
   });
   xs.forEach((x, i) => {
     if (i % 2)
-      line(x, Y0 + 12, x, Y0 + NAME_GAP + 18 + RAIL_ROW - 6, {
+      line(x, Y0 + 12, x, Y0 + NAME_GAP + 18 + RAIL_ROW_CLEAR - 6, {
         alpha: one * ramp(t, signals[i] - 0.15, 0.3),
         width: 2,
       });
   });
   railNames(names, xs, Y0, {
     wrap,
-    gap: (i) => NAME_GAP + 18 + (i % 2 ? RAIL_ROW : 0),
+    gap: (i) => NAME_GAP + 18 + (i % 2 ? RAIL_ROW_CLEAR : 0),
     alpha: (i) => one * listIn(t, signals, i),
     set: "signals",
   });

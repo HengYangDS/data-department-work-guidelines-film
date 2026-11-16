@@ -193,6 +193,14 @@ var pauseHold = (at, lasting = RECEDE) => {
   for (const [end, next] of thoughtJoins) if (at + lasting > end && at < next) return next;
   return at;
 };
+var thoughtStart = (at) => {
+  let start = -Infinity;
+  for (const [, next] of thoughtJoins) {
+    if (next > at + 0.2) break;
+    start = next;
+  }
+  return start;
+};
 var thoughtEnd = (at) => {
   for (const [end] of thoughtJoins) if (end >= at) return end;
   return Infinity;
@@ -316,20 +324,29 @@ var pacedTo = (t, end, d, least = 0.35) => {
   const T = drawTime(d, least);
   return ease((voiceTime(t) - voiceTime(end) + T) / T);
 };
-var drawnShare = (draw, length, extent = 1) => extent * ease(
-  (voiceTime(draw.t) - drawStart(draw, length * extent)) / drawTime(length * extent, draw.least ?? 0.4)
-);
+var drawnShare = (draw, length, extent = 1) => {
+  const [start, time] = drawSpan(draw, length * extent), share = ease((voiceTime(draw.t) - start) / time);
+  layout.draws?.push({
+    scene: layout.scene,
+    at: draw.at,
+    share,
+    pace: 1.5 * length * extent / time
+  });
+  return extent * share;
+};
 var LANDING = 0.15;
 var landedShare = (draw, length, extent = 1) => {
-  const time = drawTime(length * extent, draw.least ?? 0.4), landing = Math.min(LANDING, time);
-  return ease((voiceTime(draw.t) - drawStart(draw, length * extent) - (time - landing)) / landing);
+  const [start, time] = drawSpan(draw, length * extent), landing = Math.min(LANDING, time);
+  return ease((voiceTime(draw.t) - start - (time - landing)) / landing);
 };
 var WHOLE_BY = 0.3;
-var drawStart = (draw, length) => {
-  const v = voiceTime(draw.at), by = voiceTime(thoughtEnd(draw.at) - WHOLE_BY) - drawTime(length, draw.least ?? 0.4);
-  if (by >= v) return v;
-  const cuts = [...stageCuts.get(layout.scene) ?? []].filter((c) => c <= draw.at + 1e-6);
-  return Math.min(v, Math.max(by, voiceTime(Math.max(clauseStart(draw.at), ...cuts))));
+var drawSpan = (draw, length) => {
+  const v = voiceTime(draw.at), time = drawTime(length, draw.least ?? 0.4), by = voiceTime(thoughtEnd(draw.at) - WHOLE_BY) - time;
+  if (by >= v) return [v, time];
+  const cuts = [...stageCuts.get(layout.scene) ?? []].filter((c) => c <= draw.at + 1e-6), from = (word) => Math.min(v, Math.max(by, voiceTime(Math.max(word, ...cuts)))), rest = voiceTime(thoughtEnd(draw.at) + HOLD);
+  let start = from(clauseStart(draw.at));
+  if (start + time > rest) start = from(thoughtStart(draw.at));
+  return [start, Math.max(1e-3, Math.min(time, rest - start))];
 };
 
 // picture/film/drawing/strokes.js
@@ -712,42 +729,31 @@ var opensChapter = (s) => {
   const i = film.segments.indexOf(s);
   return i > 0 && film.segments[i - 1].chapter !== s.chapter;
 };
-var opening = (s) => opensChapter(s) ? Math.max(s.start, s.voice_start - 0.75) : s.start - 0.25;
-var titleY = (s, t) => mix(540, 72, ease(clamp((t - (cardLanding(s) - RISE)) / RISE)));
-var clearOfTitle = (s, t, y = 400) => {
-  if (!opensChapter(s)) return 1;
-  const c = cameraOf(s, t);
-  return clamp((c.oy + c.k * (y - c.ay) - 45 - titleY(s, t)) / 60);
-};
-var cardLanding = (s) => s.voice_start + 0.1;
-var RISE = 1.1;
+var CARD_IN = 0.3;
+var CARD_LEAD = 0.1;
+var CARD_OUT = 0.35;
+var CARD_STANDS = 0.6;
+var AHEAD = 0.15;
 var HEAD_INK = 0.8;
+var opening = (s) => opensChapter(s) ? Math.max(
+  s.start,
+  Math.min(s.voice_start - 0.55, Math.max(s.voice_start - 0.75, s.start + CARD_STANDS))
+) : s.start - 0.25;
+var cardLeaves = (s) => opening(s) - AHEAD;
 function chapterCard(s, t) {
-  if (!opensChapter(s) || t >= cardLanding(s)) return;
-  const enter = ramp(t, s.start, 0.3);
-  if (enter <= 0) return;
+  if (!opensChapter(s)) return;
+  const shown = ramp(t, s.start - CARD_LEAD, CARD_IN) * (1 - ramp(t, cardLeaves(s), CARD_OUT));
+  if (shown <= 0) return;
   const chapter = film.chapters.find((c) => c.id === s.chapter), number = chapterNumber(s.chapter);
-  const large = en ? 54 : 60, p = clamp((t - (cardLanding(s) - RISE)) / RISE), q = ease(p), size = mix(large, 24, q);
+  const size = en ? 54 : 60;
   ctx.save();
   ctx.font = font(24, false, `${number}  ${chapter.title}`);
   const prefix = ctx.measureText(`${number}  `).width;
   ctx.restore();
-  const gap = prefix * size / 24, total = gap + measure(chapter.title, size, false, "chapter");
-  const left = mix(960 - total / 2, 96, q), y = mix(540, 72, q), ink = mix(1, HEAD_INK, q) * enter;
-  text(number, left, y, size, {
-    color: blend(P.evidence, P.muted, q),
-    alpha: ink,
-    role: "chapter"
-  });
-  text(chapter.title, left + gap, y, size, {
-    color: blend(P.ink, P.muted, q),
-    alpha: ink,
-    role: "chapter"
-  });
-  line(900, 600, 1020, 600, {
-    color: P.line,
-    alpha: enter * (1 - ramp(t, cardLanding(s) - RISE, 0.35))
-  });
+  const gap = prefix * size / 24, left = 960 - (gap + measure(chapter.title, size, false, "chapter")) / 2;
+  text(number, left, 540, size, { color: P.evidence, alpha: shown, role: "chapter" });
+  text(chapter.title, left + gap, 540, size, { color: P.ink, alpha: shown, role: "chapter" });
+  line(900, 600, 1020, 600, { color: P.line, alpha: shown });
 }
 function illustrative(alpha) {
   if (alpha < 0.015 || measuring) return;
@@ -767,12 +773,12 @@ function illustrative(alpha) {
 }
 function runningHead(s, t) {
   if (t < film.segments[0].voice_start) return;
-  const first = film.segments.find((v) => v.chapter === s.chapter);
-  const a = HEAD_INK * (first === film.segments[0] ? ramp(t, first.voice_start, 0.6) : t >= cardLanding(first) ? 1 : 0);
+  const first = film.segments.find((v) => v.chapter === s.chapter), next = film.segments[film.segments.indexOf(s) + 1];
+  const enters = first === film.segments[0] ? ramp(t, first.voice_start, 0.6) : ramp(t, cardLeaves(first), CARD_OUT), leaves = next && next.chapter !== s.chapter ? ramp(t, s.end - 0.5, 0.5) : 0;
   const chapter = film.chapters.find((c) => c.id === s.chapter);
   text(`${chapterNumber(s.chapter)}  ${chapter.title}`, 96, 72, 24, {
     color: P.muted,
-    alpha: a,
+    alpha: HEAD_INK * enters * (1 - leaves),
     role: "chapter"
   });
 }
@@ -1411,6 +1417,7 @@ function railNames(names, xs, y, {
 }
 var RAIL_WRAP = 240;
 var RAIL_ROW = 44;
+var RAIL_ROW_CLEAR = 80;
 function railStations(names, first, last, { size = LABEL, gap = 34, wrap = RAIL_WRAP } = {}) {
   const widths = names.map(
     (v) => Math.max(...wrapName(v, wrap, size).map((line2) => measure(line2, size)))
@@ -1690,13 +1697,13 @@ scenes["01"] = function(s, t) {
     if (en)
       xs.forEach((x, i) => {
         if (i % 2)
-          line(x, y + R + 8, x, y + R + NAME_GAP + 26 + RAIL_ROW - 6, {
+          line(x, y + R + 8, x, y + R + NAME_GAP + 26 + RAIL_ROW_CLEAR - 6, {
             alpha: stage2 * ramp(t, roles[i] - 0.15, 0.4),
             width: 2
           });
       });
     railNames(names, xs, y + R, {
-      gap: (i) => NAME_GAP + 26 + (en && i % 2 ? RAIL_ROW : 0),
+      gap: (i) => NAME_GAP + 26 + (en && i % 2 ? RAIL_ROW_CLEAR : 0),
       alpha: (i) => stage2 * listIn(t, roles, i),
       set: "roles"
     });
@@ -2083,8 +2090,8 @@ scenes["02"] = function(s, t) {
         ([term, qual], i) => Math.max(lineW(term, widths[i], LABEL), qual.length ? lineW(qual, widths[i], NOTE) : 0)
       )
     );
-    const columnMid = (rowsEnd - Math.max(TR + 7, measure(taskName) / 2)) / 2, stageMid = (rowsEnd - L(186, 148)) / 2;
-    const TY = CONTENT_CY + 30, TX = Math.round(960 - (columnMid + stageMid) / 2), MX = TX + run + R, NX = MX + R + NAME_GAP, RX = TX - L(160, 122);
+    const columnMid = (rowsEnd - Math.max(TR + 7, measure(taskName) / 2)) / 2, stageMid = (rowsEnd - L(186, 166)) / 2;
+    const TY = CONTENT_CY + 30, TX = Math.round(960 - (columnMid + stageMid) / 2), MX = TX + run + R, NX = MX + R + NAME_GAP, RX = TX - L(160, 140);
     const ys = [TY - 170, TY, TY + 170], colors = [P.ink, P.evidence, P.authority];
     const pairMid = (run + measure(L("三件事", "Three things")) - Math.max(TR + 7, measure(taskName) / 2)) / 2;
     const early = 960 - TX - L(0.35, 0.8) * pairMid;
@@ -3660,7 +3667,7 @@ function s05Decision(s, t, analysis, which, who, what, when, one) {
   const alone = 960 - (GX0 + 2 * SX), decided = 960 - (GX0 - FP + DX0 + measure(L("哪个决定", "Which decision")) / 2) / 2;
   const parted = 960 - (GX0 - FP + IX0 + 28 + NAME_GAP + partsW) / 2;
   const sh = alone + (decided - alone) * glide(t, which + 0.05, decided - alone) + (parted - decided) * glide(t, Math.min(...parts.map(([at]) => at)) - 0.15, parted - decided);
-  const g = one * clearOfTitle(s, t, 330), GX = GX0 + sh, GY = 410, SY = 90, DX = DX0 + sh, IX = IX0 + sh, ys = [400, 500, 600];
+  const g = one, GX = GX0 + sh, GY = 410, SY = 90, DX = DX0 + sh, IX = IX0 + sh, ys = [400, 500, 600];
   const drift = 1 - soon(t, which - 0.2, 1.2);
   for (let k = 0; k < 15; k++) {
     const x = GX + k % 5 * SX + Math.sin(k * 2.3 + voiceTime(t) * 0.7) * 20 * drift;
@@ -4326,7 +4333,7 @@ scenes["06"] = function(s, t) {
         ...s06Place(0),
         two * ramp(t, restate + 0.05, 0.3),
         false,
-        en ? Math.max(restate, kindAts[0] - 1.4) : Math.min(kindAts[0], cue(s, "有记录", ""))
+        en ? Math.max(restate, kindAts[0] - 0.9) : Math.min(kindAts[0], cue(s, "有记录", ""))
       );
   }
   const three = base * stageIn(t, starts[1]) * stageOut(t, conditions);
@@ -5742,7 +5749,7 @@ scenes["09"] = function(s, t) {
   const back = glide(t, asks[4] + 0.05, 55), ringCut = en ? glide(t, six + STAGE_CUT, 55) - glide(t, asks[1] - 0.1, 55) : 0;
   ctx.save();
   ctx.translate(en ? -55 * (glide(t, unknowns[0] + 0.05, 55) - ringCut - back) : 0, 0);
-  const center = base * stageOut(t, opensFour) * clearOfTitle(s, t, top - 60);
+  const center = base * stageOut(t, opensFour);
   if (center > 0) {
     const core = ramp(t, Math.min(specific - 0.4, opening(s) + 0.2), 0.7) * center;
     tableIcon(cx - W / 2, top, W, H, { alpha: core, joined: true });
@@ -6784,7 +6791,7 @@ function s11Delegation(s, t, agentCut, seven) {
   link(wayFrom, mid, gx - 24, mid, {
     color: P.unknown,
     alpha: ramp(t, refused - 0.15, 0.4) * seven,
-    upto: (stopX + 11 - wayFrom) / (gx - 24 - wayFrom) * drawShare(t, refused - 0.05, stopX + 11 - wayFrom, 0.6),
+    upto: (stopX + 11 - wayFrom) / (gx - 24 - wayFrom) * drawnShare({ t, at: refused - 0.05, least: 0.6 }, stopX + 11 - wayFrom),
     dash: [8, 8],
     end: false
   });
@@ -6812,9 +6819,13 @@ function s11Bias(s, t, biasCut, four) {
   ]);
   const sx = L(50, 40), RX = 560 + sx, GX = 1220 + sx, NX = 1290 + sx, ROW = 125, R0 = 335, END = RX + 340;
   const SA = [R0 - 35, R0 + 35], TK = R0 + ROW, CAL = R0 + 2 * ROW, SV = [R0 + 3 * ROW - 35, R0 + 3 * ROW + 35];
+  const ALONE = L(170, 190), rise0 = ats[0] - L(0.5, 0.45);
   ctx.save();
-  ctx.translate(L(110, 70) * (1 - glide(t, ats[1] + 0.05, L(110, 70))), 0);
-  const lens = four * named(t, biasCut), on = (i) => ramp(t, ats[i] - (i ? 0.25 : L(0.5, 0.45)), 0.4) * four, lit = (i) => speaking(t, ats, i);
+  ctx.translate(
+    ALONE * (1 - glide(t, rise0, ALONE)) + L(110, 70) * (1 - glide(t, ats[1] + 0.05, L(110, 70))),
+    0
+  );
+  const lens = four * named(t, biasCut), on = (i) => ramp(t, i ? ats[i] - 0.25 : rise0, 0.4) * four, lit = (i) => speaking(t, ats, i);
   const lastWhole = ramp(t, ats[3] + 0.05, 0.4), level = (i) => Math.max(listLevel(t, ats, i), lastWhole);
   const dropAt = cueFrom(s, "偏差", "today's", ats[3]), dropped = ramp(t, dropAt + 0.05, 0.35);
   const ends = [SA[1], TK, CAL + 4, SV[1]].map((y) => y + 22);
@@ -7350,7 +7361,7 @@ function s12ControlledUse(t, path_, steps, forUse, ctrlAt, applyAt, three) {
   });
   box(ux - 60, cy - 50, 120, 100, {
     stroke: P.authority,
-    alpha: three * ramp(t, ctrlAt - 0.15, 0.4),
+    alpha: three * ramp(t, ctrlAt - L(0.5, 0.15), 0.4),
     radius: 12
   });
   check(ux, cy, 34, { color: P.authority, alpha: three * ramp(t, ctrlAt - 0.1, 0.4) });
@@ -7904,7 +7915,7 @@ function s13Responsibilities(s, t, roles, seats, coordinate, p3) {
   const STEP = L(145, 140), [third, fourth, fifth] = roles.slice(2).map((at) => at - 0.45);
   const shift = en ? building(t, roles.slice(2), STEP, 0.45) : 2 * STEP - 62 * glide(t, third, 62) - (STEP - 62) * glide(t, fourth, STEP - 62) - (STEP + 40) * glide(t, fifth, STEP + 40) + 40 * closeUp, xs = [-2, -1, 0, 1, 2].map((k) => 960 + k * PITCH + shift);
   const these = ramp(t, seats + 0.05, 0.3) * (1 - ramp(t, notSeats + 0.05, 0.3));
-  const joins = ramp(t, roles[0] + STAGE_CUT, 0.4) * (1 - ramp(t, seats + 0.05, 0.3)) * p3, JY = 640, jx = 1030;
+  const joins = ramp(t, roles[0] + STAGE_CUT, 0.4) * (1 - ramp(t, seats + 0.05, 0.3)) * p3, JY = L(676, 640), jx = 1030;
   stroke(
     () => {
       ctx.moveTo(xs[0], Y + TR + 12);
@@ -8060,9 +8071,9 @@ function s13Responsibilities(s, t, roles, seats, coordinate, p3) {
         [acts[4], exitAt]
       ]
     ];
-    const em = labelSize(LABEL), top = Y + TR + 9 + NAME_GAP, kept = p3 * (1 - ramp(t, seats + 0.05, 0.3));
+    const top = Y + TR + 9 + NAME_GAP, kept = p3 * (1 - ramp(t, seats + 0.05, 0.3));
     duties.forEach(([parts, ats], k) => {
-      const low = k % 2 ? em * LEADING : 0;
+      const low = k % 2 ? RAIL_ROW_CLEAR : 0;
       if (low)
         line(xs[k + 1], Y + TR + 12, xs[k + 1], top + low - 6, {
           alpha: kept * ramp(t, ats[0] - 0.15, 0.4),
@@ -8298,7 +8309,7 @@ function s14Handover(t, handing, rows, groups, pB, resultAt, modelName, inputsNa
     gap: NAME_GAP + 4,
     alpha: pB * named(t, resultAt)
   });
-  radialName(L("还有什么没覆盖到", "What was not covered"), RCX, RCY, RR, Math.PI / 2, {
+  radialName(L("还有什么没覆盖到", "Limits, what was not covered"), RCX, RCY, RR, Math.PI / 2, {
     gap: NAME_GAP + 14,
     width: 420,
     alpha: level(2) * named(t, rows[2][1]),
@@ -8445,7 +8456,7 @@ function s14Vault(s, t, vaultAts, lockAts, p3) {
   ];
   const vaultName = L(
     ["生产环境、共享资产，", "或者关键的管理流程"],
-    "Production, shared assets or critical management chains"
+    ["Production, shared assets,", "critical management processes"]
   );
   const lastW = Math.max(...wrapName(keys.at(-1), Infinity).map((v) => measure(v)));
   const GP = L(158, 185), VX0 = 470 + (keys.length - 1) * GP + lastW / 2 + 40, VW = 140;
@@ -8645,7 +8656,7 @@ function s14Track(s, t, stations, asNeeded, owner, both, oneDuty, quality, next,
   line(320, trackY, trackEnd, trackY, { color: P.muted, alpha: slot, width: 3 });
   if (tx > 321) line(320, trackY, tx, trackY, { color: P.authority, alpha: tokQ * pA, width: 4 });
   railNames(names, xs, trackY, {
-    gap: (i) => NAME_GAP + 18 + (en && i % 2 ? RAIL_ROW : 0),
+    gap: (i) => NAME_GAP + 18 + (en && i % 2 ? RAIL_ROW_CLEAR : 0),
     alpha: (i) => pA * listIn(t, stations, i)
   });
   const above = trackY - 32 - NAME_GAP;
@@ -8668,7 +8679,7 @@ function s14Track(s, t, stations, asNeeded, owner, both, oneDuty, quality, next,
         ctx.ellipse(xs[i], trackY, 24 + pulse, 24 + pulse, -Math.PI / 2, 0, Math.PI * 2);
         if (en && i % 2) {
           ctx.moveTo(xs[i], trackY + 30 + pulse);
-          ctx.lineTo(xs[i], trackY + NAME_GAP + 18 + RAIL_ROW - 6);
+          ctx.lineTo(xs[i], trackY + NAME_GAP + 18 + RAIL_ROW_CLEAR - 6);
         }
       },
       { color: P.ink, alpha: pA * lit, width: 2.5 }
@@ -8676,7 +8687,7 @@ function s14Track(s, t, stations, asNeeded, owner, both, oneDuty, quality, next,
   });
   const od = ramp(t, oneDuty - 0.2, 0.6) * pA, half = (i) => Math.max(60, measure(wrapName(names[i], RAIL_WRAP)[0]) / 2 + 24);
   const fx0 = xs[2] - half(2), fx1 = xs[3] + half(3);
-  const em = labelSize(LABEL), row = L(0, RAIL_ROW), namesBottom = trackY + NAME_GAP + 18 + row + blockHeight(Math.max(...[2, 3].map((i) => wrapName(names[i], RAIL_WRAP).length)));
+  const em = labelSize(LABEL), row = L(0, RAIL_ROW_CLEAR), namesBottom = trackY + NAME_GAP + 18 + row + blockHeight(Math.max(...[2, 3].map((i) => wrapName(names[i], RAIL_WRAP).length)));
   const pad = 670 + row - namesBottom, ftop = above - em - pad;
   box(fx0, ftop, fx1 - fx0, 670 + row - ftop, {
     stroke: P.authority,
@@ -8741,7 +8752,7 @@ scenes["14"] = function(s, t) {
     ],
     [
       ["", "results with"],
-      ["", "not covered"]
+      ["", "limits"]
     ],
     [
       ["", "each failure"],
@@ -8778,7 +8789,7 @@ scenes["14"] = function(s, t) {
     en ? [
       ["", "production shared"],
       ["", "shared assets"],
-      ["", "critical management chains"]
+      ["", "critical management processes"]
     ] : [
       ["生产环境", ""],
       ["共享资产", ""],
@@ -8910,7 +8921,7 @@ scenes["14"] = function(s, t) {
     );
   const pB = stageIn(t, handing) * base * handOff, resultAt = cueFrom(s, "结果", "result", handing);
   const modelName = L(["按什么标准"], ["Criteria tested"]), inputsName = en ? ["Actual inputs", ", version", ", environment", ", method"] : ["输入", "、版本", "、环境", "和方法"];
-  const failName = en ? ["Each failure", ", how it was handled"] : ["每一项失败或差异", "怎么处理"], riskName = en ? ["Remaining risk", " and its owner"] : ["剩下的风险", "归谁"];
+  const failName = en ? ["Each failure or discrepancy", ", how it was handled"] : ["每一项失败或差异", "怎么处理"], riskName = en ? ["Remaining risk", " and its owner"] : ["剩下的风险", "归谁"];
   const TW = 103, RR = 64, PAIR = 45, OUT = en ? 270 : 396, MEET = 112;
   const widest = (parts, width) => Math.max(
     ...growTexts(parts, width).map((line2) => line2.reduce((w, [, v]) => w + measure(v), 0))
@@ -8999,7 +9010,7 @@ scenes["15"] = function(s, t) {
     ["动手之前", "before acting"],
     ["摆到明面上", "visible"]
   ]);
-  const seats = clearOfTitle(s, t, 375) * base * stageOut(t, chain);
+  const seats = base * stageOut(t, chain);
   if (seats > 0) {
     const xs = [460, 780, 1100], y = 440, sy = 566, AX = 1540, BX = 1320, at = [commitment, owner, condition], q = (i) => ramp(t, at[i] - 0.1, 0.45) * seats;
     const open = soon(t, visibleAt + 0.05, Math.min(0.5, thoughtEnd(visibleAt) - visibleAt - 0.1));
@@ -9076,14 +9087,14 @@ scenes["15"] = function(s, t) {
           ctx.roundRect(x - W / 2, Y - h / 2, W, h, h / 2);
           if (i % 2) {
             ctx.moveTo(x, Y + h / 2);
-            ctx.lineTo(x, Y + H / 2 + NAME_GAP + RAIL_ROW - 6);
+            ctx.lineTo(x, Y + H / 2 + NAME_GAP + RAIL_ROW_CLEAR - 6);
           }
         },
         { color, alpha: q, width: sw + 1.5 * lit }
       );
     });
     railNames(names, xs, Y + H / 2, {
-      gap: (i) => NAME_GAP + (i % 2 ? RAIL_ROW : 0),
+      gap: (i) => NAME_GAP + (i % 2 ? RAIL_ROW_CLEAR : 0),
       alpha: (i) => ch * listIn(t, links, i),
       set: "chain"
     });
@@ -9362,7 +9373,8 @@ scenes["16"] = function(s, t) {
     if (open < 1)
       line(GX, GT, GX, mix(RY + 26, GT, open), {
         color: P.unknown,
-        alpha: gate * clamp((1 - open) / 0.15),
+        // The bar's ink falls over most of its opening, so it never leaves within one frame while it is still firm.
+        alpha: gate * clamp((1 - open) / 0.6),
         width: 4
       });
     ring(GX, MY, 20, { color: P.line, alpha: gate * (1 - tick), width: 2.5 });
@@ -9814,7 +9826,7 @@ function s17Complete(s, t, complete, rows, starts, marks, holds, done, g1) {
   const allAt = cue(s, "这些条件全都满足", "every condition holds");
   nameText(L("这些条件全都满足", "Every condition holds"), SX, SY - R - NAME_GAP, {
     valign: "bottom",
-    alpha: g1 * ramp(t, Math.max(allAt - 1.3, first - 0.25), 0.3)
+    alpha: g1 * ramp(t, Math.max(allAt - 0.9, first - 0.25), 0.3)
   });
   rows.forEach(([term, termAt, qual, qualAt], r) => {
     const side = r % 2 ? 1 : -1, dy = (Math.floor(r / 2) - 1) * GY, y = SY + dy, mx = SX + side * BXo, lit = speaking(t, marks, r);
@@ -11067,7 +11079,7 @@ scenes["19"] = function(s, t) {
   ]);
   const settleAt = en ? cue(s, "", "delegate work") : kinds[0];
   const toAgent = cue(s, "委托给智能体", "to agents"), agentAt = cue(s, "智能体", "agents");
-  const g1 = base * clearOfTitle(s, t, 350) * stageOut(t, Math.min(within, extend));
+  const g1 = base * stageOut(t, Math.min(within, extend));
   if (g1 > 0)
     s19Delegation(s, t, MX, MY, memberLeft, em, ACTOR, snap, kinds, settleAt, toAgent, agentAt, g1);
   const abilities = cues(s, [
@@ -11411,6 +11423,8 @@ function s20SeveralRoles(s, t, policy, title, samePerson, several, holders, powe
   const heldNames = [L("几种角色", "Several roles")], PX = 520, Y2 = 450;
   const HX = 1920 - PX + Math.max(60, measure(L("制度允许时", "Where policy permits")) / 2) - 40 - NAME_GAP - Math.max(...heldNames.map((v) => measure(v)));
   const ys = [Y2 - 110, Y2, Y2 + 110], OX = (PX + HX) / 2, rule = g2 * named(t, policy);
+  ctx.save();
+  ctx.translate(100 * (1 - glide(t, samePerson - 0.15, 100)), 0);
   const line1 = Y2 + 6 + 32 + NAME_GAP, PY = line1 - 65 - NAME_GAP;
   s17Page(PX - 60, PY - 85, 120, 150, { alpha: rule, rows: 4 });
   dot(PX + 44, PY + 52, 20, { color: P.row, alpha: rule });
@@ -11482,10 +11496,15 @@ function s20SeveralRoles(s, t, policy, title, samePerson, several, holders, powe
     nameText(en ? ["Decide", "Accept"][i] : ["做决定", "验收"][i], px + 26 + NAME_GAP, y, {
       align: "left",
       color: P.authority,
-      alpha: g2 * listIn(t, powers, i),
+      alpha: g2 * listIn(
+        t,
+        powers.map((at, k) => Math.max(at, stops[k] - 0.75)),
+        i
+      ),
       set: "powers"
     });
   });
+  ctx.restore();
 }
 
 // picture/film/scenes/p20/scene.js
@@ -12094,7 +12113,7 @@ function s21Checklist(s, t, two) {
     check(TX, y, 24, { alpha: two, draw: { t, at: ticks[k] + 0.05 } });
     nameText(v, NX, y, {
       align: "left",
-      alpha: two * ramp(t, rowAt[k], 0.4) * listLevel(t, starts, k),
+      alpha: two * ramp(t, en && k === 5 ? Math.max(rowAt[k], marks[5][2] - 0.7) : rowAt[k], 0.4) * listLevel(t, starts, k),
       set: "checks"
     });
   });
@@ -12680,30 +12699,29 @@ scenes["23"] = function(s, t) {
     const result = en ? 460 : ride(t, 960, [460 + centred, 460], [comm + 0.05, become + 0.05]);
     const xs = [result, 960 + L(centred, 0) * settle, 1460], at = [work, comm, others], first = L(0, 1);
     const seen = (i) => (i === first ? 1 : ramp(t, (i === 2 ? Math.min(at[i], become + 0.05) : at[i]) - 0.15, 0.4)) * one;
-    const clear = (y) => clearOfTitle(s, t, y);
     const go = { t, at: become - 0.05 };
     link(xs[0] + 76, RY, xs[2] - 60, RY, {
       color: P.evidence,
-      alpha: one * ramp(t, become - 0.05, 0.3) * clear(RY),
+      alpha: one * ramp(t, become - 0.05, 0.3),
       draw: go,
       width: 2.5,
       flowing: since(t, become + 0.9)
     });
-    documentIcon(xs[0] - 60, RY - 75, 120, 150, { alpha: seen(0) * clear(RY - 75), rows: 4 });
-    dot(xs[1], RY, 40, { color: P.ground, alpha: seen(1) * clear(RY - 40) });
+    documentIcon(xs[0] - 60, RY - 75, 120, 150, { alpha: seen(0), rows: 4 });
+    dot(xs[1], RY, 40, { color: P.ground, alpha: seen(1) });
     dot(xs[1], RY, 40, {
       color: P.evidence,
-      alpha: seen(1) * clear(RY - 40),
+      alpha: seen(1),
       hollow: true,
       width: 3
     });
-    dot(xs[1], RY, 12, { color: P.evidence, alpha: seen(1) * clear(RY - 40) });
-    person(xs[2], RY + 4, { alpha: seen(2) * clear(RY - 64), size: 2 });
+    dot(xs[1], RY, 12, { color: P.evidence, alpha: seen(1) });
+    person(xs[2], RY + 4, { alpha: seen(2), size: 2 });
     railNames(
       names.map((v) => [v]),
       xs,
       RY + 75,
-      { gap: NAME_GAP, wrap: 340, alpha: (i) => one * named(t, at[i]) * clear(RY + 97) }
+      { gap: NAME_GAP, wrap: 340, alpha: (i) => one * named(t, at[i]) }
     );
   }
   const two = base * stageIn(t, answers) * stageOut(t, purpose);
@@ -14165,7 +14183,7 @@ function s26Learning(s, t, g1) {
   dot(FX, Y, 6, { color: P.unknown, alpha: fq });
   nameText(L("失败", "The next failure"), FX, below, {
     valign: "top",
-    alpha: g1 * named(t, fails)
+    alpha: g1 * named(t, en ? Math.max(fails, cue(s, "", "the next failure") - 0.7) : fails)
   });
   const found = g1 * ramp(t, sooner - 0.1, 0.3);
   line(LATE, Y - 38, LATE, Y + 38, { color: P.line, alpha: found, width: 2 });
@@ -14629,7 +14647,7 @@ scenes["26"] = function(s, t) {
   ] : ["失去适用对象", "没人用", "和权威来源重复", "得不偿失"];
   const base = ramp(t, opening(s), 0.7);
   const PRACTICE_X = 1430, PRACTICE_R = 60;
-  const g1 = base * clearOfTitle(s, t, 360) * stageOut(t, kinds[0]);
+  const g1 = base * stageOut(t, kinds[0]);
   if (g1 > 0) s26Learning(s, t, g1);
   const judged = Math.min(retire, reasons[0], ruleAt);
   const g2 = base * stageIn(t, kinds[0]) * stageOut(t, explain);
@@ -14689,14 +14707,14 @@ function s27SmallSignals(t, changes, defects, signals, X02, X12, Y0, s27Line, on
   });
   xs.forEach((x, i) => {
     if (i % 2)
-      line(x, Y0 + 12, x, Y0 + NAME_GAP + 18 + RAIL_ROW - 6, {
+      line(x, Y0 + 12, x, Y0 + NAME_GAP + 18 + RAIL_ROW_CLEAR - 6, {
         alpha: one * ramp(t, signals[i] - 0.15, 0.3),
         width: 2
       });
   });
   railNames(names, xs, Y0, {
     wrap,
-    gap: (i) => NAME_GAP + 18 + (i % 2 ? RAIL_ROW : 0),
+    gap: (i) => NAME_GAP + 18 + (i % 2 ? RAIL_ROW_CLEAR : 0),
     alpha: (i) => one * listIn(t, signals, i),
     set: "signals"
   });
@@ -15336,14 +15354,14 @@ function s28RealWork(s, t, grows, boundary, g1) {
     0,
     half(names[1]) + Math.max(half(names[0]), half(names[2])) + 50 - (1495 - 70 - (200 - 20) - 48 - half(names[0]) - half(names[2])) / 2
   ) : 0;
-  const Y = 570, UP = 370, X02 = L(220, 200 - delta), RISE2 = L(1300, 1495 + delta), X12 = L(1700, 1716), rows = [Y, Y, Y, UP];
-  const BX0 = X02 - 20, BX1 = RISE2 - 70, BC = (BX0 + BX1) / 2;
+  const Y = 570, UP = 370, X02 = L(220, 200 - delta), RISE = L(1300, 1495 + delta), X12 = L(1700, 1716), rows = [Y, Y, Y, UP];
+  const BX0 = X02 - 20, BX1 = RISE - 70, BC = (BX0 + BX1) / 2;
   const pitch = en ? (BX1 - BX0 - 48 - half(names[0]) - half(names[2])) / 2 : Math.min(BC - BX0 - half(names[0]), BX1 - BC - half(names[2])) - 24;
   const MC = en ? (BX0 + 24 + half(names[0]) + BX1 - 24 - half(names[2])) / 2 : BC, xs = [MC - pitch, MC, MC + pitch, L(1500, 1676)];
   const starts = acts.map((at2, i) => Math.min(at2, moments[i] ?? Infinity));
   link(X02, Y, X12, UP, {
     route: "hvh",
-    mid: RISE2,
+    mid: RISE,
     color: P.muted,
     width: 3,
     alpha: g1 * ramp(t, grows - 0.1, 0.6),
@@ -15355,7 +15373,7 @@ function s28RealWork(s, t, grows, boundary, g1) {
     valign: "bottom",
     alpha: g1 * named(t, cue(s, "真实的工作", "grows through real work"))
   });
-  link(RISE2, Y, RISE2, UP, {
+  link(RISE, Y, RISE, UP, {
     color: P.evidence,
     width: 4,
     alpha: g1 * named(t, acts[2]),
@@ -15390,8 +15408,8 @@ function s28RealWork(s, t, grows, boundary, g1) {
   );
   const climbWay = [
     [xs[2] - 56, Y],
-    [RISE2, Y],
-    [RISE2, UP],
+    [RISE, Y],
+    [RISE, UP],
     [xs[3] - 56, UP]
   ];
   const climb = glide(t, starts[3] + 0.05, lengthOf(climbWay)), at = along(climbWay, climb).point;
@@ -15462,7 +15480,7 @@ function s28Coaching(s, t, coaching, notJudge, weak, noDirection, fb, g2) {
   });
   nameText(
     L("反馈要指出", "Feedback names"),
-    xs[0] - measure(names[0], LABEL) / 2 - 34,
+    xs[0] - measure(names[0], LABEL) / 2 - 104,
     R + NAME_GAP + 18 + labelSize(LABEL) / 2,
     {
       align: "right",
@@ -15551,7 +15569,7 @@ function s28Score(s, t, score, deliveryRisk, noLabel, metric, decision, gamed, a
     nameText(L("指标", "Metric"), X02 - NAME_GAP, yAt(X02), {
       align: "right",
       color: P.evidence,
-      alpha: d2 * named(t, metric)
+      alpha: d2 * named(t, en ? Math.max(metric, cue(s, "", "a metric") - 0.8) : metric)
     });
     const ask = cue(s, "先明确它", "first identify what decision"), dm = named(t, ask), dc = named(t, decision);
     link(X12 + 16, YE, DX - 40, YE, {
@@ -15630,11 +15648,11 @@ function s28Escalation(s, t, g5) {
     ["随时上报", "at once"]
   ]), escAt = en ? cue(s, "", "escalate high-risk") : upAt;
   const sigName = L("高风险的苗头", "High-risk signals"), upName = en ? ["Escalate", " at once"] : ["随时上报"];
-  const R = 22, RUN = 720, RISE2 = 180, BASE = 660, wide = Math.max(measure(sigName), measure(upName.join("")));
-  const X02 = 960 - (RUN + R + NAME_GAP + wide) / 2, SX = X02 + RUN, SY = BASE - RISE2 - R, PY = 270;
+  const R = 22, RUN = 720, RISE = 180, BASE = 660, wide = Math.max(measure(sigName), measure(upName.join("")));
+  const X02 = 960 - (RUN + R + NAME_GAP + wide) / 2, SX = X02 + RUN, SY = BASE - RISE - R, PY = 270;
   const course = [];
   for (let x = X02; x <= SX + 0.5; x += 8)
-    course.push([Math.min(x, SX), BASE - RISE2 * ease(clamp((x - (SX - 320)) / 320))]);
+    course.push([Math.min(x, SX), BASE - RISE * ease(clamp((x - (SX - 320)) / 320))]);
   path(course, { color: P.line, alpha: g5, width: 3 });
   const sq = ramp(t, sigAt - 0.15, 0.4) * g5;
   path(
@@ -16000,24 +16018,25 @@ function s29Demonstration(s, t, demo, misuse, four) {
 }
 function s29Closest(t, within, closest, paths, boundCut, five) {
   const fw = mix(700, 980, glide(t, paths[0] - 0.55, 140)), fx = 960 - fw / 2, fy = 375, fh = 250, my = fy + fh / 2, px = fx + 480, sx = fx + 800;
-  const edge = rounded(
-    [
-      [fx, fy + fh / 2],
-      [fx, fy],
-      [fx + fw, fy],
-      [fx + fw, fy + fh],
-      [fx, fy + fh],
-      [fx, fy + fh / 2]
-    ],
-    22
-  );
-  box(fx, fy, fw, fh, { fill: P.row, alpha: five, radius: 22 });
-  path(edge, {
-    color: P.authority,
-    alpha: five,
-    width: 2,
-    draw: { t, at: boundCut + STAGE_CUT, least: 1.2 }
-  });
+  box(fx, fy, fw, fh, { fill: P.row, stroke: P.line, alpha: five, radius: 22, width: 2 });
+  for (const side of [-fh / 2, fh / 2])
+    path(
+      rounded(
+        [
+          [fx, my],
+          [fx, my + side],
+          [fx + fw, my + side],
+          [fx + fw, my]
+        ],
+        22
+      ),
+      {
+        color: P.authority,
+        alpha: five,
+        width: 2,
+        draw: { t, at: boundCut + STAGE_CUT, least: 1.2 }
+      }
+    );
   nameText(L("在边界之内", "Stated boundaries"), fx, fy - NAME_GAP, {
     align: "left",
     valign: "bottom",
@@ -16572,10 +16591,9 @@ scenes["30"] = function(s, t) {
   const pair = (1920 - (PX0 - CX0) - measure(L("下一位用它的人", "Its next user")) / 2) / 2 - CX0;
   const lone = 960 - 150 * K - CX0, onward = glide(t, needs[0] - 0.1, Math.max(Math.abs(pair), Math.abs(pair - lone)));
   const CX = CX0 + mix(mix(lone, pair, glide(t, userAt - 0.1, pair - lone)), 0, onward), PX = PX0 + pair * (1 - onward), edgeX = CX + 300 * K;
-  const lift = (y) => clearOfTitle(s, t, y);
-  illustrative(g1 * Math.min(lift(CY), ramp(t, s.words[0].start - HOLD, 0.4)));
+  illustrative(g1 * ramp(t, s.words[0].start - HOLD, 0.4));
   if (g1 > 0) {
-    const card = g1 * lift(CY), user = named(t, Math.min(next, cue(s, "下一位用它的人", "with") + 0.05)) * g1 * lift(Y1 - 60);
+    const card = g1, user = named(t, Math.min(next, cue(s, "下一位用它的人", "with") + 0.05)) * g1;
     reportCard(CX, CY, { alpha: card, scale: K, done: 1, named: card * named(t, back) });
     nameText(L("做完了", "A finished dataset"), CX + 150 * K, CY - NAME_GAP, {
       valign: "bottom",
@@ -16584,7 +16602,7 @@ scenes["30"] = function(s, t) {
     person(PX, Y1, { alpha: user, size: 1.4 });
     nameText(L("下一位用它的人", "Its next user"), PX, Y1 + 32 + NAME_GAP, {
       valign: "top",
-      alpha: named(t, next) * g1 * lift(Y1 - 60)
+      alpha: named(t, next) * g1
     });
     const relied = ramp(t, rely - 0.1, 0.5);
     link(edgeX + 20, Y1, PX - 60, Y1, { alpha: user, draw: { t, at: next - 0.1 } });
@@ -16818,7 +16836,7 @@ function drawScene(s, t, fade, words = fade) {
   window.__sceneId = null;
 }
 function drawAt(t) {
-  setDrawing({ layout: { texts: [], scene: null, time: t } });
+  setDrawing({ layout: { texts: [], draws: [], scene: null, time: t } });
   ctx.setTransform(resolution, 0, 0, resolution, 0, 0);
   ctx.globalAlpha = 1;
   ctx.fillStyle = P.ground;
@@ -16849,7 +16867,7 @@ function drawAt(t) {
   publish(t);
 }
 function publish(t) {
-  window.__filmLayout = { time: t, texts: layout.texts };
+  window.__filmLayout = { time: t, texts: layout.texts, draws: layout.draws };
 }
 window.renderFrame = (t) => drawAt(t + (film.render_offset || 0));
 window.renderCover = () => {

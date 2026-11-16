@@ -87,11 +87,11 @@ export function s17Complete(s, t, complete, rows, starts, marks, holds, done, g1
     { alpha: place, struck: struck * g1 },
   );
   nameText(L("完成", "Complete"), SX, SY + 70, { alpha: g1 * named(t, complete) });
-  // The rule is named from the scene's first words, so the scene cuts in with its claim in view.
+  // The rule is named within 0.9 s of its words; the stamp stands from the scene's first words.
   const allAt = cue(s, "这些条件全都满足", "every condition holds");
   nameText(L("这些条件全都满足", "Every condition holds"), SX, SY - R - NAME_GAP, {
     valign: "bottom",
-    alpha: g1 * ramp(t, Math.max(allAt - 1.3, first - 0.25), 0.3),
+    alpha: g1 * ramp(t, Math.max(allAt - 0.9, first - 0.25), 0.3),
   });
   rows.forEach(([term, termAt, qual, qualAt], r) => {
     const side = r % 2 ? 1 : -1,

@@ -246,7 +246,7 @@ export function s28Coaching(s, t, coaching, notJudge, weak, noDirection, fb, g2)
   // The list reads as the sentence: what feedback names, then the stations it names.
   nameText(
     L("反馈要指出", "Feedback names"),
-    xs[0] - measure(names[0], LABEL) / 2 - 34,
+    xs[0] - measure(names[0], LABEL) / 2 - 104,
     R + NAME_GAP + 18 + labelSize(LABEL) / 2,
     {
       align: "right",

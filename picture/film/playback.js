@@ -102,7 +102,7 @@ function drawScene(s, t, fade, words = fade) {
   window.__sceneId = null;
 }
 function drawAt(t) {
-  setDrawing({ layout: { texts: [], scene: null, time: t } });
+  setDrawing({ layout: { texts: [], draws: [], scene: null, time: t } });
   ctx.setTransform(resolution, 0, 0, resolution, 0, 0);
   ctx.globalAlpha = 1;
   ctx.fillStyle = P.ground;
@@ -137,7 +137,7 @@ function drawAt(t) {
   publish(t);
 }
 function publish(t) {
-  window.__filmLayout = { time: t, texts: layout.texts };
+  window.__filmLayout = { time: t, texts: layout.texts, draws: layout.draws };
 }
 window.renderFrame = (t) => drawAt(t + (film.render_offset || 0));
 window.renderCover = () => {

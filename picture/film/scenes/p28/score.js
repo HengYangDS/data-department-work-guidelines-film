@@ -124,13 +124,13 @@ export function s28Score(
     const pts = [];
     for (let x = X0; x <= X1; x += 8) pts.push([x, yAt(x)]);
     // The trace stands at the structure tier from the cut, so the stage opens on its object, and the metric draws on
-    // over it in its own colour. It is named from the clause that opens the stage, which names it.
+    // over it in its own colour. It is named within 0.9 s of the words that name it.
     path(pts, { color: P.line, alpha: d2, width: 3 });
     path(pts, { color: P.evidence, alpha: d2, width: 3, draw: { t, at: metric + STAGE_CUT } });
     nameText(L("指标", "Metric"), X0 - NAME_GAP, yAt(X0), {
       align: "right",
       color: P.evidence,
-      alpha: d2 * named(t, metric),
+      alpha: d2 * named(t, en ? Math.max(metric, cue(s, "", "a metric") - 0.8) : metric),
     });
     // The decision the metric supports: a link from the trace's end to the decision's mark, on the words that ask for
     // it (in English the clause that opens the stage, so the stage opens with three firm marks), and its name on its

@@ -296,7 +296,10 @@ export function s21Checklist(s, t, two) {
     check(TX, y, 24, { alpha: two, draw: { t, at: ticks[k] + 0.05 } });
     nameText(v, NX, y, {
       align: "left",
-      alpha: two * ramp(t, rowAt[k], 0.4) * listLevel(t, starts, k),
+      alpha:
+        two *
+        ramp(t, en && k === 5 ? Math.max(rowAt[k], marks[5][2] - 0.7) : rowAt[k], 0.4) *
+        listLevel(t, starts, k),
       set: "checks",
     });
   });

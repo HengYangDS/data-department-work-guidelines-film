@@ -8,7 +8,7 @@ import { restMark } from "../../drawing/levels.js";
 import { link } from "../../drawing/links.js";
 import { box, diamond, dot, line, path, text } from "../../drawing/strokes.js";
 import { check, documentIcon, person, ring } from "../../drawing/symbols.js";
-import { clearOfTitle, opening } from "../../framing/chapters.js";
+import { opening } from "../../framing/chapters.js";
 import { building, listIn, named, speaking } from "../../naming/lists.js";
 import { NAME_GAP, nameText, wrapName } from "../../naming/names.js";
 import { blockHeight, growName } from "../../naming/parts.js";
@@ -89,7 +89,7 @@ scenes["09"] = function (s, t) {
   // 1-3. The price data stands at the centre while it is questioned: its name above its left edge, the specific use it
   // must be shown fit for above its right edge on the same line, and its trust an open seal on its corner. Its rules are
   // one stroke with it, so the table reads as one mark under its name.
-  const center = base * stageOut(t, opensFour) * clearOfTitle(s, t, top - 60);
+  const center = base * stageOut(t, opensFour);
   if (center > 0) {
     const core = ramp(t, Math.min(specific - 0.4, opening(s) + 0.2), 0.7) * center;
     tableIcon(cx - W / 2, top, W, H, { alpha: core, joined: true });

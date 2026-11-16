@@ -72,7 +72,7 @@ export function s14Handover(
     gap: NAME_GAP + 4,
     alpha: pB * named(t, resultAt),
   });
-  radialName(L("还有什么没覆盖到", "What was not covered"), RCX, RCY, RR, Math.PI / 2, {
+  radialName(L("还有什么没覆盖到", "Limits, what was not covered"), RCX, RCY, RR, Math.PI / 2, {
     gap: NAME_GAP + 14,
     width: 420,
     alpha: level(2) * named(t, rows[2][1]),

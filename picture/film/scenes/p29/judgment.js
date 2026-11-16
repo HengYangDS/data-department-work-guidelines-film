@@ -108,24 +108,28 @@ export function s29Closest(t, within, closest, paths, boundCut, five) {
     my = fy + fh / 2,
     px = fx + 480,
     sx = fx + 800;
-  const edge = rounded(
-    [
-      [fx, fy + fh / 2],
-      [fx, fy],
-      [fx + fw, fy],
-      [fx + fw, fy + fh],
-      [fx, fy + fh],
-      [fx, fy + fh / 2],
-    ],
-    22,
-  );
-  box(fx, fy, fw, fh, { fill: P.row, alpha: five, radius: 22 });
-  path(edge, {
-    color: P.authority,
-    alpha: five,
-    width: 2,
-    draw: { t, at: boundCut + STAGE_CUT, least: 1.2 },
-  });
+  box(fx, fy, fw, fh, { fill: P.row, stroke: P.line, alpha: five, radius: 22, width: 2 });
+  // The boundary stands as a frame from the cut, and its edge draws on over it in the authority's colour from the
+  // middle of its left side both ways, closing at the middle of its right, so each tip keeps the tip pace and the edge
+  // is whole within the thought that states the boundary.
+  for (const side of [-fh / 2, fh / 2])
+    path(
+      rounded(
+        [
+          [fx, my],
+          [fx, my + side],
+          [fx + fw, my + side],
+          [fx + fw, my],
+        ],
+        22,
+      ),
+      {
+        color: P.authority,
+        alpha: five,
+        width: 2,
+        draw: { t, at: boundCut + STAGE_CUT, least: 1.2 },
+      },
+    );
   nameText(L("在边界之内", "Stated boundaries"), fx, fy - NAME_GAP, {
     align: "left",
     valign: "bottom",

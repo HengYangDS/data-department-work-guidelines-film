@@ -7,10 +7,10 @@ import { restMark } from "../../drawing/levels.js";
 import { link } from "../../drawing/links.js";
 import { box, dot, labelSize, line, measure, path, stroke } from "../../drawing/strokes.js";
 import { check, documentIcon, person, ring } from "../../drawing/symbols.js";
-import { clearOfTitle, opening } from "../../framing/chapters.js";
+import { opening } from "../../framing/chapters.js";
 import { listIn, named, speaking } from "../../naming/lists.js";
 import { NAME_GAP, nameText } from "../../naming/names.js";
-import { RAIL_ROW, radialName, railNames } from "../../naming/placement.js";
+import { RAIL_ROW_CLEAR, radialName, railNames } from "../../naming/placement.js";
 import { rejectedName } from "../../naming/rejected.js";
 import { termRow } from "../../naming/terms.js";
 import { LABEL, P } from "../../palette.js";
@@ -60,7 +60,7 @@ scenes["15"] = function (s, t) {
   const decider = cueFrom(s, "决策负责人", "the decision owner", scope);
   const base = ramp(t, opening(s), 0.7);
   // 1. Before acting, three things are made visible: the commitment, the owner and the completion condition. The scene
-  // opens on these words, under the chapter's rising title: the action stands on the right behind a closed bar from the
+  // opens on these words, as the chapter card leaves: the action stands on the right behind a closed bar from the
   // words that put it after them. The three build one row of stations on the left, each station with its mark on its
   // own words, and the one being named lights its station; on the words that make them visible the bar lifts and the
   // way runs on to the action. The row holds until the chain of trust is named and leaves in one cut. The row's rail
@@ -69,7 +69,7 @@ scenes["15"] = function (s, t) {
     ["动手之前", "before acting"],
     ["摆到明面上", "visible"],
   ]);
-  const seats = clearOfTitle(s, t, 375) * base * stageOut(t, chain);
+  const seats = base * stageOut(t, chain);
   if (seats > 0) {
     const xs = [460, 780, 1100],
       y = 440,
@@ -181,14 +181,14 @@ scenes["15"] = function (s, t) {
           ctx.roundRect(x - W / 2, Y - h / 2, W, h, h / 2);
           if (i % 2) {
             ctx.moveTo(x, Y + h / 2);
-            ctx.lineTo(x, Y + H / 2 + NAME_GAP + RAIL_ROW - 6);
+            ctx.lineTo(x, Y + H / 2 + NAME_GAP + RAIL_ROW_CLEAR - 6);
           }
         },
         { color, alpha: q, width: sw + 1.5 * lit },
       );
     });
     railNames(names, xs, Y + H / 2, {
-      gap: (i) => NAME_GAP + (i % 2 ? RAIL_ROW : 0),
+      gap: (i) => NAME_GAP + (i % 2 ? RAIL_ROW_CLEAR : 0),
       alpha: (i) => ch * listIn(t, links, i),
       set: "chain",
     });

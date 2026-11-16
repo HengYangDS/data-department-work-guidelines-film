@@ -77,7 +77,7 @@ export function s26Learning(s, t, g1) {
   // alone there.
   nameText(L("失败", "The next failure"), FX, below, {
     valign: "top",
-    alpha: g1 * named(t, fails),
+    alpha: g1 * named(t, en ? Math.max(fails, cue(s, "", "the next failure") - 0.7) : fails),
   });
   // Found earlier: the place the failure used to be found and how long its manual rescue ran stay as muted traces at
   // the structure tier, while the new place stands near the failure and the band shrinks.

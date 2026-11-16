@@ -7,7 +7,7 @@ import { restMark } from "../../drawing/levels.js";
 import { link } from "../../drawing/links.js";
 import { box, diamond, dot, fill, line, measure, text } from "../../drawing/strokes.js";
 import { clock, cross, person, ring } from "../../drawing/symbols.js";
-import { clearOfTitle, opening } from "../../framing/chapters.js";
+import { opening } from "../../framing/chapters.js";
 import { listIn, named, speaking } from "../../naming/lists.js";
 import { NAME_GAP, nameText, wrapName } from "../../naming/names.js";
 import { LABEL, P } from "../../palette.js";
@@ -50,7 +50,7 @@ export function s05Decision(s, t, analysis, which, who, what, when, one) {
     alone +
     (decided - alone) * glide(t, which + 0.05, decided - alone) +
     (parted - decided) * glide(t, Math.min(...parts.map(([at]) => at)) - 0.15, parted - decided);
-  const g = one * clearOfTitle(s, t, 330),
+  const g = one,
     GX = GX0 + sh,
     GY = 410,
     SY = 90,

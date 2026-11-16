@@ -1,7 +1,7 @@
 /* 26 evolve: what learning is for. The scene: its cues and the cuts between its stages, each stage on the words that
  * name it. */
 
-import { clearOfTitle, opening } from "../../framing/chapters.js";
+import { opening } from "../../framing/chapters.js";
 import { en } from "../../timeline.js";
 import { cue, cues } from "../../timing/cues.js";
 import { ramp } from "../../timing/easing.js";
@@ -78,9 +78,8 @@ scenes["26"] = function (s, t) {
   // stands unnamed through them. On the words that say it is found earlier, the place it is found stands near it while
   // the place it used to be found stays as a muted trace further on, and the time gained lights along the lane from the
   // old place to the new; no mark slides. The manual rescue it takes stands behind it as a long band on its words and
-  // shrinks, leaving the muted outline of its old reach. More files are refused beside the lane. The stage stands clear
-  // of the rising chapter title.
-  const g1 = base * clearOfTitle(s, t, 360) * stageOut(t, kinds[0]);
+  // shrinks, leaving the muted outline of its old reach. More files are refused beside the lane.
+  const g1 = base * stageOut(t, kinds[0]);
   if (g1 > 0) s26Learning(s, t, g1);
   // 2. The way into department practice. The five kinds of candidate build one column, each with its emblem (a rule's
   // page, a template's blank form, a tool, an Agent, a platform's wheel), and merge into one way, which splits into three

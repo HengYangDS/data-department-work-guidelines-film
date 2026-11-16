@@ -7,7 +7,7 @@ import { opening } from "../../framing/chapters.js";
 import { listIn, named } from "../../naming/lists.js";
 import { NAME_GAP, nameText, wrapName } from "../../naming/names.js";
 import { blockHeight } from "../../naming/parts.js";
-import { RAIL_ROW, RAIL_WRAP, railNames } from "../../naming/placement.js";
+import { RAIL_ROW_CLEAR, RAIL_WRAP, railNames } from "../../naming/placement.js";
 import { LABEL, P } from "../../palette.js";
 import { L, en } from "../../timeline.js";
 import { ramp } from "../../timing/easing.js";
@@ -42,7 +42,7 @@ export function s14Track(
   // The stages are named on one baseline below the track and the owner above its figure; every name stays while the
   // track stands, the stage being named at full ink and the named ones at the second level until all are named.
   railNames(names, xs, trackY, {
-    gap: (i) => NAME_GAP + 18 + (en && i % 2 ? RAIL_ROW : 0),
+    gap: (i) => NAME_GAP + 18 + (en && i % 2 ? RAIL_ROW_CLEAR : 0),
     alpha: (i) => pA * listIn(t, stations, i),
   });
   // The names above the track stand on one line, a name gap over the tallest mark on it, the owner's figure (32 px
@@ -71,7 +71,7 @@ export function s14Track(
         ctx.ellipse(xs[i], trackY, 24 + pulse, 24 + pulse, -Math.PI / 2, 0, Math.PI * 2);
         if (en && i % 2) {
           ctx.moveTo(xs[i], trackY + 30 + pulse);
-          ctx.lineTo(xs[i], trackY + NAME_GAP + 18 + RAIL_ROW - 6);
+          ctx.lineTo(xs[i], trackY + NAME_GAP + 18 + RAIL_ROW_CLEAR - 6);
         }
       },
       { color: P.ink, alpha: pA * lit, width: 2.5 },
@@ -85,7 +85,7 @@ export function s14Track(
   // The responsibility's frame is drawn in its colour around the two stations when it is named, as far above quality's
   // name as below the stages' names.
   const em = labelSize(LABEL),
-    row = L(0, RAIL_ROW),
+    row = L(0, RAIL_ROW_CLEAR),
     namesBottom =
       trackY +
       NAME_GAP +

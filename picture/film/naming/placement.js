@@ -60,6 +60,10 @@ export const RAIL_WRAP = 240;
 /* The second baseline of a rail whose names stand on two: a name's own height and leading below the first, so the two
  * rows take the height two lines of a name would. */
 export const RAIL_ROW = 44;
+/* The second baseline where names on the two baselines reach under one another: a name's own height and the gap
+ * between neighbouring names (48 px) below the first, so a name stands as clear of its neighbours on the other baseline
+ * as names of one row stand of each other. A rail takes it where its lower names keep their marks within reach. */
+export const RAIL_ROW_CLEAR = 80;
 export function railStations(
   names,
   first,

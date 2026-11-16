@@ -177,7 +177,8 @@ scenes["16"] = function (s, t) {
     if (open < 1)
       line(GX, GT, GX, mix(RY + 26, GT, open), {
         color: P.unknown,
-        alpha: gate * clamp((1 - open) / 0.15),
+        // The bar's ink falls over most of its opening, so it never leaves within one frame while it is still firm.
+        alpha: gate * clamp((1 - open) / 0.6),
         width: 4,
       });
     ring(GX, MY, 20, { color: P.line, alpha: gate * (1 - tick), width: 2.5 });

@@ -68,7 +68,7 @@ scenes["14"] = function (s, t) {
           ],
           [
             ["", "results with"],
-            ["", "not covered"],
+            ["", "limits"],
           ],
           [
             ["", "each failure"],
@@ -108,7 +108,7 @@ scenes["14"] = function (s, t) {
       ? [
           ["", "production shared"],
           ["", "shared assets"],
-          ["", "critical management chains"],
+          ["", "critical management processes"],
         ]
       : [
           ["生产环境", ""],
@@ -290,7 +290,9 @@ scenes["14"] = function (s, t) {
     inputsName = en
       ? ["Actual inputs", ", version", ", environment", ", method"]
       : ["输入", "、版本", "、环境", "和方法"];
-  const failName = en ? ["Each failure", ", how it was handled"] : ["每一项失败或差异", "怎么处理"],
+  const failName = en
+      ? ["Each failure or discrepancy", ", how it was handled"]
+      : ["每一项失败或差异", "怎么处理"],
     riskName = en ? ["Remaining risk", " and its owner"] : ["剩下的风险", "归谁"];
   // A side's two parts stand 45 px above and below the result's line, their outer edges on one line 396 px from the
   // result (the English criteria, alone, on the line with its edge 270 px out), and their ways meet 112 px from it.
@@ -360,7 +362,7 @@ scenes["14"] = function (s, t) {
     );
   // The result stands at its dock from the cut that brings the report, rather than gliding there across the frame.
   token(docked ? RCX : tx, docked ? RCY : trackY, { alpha: tokQ * handOff, r: docked ? 24 : 10 });
-  // 3. Changing production, shared assets or critical management chains needs more. The change waits at the start
+  // 3. Changing production, shared assets or critical management processes needs more. The change waits at the start
   // of a way to the vault that holds them, named from the cut by the voice's first word, the change itself, and the way
   // crosses seven gates, one per required control, the last the evidence from the current version and environment:
   // each gate arrives shut on the words that name its control and opens one step per requirement as each is said,

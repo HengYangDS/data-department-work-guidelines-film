@@ -2,7 +2,7 @@
  * stage on the words that name it. */
 
 import { labelSize, measure } from "../../drawing/strokes.js";
-import { clearOfTitle, illustrative, opening } from "../../framing/chapters.js";
+import { illustrative, opening } from "../../framing/chapters.js";
 import { NAME_GAP } from "../../naming/names.js";
 import { LABEL } from "../../palette.js";
 import { L, en } from "../../timeline.js";
@@ -40,7 +40,7 @@ scenes["19"] = function (s, t) {
   };
   // 1. The member delegates kinds of work to an Agent: the kinds build into one column beside the member as they are
   // named, and on the words that hand them over the column is joined to the Agent by one link. The member stands from
-  // the first words, clear of the rising chapter title; each kind arrives on its own word and the Agent on its name.
+  // the first words; each kind arrives on its own word and the Agent on its name.
   // Until the handover the member and the column stand alone, centred as one group, and on the handover's words they
   // move left to their places beside the Agent, the member to the place it keeps through the next stages. Before the
   // first kind is named the member stands alone at the centre, and it moves to its place in the group on that kind's
@@ -56,7 +56,7 @@ scenes["19"] = function (s, t) {
   const settleAt = en ? cue(s, "", "delegate work") : kinds[0];
   const toAgent = cue(s, "委托给智能体", "to agents"),
     agentAt = cue(s, "智能体", "agents");
-  const g1 = base * clearOfTitle(s, t, 350) * stageOut(t, Math.min(within, extend));
+  const g1 = base * stageOut(t, Math.min(within, extend));
   if (g1 > 0)
     s19Delegation(s, t, MX, MY, memberLeft, em, ACTOR, snap, kinds, settleAt, toAgent, agentAt, g1);
   // 2. Within the delegated boundary the Agent extends what people can investigate, reason about and do: the boundary

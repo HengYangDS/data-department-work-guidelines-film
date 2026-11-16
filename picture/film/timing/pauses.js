@@ -33,6 +33,16 @@ export const pauseHold = (at, lasting = RECEDE) => {
   for (const [end, next] of thoughtJoins) if (at + lasting > end && at < next) return next;
   return at;
 };
+/* The first word's start of the thought speaking at `at` (a cue may lead its word by a little), or -Infinity in the
+ * film's first thought. */
+export const thoughtStart = (at) => {
+  let start = -Infinity;
+  for (const [, next] of thoughtJoins) {
+    if (next > at + 0.2) break;
+    start = next;
+  }
+  return start;
+};
 /* The last word's end of the thought speaking at `at`. */
 export const thoughtEnd = (at) => {
   for (const [end] of thoughtJoins) if (end >= at) return end;

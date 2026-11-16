@@ -12,7 +12,7 @@ import { LABEL, P } from "../../palette.js";
 import { L, en } from "../../timeline.js";
 import { cueFrom, cues } from "../../timing/cues.js";
 import { clamp, mix, ramp } from "../../timing/easing.js";
-import { GLIDE_PEAK, drawShare, glide, smoother } from "../../timing/pace.js";
+import { GLIDE_PEAK, drawnShare, glide, smoother } from "../../timing/pace.js";
 import { thoughtEnd, voiceTime } from "../../timing/pauses.js";
 import { CORR, DEC, X0, X1, corrected, priceAt, series } from "./prices.js";
 
@@ -182,7 +182,7 @@ export function s11Delegation(s, t, agentCut, seven) {
     alpha: ramp(t, refused - 0.15, 0.4) * seven,
     upto:
       ((stopX + 11 - wayFrom) / (gx - 24 - wayFrom)) *
-      drawShare(t, refused - 0.05, stopX + 11 - wayFrom, 0.6),
+      drawnShare({ t, at: refused - 0.05, least: 0.6 }, stopX + 11 - wayFrom),
     dash: [8, 8],
     end: false,
   });

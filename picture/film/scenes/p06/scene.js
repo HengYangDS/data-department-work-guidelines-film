@@ -309,7 +309,7 @@ scenes["06"] = function (s, t) {
         ...s06Place(0),
         two * ramp(t, restate + 0.05, 0.3),
         false,
-        en ? Math.max(restate, kindAts[0] - 1.4) : Math.min(kindAts[0], cue(s, "有记录", "")),
+        en ? Math.max(restate, kindAts[0] - 0.9) : Math.min(kindAts[0], cue(s, "有记录", "")),
       );
   }
   // 3. The case's statements sorted into the six kinds. The stage begins on the second statement's first words, while

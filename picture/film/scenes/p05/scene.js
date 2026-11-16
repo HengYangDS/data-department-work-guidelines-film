@@ -71,7 +71,7 @@ scenes["05"] = function (s, t) {
   // words in the first clause, near enough to the centre to stand alone. On the decision's words one quiet link carries
   // it to the decision, one mark named as it is asked, and the decision's three parts (who, by when, what) branch from
   // it, each arriving on its own words in the order each edition speaks them, while the drift settles into rows and its
-  // frame closes: framed, the analysis has its aim. Everything waits for the rising chapter title to clear it.
+  // frame closes: framed, the analysis has its aim. Everything begins as the chapter card leaves.
   // The illustrative case cuts in on its first named mark: the catalog in Chinese, the team that wants it in English.
   const teamAt = cue(s, "大家", "a team"),
     caseAt = Math.min(catalog, teamAt);

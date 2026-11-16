@@ -26,7 +26,7 @@ import { blockHeight } from "../../naming/parts.js";
 import {
   CONTENT_CY,
   HEAD_CLEAR,
-  RAIL_ROW,
+  RAIL_ROW_CLEAR,
   railNames,
   railStations,
   stackTops,
@@ -305,13 +305,13 @@ scenes["01"] = function (s, t) {
     if (en)
       xs.forEach((x, i) => {
         if (i % 2)
-          line(x, y + R + 8, x, y + R + NAME_GAP + 26 + RAIL_ROW - 6, {
+          line(x, y + R + 8, x, y + R + NAME_GAP + 26 + RAIL_ROW_CLEAR - 6, {
             alpha: stage2 * ramp(t, roles[i] - 0.15, 0.4),
             width: 2,
           });
       });
     railNames(names, xs, y + R, {
-      gap: (i) => NAME_GAP + 26 + (en && i % 2 ? RAIL_ROW : 0),
+      gap: (i) => NAME_GAP + 26 + (en && i % 2 ? RAIL_ROW_CLEAR : 0),
       alpha: (i) => stage2 * listIn(t, roles, i),
       set: "roles",
     });

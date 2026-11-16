@@ -8,7 +8,7 @@ import { link } from "../../drawing/links.js";
 import { s23Page } from "../../drawing/pages.js";
 import { dot, labelSize, line, measure, path, text } from "../../drawing/strokes.js";
 import { check, person, ring } from "../../drawing/symbols.js";
-import { clearOfTitle, illustrative, opening } from "../../framing/chapters.js";
+import { illustrative, opening } from "../../framing/chapters.js";
 import { beats, listIn, listLevel, named, speaking } from "../../naming/lists.js";
 import { NAME_GAP, nameText, wrapName } from "../../naming/names.js";
 import { blockHeight, growTexts } from "../../naming/parts.js";
@@ -88,14 +88,13 @@ scenes["30"] = function (s, t) {
   const CX = CX0 + mix(mix(lone, pair, glide(t, userAt - 0.1, pair - lone)), 0, onward),
     PX = PX0 + pair * (1 - onward),
     edgeX = CX + 300 * K;
-  const lift = (y) => clearOfTitle(s, t, y);
-  // The chip stands in the head band, clear of the rising title, so it waits for the first words rather than ink in
+  // The chip stands in the head band and waits for the first words rather than ink in
   // with the card in the quiet before them, and fades in over 0.4 s.
-  illustrative(g1 * Math.min(lift(CY), ramp(t, s.words[0].start - HOLD, 0.4)));
+  illustrative(g1 * ramp(t, s.words[0].start - HOLD, 0.4));
   if (g1 > 0) {
     // The next user stands as the sentence that returns to the dataset ends, and is named on its own words.
-    const card = g1 * lift(CY),
-      user = named(t, Math.min(next, cue(s, "下一位用它的人", "with") + 0.05)) * g1 * lift(Y1 - 60);
+    const card = g1,
+      user = named(t, Math.min(next, cue(s, "下一位用它的人", "with") + 0.05)) * g1;
     reportCard(CX, CY, { alpha: card, scale: K, done: 1, named: card * named(t, back) });
     // The card is named finished over its top, as a page is named over it, clear of the card's ruled rows below.
     nameText(L("做完了", "A finished dataset"), CX + 150 * K, CY - NAME_GAP, {
@@ -106,7 +105,7 @@ scenes["30"] = function (s, t) {
     person(PX, Y1, { alpha: user, size: 1.4 });
     nameText(L("下一位用它的人", "Its next user"), PX, Y1 + 32 + NAME_GAP, {
       valign: "top",
-      alpha: named(t, next) * g1 * lift(Y1 - 60),
+      alpha: named(t, next) * g1,
     });
     // The way to the user draws on as the user is named; it turns to evidence and carries one point once the dataset is
     // reliable, and that word is named above it.

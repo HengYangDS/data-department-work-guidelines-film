@@ -48,12 +48,19 @@ export function s11Bias(s, t, biasCut, four) {
     CAL = R0 + 2 * ROW,
     SV = [R0 + 3 * ROW - 35, R0 + 3 * ROW + 35];
   // The stage eases back from the second place's words until the third place rises, so it keeps moving between them.
+  // While the lens stands alone, before the first place rises, the stage stands further right still, so the lens stands
+  // within 350 px of the centre, and it eases left as that place rises.
+  const ALONE = L(170, 190),
+    rise0 = ats[0] - L(0.5, 0.45);
   ctx.save();
-  ctx.translate(L(110, 70) * (1 - glide(t, ats[1] + 0.05, L(110, 70))), 0);
+  ctx.translate(
+    ALONE * (1 - glide(t, rise0, ALONE)) + L(110, 70) * (1 - glide(t, ats[1] + 0.05, L(110, 70))),
+    0,
+  );
   // Each place rises just before its words, the first a little earlier, so the lens never stands alone for long; the
   // Chinese first place, after the lens's longer phrase, rises 0.5 s before its words, the English 0.45 s.
   const lens = four * named(t, biasCut),
-    on = (i) => ramp(t, ats[i] - (i ? 0.25 : L(0.5, 0.45)), 0.4) * four,
+    on = (i) => ramp(t, i ? ats[i] - 0.25 : rise0, 0.4) * four,
     lit = (i) => speaking(t, ats, i);
   // The whole set returns to full ink on the last item's words, inside its thought, so it stands complete before the
   // stage cuts; the item being spoken keeps its own light.

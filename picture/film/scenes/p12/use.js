@@ -64,9 +64,11 @@ export function s12ControlledUse(t, path_, steps, forUse, ctrlAt, applyAt, three
     draw: { t, at: path_ + 0.05 },
     flowing: since(t, path_ + 0.65),
   });
+  // The Chinese says the signal's long name before the use's, so its use's frame rises 0.5 s before its words and the
+  // signal stands alone at the left for under a second.
   box(ux - 60, cy - 50, 120, 100, {
     stroke: P.authority,
-    alpha: three * ramp(t, ctrlAt - 0.15, 0.4),
+    alpha: three * ramp(t, ctrlAt - L(0.5, 0.15), 0.4),
     radius: 12,
   });
   check(ux, cy, 34, { color: P.authority, alpha: three * ramp(t, ctrlAt - 0.1, 0.4) });

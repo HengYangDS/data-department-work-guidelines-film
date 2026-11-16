@@ -1,5 +1,6 @@
 /* 20's first stages: the five roles a piece of work involves, and the several roles one person may hold. */
 
+import { ctx } from "../../canvas.js";
 import { link } from "../../drawing/links.js";
 import { s17Page } from "../../drawing/pages.js";
 import { box, dot, line, measure, path } from "../../drawing/strokes.js";
@@ -80,6 +81,10 @@ export function s20SeveralRoles(s, t, policy, title, samePerson, several, holder
   const ys = [Y2 - 110, Y2, Y2 + 110],
     OX = (PX + HX) / 2,
     rule = g2 * named(t, policy);
+  // While the policy's page stands alone the stage stands 100 px right, so the page stands within 360 px of the centre,
+  // and it eases to its place as the one person rises.
+  ctx.save();
+  ctx.translate(100 * (1 - glide(t, samePerson - 0.15, 100)), 0);
   // The policy stands high enough that its name shares the one person's line, the stage's one line of names.
   const line1 = Y2 + 6 + 32 + NAME_GAP,
     PY = line1 - 65 - NAME_GAP;
@@ -174,8 +179,15 @@ export function s20SeveralRoles(s, t, policy, title, samePerson, several, holder
     nameText(en ? ["Decide", "Accept"][i] : ["做决定", "验收"][i], px + 26 + NAME_GAP, y, {
       align: "left",
       color: P.authority,
-      alpha: g2 * listIn(t, powers, i),
+      alpha:
+        g2 *
+        listIn(
+          t,
+          powers.map((at, k) => Math.max(at, stops[k] - 0.75)),
+          i,
+        ),
       set: "powers",
     });
   });
+  ctx.restore();
 }

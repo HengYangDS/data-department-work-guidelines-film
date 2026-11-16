@@ -18,8 +18,9 @@ import {
 } from "../../drawing/strokes.js";
 import { check, person, ring } from "../../drawing/symbols.js";
 import { building, listIn, named, speaking } from "../../naming/lists.js";
-import { LEADING, NAME_GAP, nameText } from "../../naming/names.js";
+import { NAME_GAP, nameText } from "../../naming/names.js";
 import { growName } from "../../naming/parts.js";
+import { RAIL_ROW_CLEAR } from "../../naming/placement.js";
 import { rejectedName } from "../../naming/rejected.js";
 import { LABEL, P } from "../../palette.js";
 import { L, en } from "../../timeline.js";
@@ -88,9 +89,9 @@ export function s13Responsibilities(s, t, roles, seats, coordinate, p3) {
   // across from Development's token: the shared data and the calculation joined, checked on the words that say so.
   // Standing 70 px right of the centre, they balance the row's first members, which stand at its left. The Chinese
   // names them under their way on the words that say Development checks them. They give way, with that name, as the
-  // roles are said to be responsibilities.
+  // roles are said to be responsibilities. In Chinese they stand 36 px lower, clear of the duties' second baseline.
   const joins = ramp(t, roles[0] + STAGE_CUT, 0.4) * (1 - ramp(t, seats + 0.05, 0.3)) * p3,
-    JY = 640,
+    JY = L(676, 640),
     jx = 1030;
   stroke(
     () => {
@@ -246,8 +247,9 @@ export function s13Responsibilities(s, t, roles, seats, coordinate, p3) {
   });
   // The Chinese names each further duty under its role on the words that say it, whole on one line, its second part
   // joining on its own words, so every holder is read by what it does. The duties stand on two baselines at the row's
-  // one pitch, every other one a row lower on a short stem from its role, so each stands whole and clear of its
-  // neighbours; they give way with 核对关联 as the roles are said to be responsibilities.
+  // one pitch, every other one a rail row lower on a short stem from its role, so each stands whole and 48 px or more
+  // clear of its neighbours on the other baseline; they give way with 核对关联 as the roles are said to be
+  // responsibilities.
   if (!en) {
     const duties = [
       [["检查兼容性"], [acts[1]]],
@@ -261,11 +263,10 @@ export function s13Responsibilities(s, t, roles, seats, coordinate, p3) {
         [acts[4], exitAt],
       ],
     ];
-    const em = labelSize(LABEL),
-      top = Y + TR + 9 + NAME_GAP,
+    const top = Y + TR + 9 + NAME_GAP,
       kept = p3 * (1 - ramp(t, seats + 0.05, 0.3));
     duties.forEach(([parts, ats], k) => {
-      const low = k % 2 ? em * LEADING : 0;
+      const low = k % 2 ? RAIL_ROW_CLEAR : 0;
       if (low)
         line(xs[k + 1], Y + TR + 12, xs[k + 1], top + low - 6, {
           alpha: kept * ramp(t, ats[0] - 0.15, 0.4),

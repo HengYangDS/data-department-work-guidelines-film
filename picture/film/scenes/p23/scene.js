@@ -8,7 +8,7 @@ import { link } from "../../drawing/links.js";
 import { s23Page } from "../../drawing/pages.js";
 import { box, dot, labelSize, line, measure, stroke, text } from "../../drawing/strokes.js";
 import { check, documentIcon, person, ring } from "../../drawing/symbols.js";
-import { clearOfTitle, opening } from "../../framing/chapters.js";
+import { opening } from "../../framing/chapters.js";
 import { listIn, listLevel, named, speaking } from "../../naming/lists.js";
 import { NAME_GAP, nameText } from "../../naming/names.js";
 import { CONTENT_CY, radialName, railNames } from "../../naming/placement.js";
@@ -41,8 +41,8 @@ scenes["23"] = function (s, t) {
   // 1. Through communication, results become something others can act on: the result, the channel and the reader stand as
   // three stations on one rail, each arriving on its own words; the way between them draws on when the result becomes
   // action, and one point then travels it from the result to the reader. The reader stands as the result becomes action,
-  // just before the words name them. Each edition opens on what it names first, which stands from the first words under
-  // the rising chapter title, so the chapter opens on it at full contrast. The Chinese names the result alone first: it
+  // just before the words name them. Each edition opens on what it names first, which stands from the first words, so
+  // the chapter opens on it. The Chinese names the result alone first: it
   // stands centred until the channel is named, the two then stand centred as a pair, and on the words that make the
   // result action they move to their stations. The English names the channel first and the result just before it
   // becomes action, so there each stands at its station from its words, the channel alone at the centre.
@@ -65,34 +65,33 @@ scenes["23"] = function (s, t) {
     const seen = (i) =>
       (i === first ? 1 : ramp(t, (i === 2 ? Math.min(at[i], become + 0.05) : at[i]) - 0.15, 0.4)) *
       one;
-    const clear = (y) => clearOfTitle(s, t, y);
     const go = { t, at: become - 0.05 };
     link(xs[0] + 76, RY, xs[2] - 60, RY, {
       color: P.evidence,
-      alpha: one * ramp(t, become - 0.05, 0.3) * clear(RY),
+      alpha: one * ramp(t, become - 0.05, 0.3),
       draw: go,
       width: 2.5,
       flowing: since(t, become + 0.9),
     });
     // The result's page, a station of the rail.
-    documentIcon(xs[0] - 60, RY - 75, 120, 150, { alpha: seen(0) * clear(RY - 75), rows: 4 });
+    documentIcon(xs[0] - 60, RY - 75, 120, 150, { alpha: seen(0), rows: 4 });
     // The channel sits on the way, its disc covering the way where they meet; both editions name it before the result
     // becomes action, so the way then draws on beneath it.
-    dot(xs[1], RY, 40, { color: P.ground, alpha: seen(1) * clear(RY - 40) });
+    dot(xs[1], RY, 40, { color: P.ground, alpha: seen(1) });
     dot(xs[1], RY, 40, {
       color: P.evidence,
-      alpha: seen(1) * clear(RY - 40),
+      alpha: seen(1),
       hollow: true,
       width: 3,
     });
-    dot(xs[1], RY, 12, { color: P.evidence, alpha: seen(1) * clear(RY - 40) });
-    person(xs[2], RY + 4, { alpha: seen(2) * clear(RY - 64), size: 2 });
+    dot(xs[1], RY, 12, { color: P.evidence, alpha: seen(1) });
+    person(xs[2], RY + 4, { alpha: seen(2), size: 2 });
     // Each name stands whole on one line, so it keeps one layout while the stations glide apart.
     railNames(
       names.map((v) => [v]),
       xs,
       RY + 75,
-      { gap: NAME_GAP, wrap: 340, alpha: (i) => one * named(t, at[i]) * clear(RY + 97) },
+      { gap: NAME_GAP, wrap: 340, alpha: (i) => one * named(t, at[i]) },
     );
   }
   // 2. So answer the reader's actual need before recounting the whole process: the answer is one card next
