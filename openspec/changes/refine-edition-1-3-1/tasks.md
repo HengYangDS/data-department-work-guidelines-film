@@ -48,8 +48,8 @@
 
 ## 7. Edition
 
-- [ ] 7.1 Set the version to 1.3.1 and record the edition in the Changelog; done when `mise run check` passes in a checkout that holds no build.
-- [ ] 7.2 Build both editions; done when `mise run film:build` ends with every film verified.
-- [ ] 7.3 Obtain an independent review of each edition; done when every dimension is at 95 or above and no material or minor finding stands.
-- [ ] 7.4 Deliver the reviewed editions; done when the delivery reads back from Documents.
-- [ ] 7.5 Record the 1.3.1 assets in `content/release.json`; done when `tests/delivery/test_release.py` passes against the staged release folder.
+- [x] 7.1 Set the version to 1.3.1 and record the edition in the Changelog; done when `mise run check` passes in a checkout that holds no build. `VERSION` holds 1.3.1 and the Changelog's 1.3.1 section records the edition; the repository's check passes on the head that holds them (16 November).
+- [x] 7.2 Build both editions; done when `mise run film:build` ends with every film verified. Both editions are built on `filmkit` 0.22.3 (16 November): each edition's two pictures agree at all 90,000 frames with no one-frame fault, all eight films are packaged, and the technical verification passes.
+- [x] 7.3 Obtain an independent review of each edition; done when every dimension is at 95 or above and no material or minor finding stands. Review round 42 (16 November) scores the Chinese edition 99.2 and the English edition 97.4, every dimension at 96 or more and each of 信, 达 and 雅 passing, with no material or minor finding; its 5 notes on the Chinese edition and 10 notes on the English one are in the published review records. The review is a model's judgment; human listening is a separate acceptance.
+- [x] 7.4 Deliver the reviewed editions; done when the delivery reads back from Documents. The reviewed editions are delivered to the film's Documents folder on 16 November and read back: 25 members, every digest matching, each film with one author and trimmed keywords.
+- [x] 7.5 Record the 1.3.1 assets in `content/release.json`; done when `tests/delivery/test_release.py` passes against the staged release folder. `content/release.json` records the 21 assets of 1.3.1 from the delivered build, and `tests/delivery/test_release.py` passes against the staged release folder (16 November).
