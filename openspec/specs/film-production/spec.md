@@ -54,8 +54,9 @@ bounded illustrative examples without implying deployment or adoption.
 ### Requirement: Exact Native Media And Connected Performance
 
 The production SHALL produce independently understandable Chinese and English
-editions, each exactly 1500 seconds at native progressive 60 fps with a UHD
-master and a captioned 1080p viewing edition, the selected narrator, 48 kHz
+editions, each exactly 1500 seconds at native progressive 60 fps as a UHD
+master and a 1080p viewing film, each with captions and without them, with the
+selected narrator, 48 kHz
 stereo narration only, no music and purposeful orderly 2D motion. It SHALL
 qualify actual changed media and all transitions before it replaces the viewing
 edition, and each film SHALL carry the release metadata its script declares.
