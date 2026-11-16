@@ -4,19 +4,37 @@ All notable changes to the DDWG introduction films and their build are recorded 
 
 ## [Unreleased]
 
+## [1.3.1] - 2026-11-16
+
+### Added
+
+- `film:sound` ends each edition with the engine's sound gate, which refuses a soundtrack with a segment under its clarity floor or a thought or heard phrase that stops instead of dying away. `film:picture` refuses neighbouring names on one row that stand closer than one and a half times their size, and the film declares 450 px/s as its pace limit, so the picture gate refuses a mark that moves faster.
+
 ### Changed
 
-- The repository runs ETHOS 0.2.0-beta.10 instead of 0.2.0-alpha.29, declares its GitLab and GitHub
-  publication peers by their Git remotes, verifies every change with the portable full proof on
-  Apple-silicon macOS in the hosted jobs of both forges, and installs Mise 2026.11.8 instead of
-  2026.10.25 in the GitHub job. The films of 1.3.0 are unchanged.
+- The text says what round 40's notes found missing or hard on first hearing, each sentence read against its source lines and rechecked independently before it was narrated. The English 14.2 has its verbs and all six conditions of the source, in three sentences ("Before handing a result over, its owner states the criteria tested. …"), and the Chinese 14.2 says them as three things (「交出结果之前，讲清三件事：…」). 17.3 says that a passing test "does not prove that the work was reviewed, is correct overall, or was accepted" (「不等于已评审、整体正确或已验收」), and 21.2 asks whether "the current inputs" are true and complete (「当前的输入」). The English 11.10 is two sentences, and 07.6.2 names "an appeal to common sense, experience or best practice without checking its limits". The Chinese 14.3 says 「关键的管理流程」 for the source's critical management chains, as the owner approved on 14 November 2026. The English 14.3 says "critical management processes" for the same term, and 26.3 says that a trial chooses and verifies how to meet an obligation, "not whether it applies". The Chinese narration has 7,263 Han characters and the English 4,248 words.
+- The changed thoughts are narrated again: the Chinese 14.2, 14.3, 17.4 and 21.2 and the English 07.6, 11.10, 14.2, 17.3 and 21.2; 17.4 and 17.3 are narrated on into the next thought, so that their last words die away. The English statement pause averages 0.77 s where it averaged 0.81 s, for the 31 added words; speech is not stretched, and each soundtrack still lasts exactly 1500 seconds.
+- Each thought stands within 0.4 dB of its segment's level, where the tolerance was 0.5 dB, and in the English edition each segment within 0.2 dB of its chapter's level. The largest step between adjacent thoughts is 0.81 LU inside a segment in both editions and, across segments, 0.87 LU in Chinese and 0.98 LU in English, where 1.3.0's English held a step of 1.37 LU.
+- Every glide and flow of the scenes keeps 450 px/s: the glide peak is 420 px/s, each glide takes the time its distance needs, compound moves become one glide or one ride through their stops, and no mark is carried by a drawing tip. 10.1's price lifts from the table's cell nearest its station, so its English flight covers about 700 px at about 430 px/s where it flew 787 px at about 495.
+- No chapter title travels: the chapter card dissolves where it stands and the running head fades in at its own place, where the title flew to the head at about 1,200 px/s; a chapter's first scene begins as the card leaves.
+- A stroke that draws on is whole when its thought's voice comes to rest: it sets off as early as it needs within its thought. In 1.3.0 the bracket of 08.2 stood at three fifths of its way through the quiet after its thought and left with its stage.
+- Names on a rail's two baselines stand at least 48 px clear of each other where they reach under one another (13.4, 15.2 and 27.1, and the English 01.4 and 14.1); 11.6, 12.3, 17.3, 20.1 and the English 28.2 open nearer the centre; six English names wait for the words that name them; 14.2's English names carry the discrepancy and the limits.
+- Thirteen English thoughts take clearer recordings, among them 14.3 and 26.3 on their new words, and a pause after a question mark inside an English thought lasts at least 0.26 s, so that 21.2's questions part evenly. A single thought's clarity is judged against the floor less 1.0 dB, as the owner decided on 16 November 2026, with the floor of 17 dB kept for the soundtrack and for each segment, and the review prompt states it: the English soundtrack reads 17.72 dB, every segment 17.30 dB or more, and 10 thoughts stand between the two lines, the lowest at 16.59 dB.
+- 15.1's rail inks in with the action, so the Chinese opening stands in balance; nine finished English stages stand within 30 px of the content centre; neighbouring names on one row stand at least 48 px apart; each reading run of 21.2 ends by its tick or its thought's last word; two labels say the voice's words at their moment (14.4 and 24.3), and 11.10's stage cut falls on its second sentence's first words.
+- Three English cues take authored breaks where their sentences allow a slower reading and now read at 24.1 characters per second or less; one cue stays at 25.2. The timeline's caption text is typeset as it is drawn and holds no straight apostrophe.
+- The films are built by `filmkit` 0.22.3 instead of 0.21.0 and rendered with HyperFrames 0.9.46 instead of 0.9.9; GSAP moves to 3.15.1, `puppeteer-core` to 25.17.0, `@puppeteer/browsers` to 3.2.7, `undici` to 7.30.2 and Prettier to 3.10.1. Node, Python, uv and Chrome Headless Shell keep their versions.
+- The repository runs ETHOS 0.2.0-beta.10 instead of 0.2.0-alpha.29, declares its GitLab and GitHub publication peers by their Git remotes, verifies every change with the portable full proof on Apple-silicon macOS in the hosted jobs of both forges, and installs Mise 2026.11.8 instead of 2026.10.25 in the GitHub job.
+- Review round 42 scored the Chinese edition 99.2 and the English edition 97.4, with every one of the twelve dimensions at 96 or more, each of 信, 达 and 雅 passing and no material or minor finding. Its 5 Chinese notes and 10 English notes are listed in the published review records, `ddwg-zh-production-review.md` and `ddwg-en-production-review.md`. Round 41 had reviewed a first build and did not pass it, on a stroke that rested part-drawn through a quiet, on the chapter titles' move and on fifteen English thoughts under the clarity floor; round 42 reviewed the build that repairs the first two and judges a single thought by the owner's line. The review is a model's judgment of the media and their measurements; human listening is a separate acceptance.
+
+### Removed
+
+- The Prettier and Taplo configuration files under `.config/checks/`, which repeated the settings ETHOS ships.
 
 ### Fixed
 
-- The listening-plan test derives the plan from the current scripts and no longer pins its SHA-256.
-  The engine's plan records each assembled edition's timeline and soundtrack, so the pinned digest
-  held only in a checkout with a local build and failed in a fresh one, as the hosted runs of dev,
-  `v1.3.0` and main at `6ed89d4` did. The films of 1.3.0 are unchanged.
+- The listening-plan test derives the plan from the current scripts and no longer pins its SHA-256. The engine's plan records each assembled edition's timeline and soundtrack, so the pinned digest held only in a checkout with a local build and failed in a fresh one, as the hosted runs of dev, `v1.3.0` and main at `6ed89d4` did.
+- The English 13.2 says "A convenient schema": recognition wrote "convenience" for the 1.3.0 take. The English 14.4's "person," dies away, where the engine's phrase-end measure found it stopped. The English 08.1 takes a clearer recording, and segment 08 reads 17.62 dB by the engine's measure, where the review of 1.3.0 measured it 0.12 dB above the floor of 17 dB.
+- `NOTICE` names Prettier 3.10.1, the version the lock holds.
 
 ## [1.3.0] - 2026-11-14
 
@@ -95,7 +113,8 @@ All notable changes to the DDWG introduction films and their build are recorded 
 - ETHOS governance, with its portable proof projected into GitHub Actions.
 - The MIT License for the code and CC BY 4.0 for the films' content, with the third-party notices and the narrator's provenance in `NOTICE`.
 
-[Unreleased]: https://github.com/HengYangDS/data-department-work-guidelines-film/compare/v1.3.0...HEAD
+[Unreleased]: https://github.com/HengYangDS/data-department-work-guidelines-film/compare/v1.3.1...HEAD
+[1.3.1]: https://github.com/HengYangDS/data-department-work-guidelines-film/releases/tag/v1.3.1
 [1.3.0]: https://github.com/HengYangDS/data-department-work-guidelines-film/releases/tag/v1.3.0
 [1.2.0]: https://github.com/HengYangDS/data-department-work-guidelines-film/releases/tag/v1.2.0
 [1.1.0]: https://github.com/HengYangDS/data-department-work-guidelines-film/releases/tag/v1.1.0

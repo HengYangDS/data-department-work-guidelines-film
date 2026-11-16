@@ -10,7 +10,7 @@ Author: Yang HENG.
 
 All four films of each edition are published as release assets, together with their captions, transcripts, covers, independent review records and `SHA256SUMS`. [`content/release.json`](content/release.json) records each asset's name, size and SHA-256, the digests of the soundtrack and of the two staged pictures, with captions and without them, that each edition was made from, and those of the film-bound sources: the scripts, narration texts, voice contracts, reference recordings, source manifest, covers, fonts, composition and entry page whose exact bytes the build reads. The independent review of the `v1.3.0` films scored the Chinese edition 98.8 and the English edition 96.6 out of 100, with every one of its twelve dimensions at 96 or above, each of its three levels, 信, 达 and 雅, passing and no material or minor finding; the published review records list its notes. That review scores the audio from automated evidence; human listening is a separate acceptance.
 
-The films of `v1.3.0` are the current editions, and those of `v1.2.0` and `v1.0.0` stay available as those releases' assets. A release that changes only how the films are built publishes no films of its own, and its tag names the source that rebuilds them.
+The films of `v1.3.1` are the current editions, and those of `v1.3.0`, `v1.2.0` and `v1.0.0` stay available as those releases' assets. A release that changes only how the films are built publishes no films of its own, and its tag names the source that rebuilds them.
 
 ## Rebuilding the films
 
@@ -47,7 +47,7 @@ The stages also run one at a time: `film:narrate`, `film:sound`, `film:picture`,
 Download the release assets into `build/artifacts/release/` and compare:
 
 ```bash
-gh release download v1.3.0 --repo HengYangDS/data-department-work-guidelines-film --dir build/artifacts/release
+gh release download v1.3.1 --repo HengYangDS/data-department-work-guidelines-film --dir build/artifacts/release
 ```
 
 ```bash
