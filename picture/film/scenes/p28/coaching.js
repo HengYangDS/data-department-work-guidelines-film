@@ -23,6 +23,7 @@ import { L, en } from "../../timeline.js";
 import { cue, cues } from "../../timing/cues.js";
 import { mix, ramp, soon } from "../../timing/easing.js";
 import { glide } from "../../timing/pace.js";
+import { STAGE_CUT } from "../../timing/stages.js";
 
 /* Stage 1: one task as a rail the member walks, stopping where the guidelines say to look. */
 export function s28RealWork(s, t, grows, boundary, g1) {
@@ -172,14 +173,17 @@ export function s28Coaching(s, t, coaching, notJudge, weak, noDirection, fb, g2)
     CY = 350,
     JX = 1640 + SH,
     reasoning = cue(s, "成员的推理", "a member's reasoning"),
-    rail = ramp(t, reasoning - 0.15, 0.4);
+    // The English names the reasoning half a second after the stage's cut: the member and their reasoning's rail stand
+    // from the cut there, so the coach never stands alone at the far left, and the reasoning is named on its words.
+    stands = en ? Math.min(reasoning - 0.15, coaching + STAGE_CUT) : reasoning - 0.15,
+    rail = ramp(t, stands, 0.4);
   const names = en
     ? ["Proposition", "Evidence", "Behavior", "Consequence"]
     : ["说法", "证据", "行为", "后果"];
   // The feedback stations stand at one pitch, ending far enough short of the judgment that its name keeps clear of the
   // last station's.
   const xs = railStations(names, 640 + SH, 1340 + SH);
-  person(MX, R - 4, { alpha: g2 * named(t, reasoning), size: 1.1 });
+  person(MX, R - 4, { alpha: g2 * rail, size: 1.1 });
   // The reasoning stands whole with the member it belongs to, so the stage stands balanced while the coach tests it.
   link(MX + 16, R, JX - 40, R, { color: P.muted, width: 3, alpha: g2 * rail, end: false });
   nameText(L("成员的推理", "A member's reasoning"), MX + 40, R - 40, {

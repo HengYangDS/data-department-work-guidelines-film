@@ -9980,8 +9980,9 @@ scenes["17"] = function(s, t) {
       const d = centreOn(k + 2) - centreOn(k + 1);
       return v + d * glide(t, nots[i] - 0.1, d);
     }, centreOn(1));
+    const ALONE = 150, opens = rows2[0], wayDone = nots[opens] + 0.05 + Math.max(0.4, stops[opens] - nots[opens]), alone = ALONE * (1 - glide(t, Math.max(rightAts[opens] - 0.15 - glideTime(ALONE), wayDone), ALONE));
     ctx.save();
-    ctx.translate(shift, 0);
+    ctx.translate(shift + alone, 0);
     line(BAR, last[0] - 50, BAR, last.at(-1) + 50, {
       color: P.line,
       alpha: ramp(t, stops[rows2[0]] + 0.05, 0.3) * a,
@@ -15418,10 +15419,10 @@ function s28RealWork(s, t, grows, boundary, g1) {
 }
 function s28Coaching(s, t, coaching, notJudge, weak, noDirection, fb, g2) {
   const judgmentAt = cue(s, "判断", "judgment"), SH = mix(L(25, 30), L(25, 0), soon(t, judgmentAt + 0.05, 0.6));
-  const R = 550, MX = 290 + SH, CY = 350, JX = 1640 + SH, reasoning = cue(s, "成员的推理", "a member's reasoning"), rail = ramp(t, reasoning - 0.15, 0.4);
+  const R = 550, MX = 290 + SH, CY = 350, JX = 1640 + SH, reasoning = cue(s, "成员的推理", "a member's reasoning"), stands = en ? Math.min(reasoning - 0.15, coaching + STAGE_CUT) : reasoning - 0.15, rail = ramp(t, stands, 0.4);
   const names = en ? ["Proposition", "Evidence", "Behavior", "Consequence"] : ["说法", "证据", "行为", "后果"];
   const xs = railStations(names, 640 + SH, 1340 + SH);
-  person(MX, R - 4, { alpha: g2 * named(t, reasoning), size: 1.1 });
+  person(MX, R - 4, { alpha: g2 * rail, size: 1.1 });
   link(MX + 16, R, JX - 40, R, { color: P.muted, width: 3, alpha: g2 * rail, end: false });
   nameText(L("成员的推理", "A member's reasoning"), MX + 40, R - 40, {
     align: "left",

@@ -201,8 +201,16 @@ scenes["17"] = function (s, t) {
       const d = centreOn(k + 2) - centreOn(k + 1);
       return v + d * glide(t, nots[i] - 0.1, d);
     }, centreOn(1));
+    // While the table's first reached state stands without the state it does not make, the table stands ALONE px right
+    // of its place, so that state stands within 400 px of the centre; once its way has reached the gate the table
+    // glides to its place, arriving as the other state is named.
+    const ALONE = 150,
+      opens = rows[0],
+      wayDone = nots[opens] + 0.05 + Math.max(0.4, stops[opens] - nots[opens]),
+      alone =
+        ALONE * (1 - glide(t, Math.max(rightAts[opens] - 0.15 - glideTime(ALONE), wayDone), ALONE));
     ctx.save();
-    ctx.translate(shift, 0);
+    ctx.translate(shift + alone, 0);
     line(BAR, last[0] - 50, BAR, last.at(-1) + 50, {
       color: P.line,
       alpha: ramp(t, stops[rows[0]] + 0.05, 0.3) * a,
