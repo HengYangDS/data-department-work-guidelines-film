@@ -12,6 +12,7 @@ The notes are recorded, each with its observation, repair and reverification lin
 - The picture balances 15.1's opening (Z40-1), names eight labels in the voice's words or declares them (Z40-5), centres nine finished stages (EN40-14), gives neighbouring names on a row a clear gap (EN40-16) and ends 21.2's reading run before the quiet (EN40-17).
 - Glides are timed by their distance under a lower peak (Z40-7, EN40-12).
 - The soundtracks, captions and comparisons are made on the engine release that levels each thought within a declared tolerance, typesets the timeline text, assigns clarity frames as its prompt states, gates glides and stopped phrase ends, tests the two masters for one-frame transients and probes row gaps (Z40-2, EN40-6, EN40-7, EN40-9, EN40-11, EN40-12, EN40-13, EN40-16).
+- Round 41 reviewed the first build and did not pass it: one minor finding in Chinese and two material findings in English. A second build repairs them: no chapter title travels (EN41-11, Z41-4), a stroke that draws on is whole when its thought's voice rests (Z41-1), names on a rail's two baselines stand clear of each other (Z41-3), two English sentences say what a first hearing needs (EN41-7), and the English thoughts under the clarity floor take clearer takes, with the line for a single thought put to the owner (EN41-1).
 - The requirements name the four films and both staged picture documents that each edition publishes.
 
 The films stay 1500 seconds, with the same narrator, chapters and argument. The result is edition 1.3.1.
