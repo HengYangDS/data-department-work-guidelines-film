@@ -17,6 +17,7 @@ build-backend = "hatchling.build"
 [tool.uv]
 package = false
 prerelease = "disallow"
+exclude-newer = "24 hours"
 # The repair keeps the speech engine that narrated the accepted v1.1.0 editions, so every thought it
 # leaves unchanged reproduces its recording from its seed; filmkit 0.19.0 itself requires mlx-audio
 # 0.6.4, which resolves MLX 0.32.4, and those change some of the takes. The next full production
